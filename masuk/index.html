@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0B1020">
+    <title>Masuk · Financial Daily Report</title>
+    <link rel="icon" type="image/png" href="/app/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <script>
+        // Dicatat sebelum pustaka Supabase membaca lalu membersihkan alamat
+        window.FD_IS_RECOVERY = /type=recovery/.test(location.hash);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"
+            integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok"
+            crossorigin="anonymous"></script>
+    <script src="/fd-auth.js"></script>
+    <style>
+        :root {
+            --bg: #0B1020; --ink: #E7ECF7; --ink-2: #AEB8D4; --stroke: rgba(255,255,255,.12);
+            --cyan: #22D3EE; --violet: #A78BFA; --pink: #F472B6; --danger: #FDA4AF; --ok: #6EE7B7;
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; min-height: 100%; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif; color: var(--ink); line-height: 1.5;
+            background: radial-gradient(1200px 600px at 10% -10%, rgba(34,211,238,.16), transparent 60%),
+                        radial-gradient(900px 600px at 110% 110%, rgba(167,139,250,.18), transparent 60%),
+                        linear-gradient(160deg, #0B1020 0%, #111A3A 55%, #1A1340 100%);
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: max(24px, env(safe-area-inset-top)) 18px max(24px, env(safe-area-inset-bottom));
+        }
+        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+        .brand-logo {
+            width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center;
+            background: linear-gradient(135deg, var(--cyan), var(--violet)); color: #08111f;
+            font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 16px;
+        }
+        .brand-name { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 19px; color: #fff; }
+        .card {
+            width: 100%; max-width: 420px; padding: 28px 24px; border-radius: 20px;
+            background: rgba(255,255,255,.05); border: 1px solid var(--stroke);
+            box-shadow: 0 20px 60px rgba(0,0,0,.45); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+        }
+        h1 { margin: 0 0 4px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; color: #fff; }
+        .sub { margin: 0 0 22px; color: var(--ink-2); font-size: 14px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin: 0 0 6px; color: #C9D2E8; }
+        .field { margin-bottom: 16px; }
+        input {
+            width: 100%; min-height: 48px; padding: 0 14px; border-radius: 12px; font: inherit; font-size: 15px;
+            background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.16); color: #fff;
+        }
+        input::placeholder { color: #8390B0; }
+        input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(34,211,238,.18); }
+        .pass-wrap { position: relative; }
+        .pass-wrap input { padding-right: 52px; }
+        .eye {
+            position: absolute; right: 4px; top: 4px; width: 44px; height: 40px; border: none; border-radius: 9px;
+            background: transparent; color: var(--ink-2); cursor: pointer; display: grid; place-items: center;
+        }
+        .eye:hover { color: #fff; } .eye svg { width: 20px; height: 20px; }
+        .btn {
+            width: 100%; min-height: 48px; border: none; border-radius: 12px; cursor: pointer; font: inherit;
+            font-weight: 700; font-size: 15px; background: linear-gradient(135deg, var(--cyan), var(--violet)); color: #08111f;
+        }
+        .btn[disabled] { opacity: .6; cursor: progress; }
+        .link {
+            display: inline-block; margin-top: 14px; background: none; border: none; padding: 6px 0; cursor: pointer;
+            color: #9EEEFB; font: inherit; font-size: 14px; font-weight: 600;
+        }
+        .link:hover { color: #fff; text-decoration: underline; }
+        :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+        .msg { display: none; margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; font-size: 14px; }
+        .msg.show { display: block; }
+        .msg.err { background: rgba(253,164,175,.12); border: 1px solid rgba(253,164,175,.35); color: #FFD2D8; }
+        .msg.ok { background: rgba(110,231,183,.12); border: 1px solid rgba(110,231,183,.35); color: #C9F6E4; }
+        .msg.info { background: rgba(34,211,238,.10); border: 1px solid rgba(34,211,238,.30); color: #CFF7FD; }
+        .foot { margin-top: 18px; font-size: 13px; color: var(--ink-2); text-align: center; max-width: 420px; }
+        [hidden] { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="brand"><div class="brand-logo" aria-hidden="true">FD</div><div class="brand-name">Financial Daily Report</div></div>
+
+    <main class="card">
+        <div id="msg" class="msg" role="alert" aria-live="polite"></div>
+
+        <!-- Masuk -->
+        <section id="panelLogin">
+            <h1>Masuk</h1>
+            <p class="sub">Pakai akun yang terdaftar di instansimu.</p>
+            <form id="formLogin" novalidate>
+                <div class="field">
+                    <label for="loginId">Email atau nama pengguna</label>
+                    <input id="loginId" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+                </div>
+                <div class="field">
+                    <label for="loginPass">Password</label>
+                    <div class="pass-wrap">
+                        <input id="loginPass" type="password" autocomplete="current-password" required>
+                        <button type="button" class="eye" data-target="loginPass" aria-label="Tampilkan password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    </div>
+                </div>
+                <button type="submit" class="btn" id="btnLogin">Masuk</button>
+            </form>
+            <button type="button" class="link" id="toReset">Lupa password?</button>
+        </section>
+
+        <!-- Lupa password -->
+        <section id="panelReset" hidden>
+            <h1>Atur ulang password</h1>
+            <p class="sub">Masukkan email akunmu. Kami kirim tautan untuk membuat password baru.</p>
+            <form id="formReset" novalidate>
+                <div class="field">
+                    <label for="resetEmail">Email</label>
+                    <input id="resetEmail" type="email" autocomplete="email" autocapitalize="none" required>
+                </div>
+                <button type="submit" class="btn" id="btnReset">Kirim tautan</button>
+            </form>
+            <button type="button" class="link" id="backToLogin">Kembali ke halaman masuk</button>
+        </section>
+
+        <!-- Password baru (setelah membuka tautan dari email) -->
+        <section id="panelNewPass" hidden>
+            <h1>Buat password baru</h1>
+            <p class="sub">Minimal 8 karakter. Setelah disimpan, kamu langsung masuk.</p>
+            <form id="formNewPass" novalidate>
+                <div class="field">
+                    <label for="newPass">Password baru</label>
+                    <div class="pass-wrap">
+                        <input id="newPass" type="password" autocomplete="new-password" minlength="8" required>
+                        <button type="button" class="eye" data-target="newPass" aria-label="Tampilkan password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="newPass2">Ulangi password baru</label>
+                    <input id="newPass2" type="password" autocomplete="new-password" minlength="8" required>
+                </div>
+                <button type="submit" class="btn" id="btnNewPass">Simpan password</button>
+            </form>
+        </section>
+    </main>
+
+    <p class="foot">Akun pemantau dibuat oleh admin instansimu.</p>
+
+    <script>
+    (function () {
+        'use strict';
+        var $ = function (id) { return document.getElementById(id); };
+        var msgEl = $('msg');
+
+        function show(text, kind) { msgEl.textContent = text; msgEl.className = 'msg show ' + (kind || 'err'); }
+        function clearMsg() { msgEl.className = 'msg'; msgEl.textContent = ''; }
+        function panel(name) {
+            ['panelLogin', 'panelReset', 'panelNewPass'].forEach(function (p) { $(p).hidden = (p !== name); });
+            clearMsg();
+        }
+        function busy(btn, on, label) { btn.disabled = on; btn.textContent = label; }
+
+        if (!window.FD) { show('Aplikasi gagal memuat sambungan ke server. Periksa internet, lalu muat ulang halaman ini.'); return; }
+
+        // Tombol tampilkan/sembunyikan password
+        document.querySelectorAll('.eye').forEach(function (b) {
+            b.addEventListener('click', function () {
+                var inp = $(b.dataset.target), shown = inp.type === 'text';
+                inp.type = shown ? 'password' : 'text';
+                b.setAttribute('aria-label', shown ? 'Tampilkan password' : 'Sembunyikan password');
+            });
+        });
+
+        // Pesan dari halaman aplikasi (misalnya akses dicabut)
+        var reason = sessionStorage.getItem('fd_logout_reason');
+        if (reason) { sessionStorage.removeItem('fd_logout_reason'); show(reason, 'info'); }
+
+        async function goToApp(user) {
+            var member = await FD.fetchMember(user);
+            if (!member) {
+                await FD.sb.auth.signOut({ scope: 'local' });
+                FD.saveMember(null);
+                show('Akun ini belum terhubung ke instansi mana pun. Hubungi admin instansimu.');
+                return false;
+            }
+            FD.saveMember(member);
+            FD.go(FD.APP_URL);
+            return true;
+        }
+
+        // Datang dari tautan reset password di email
+        FD.sb.auth.onAuthStateChange(function (event) {
+            if (event === 'PASSWORD_RECOVERY') panel('panelNewPass');
+        });
+
+        // Sudah login sebelumnya? Langsung ke aplikasi
+        (async function () {
+            if (window.FD_IS_RECOVERY) { panel('panelNewPass'); return; }
+            var s = await FD.sb.auth.getSession();
+            var session = s && s.data && s.data.session;
+            if (!session) return;
+            if (!navigator.onLine) {
+                var cached = FD.readMember();
+                if (cached && cached.user_id === session.user.id) FD.go(FD.APP_URL);
+                return;
+            }
+            try { await goToApp(session.user); } catch (e) { /* biarkan di halaman masuk */ }
+        })();
+
+        // ---- Masuk ----
+        $('formLogin').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            clearMsg();
+            var id = $('loginId').value.trim(), pass = $('loginPass').value;
+            if (!id || !pass) { show('Isi email atau nama pengguna, dan password.'); return; }
+            if (id.indexOf('@') === -1) { show('Masuk dengan nama pengguna aktif setelah akun pemantau dibuat. Untuk saat ini, masuk dengan email.', 'info'); return; }
+            if (!navigator.onLine) { show('Tidak ada koneksi internet. Masuk pertama kali butuh internet.'); return; }
+            var btn = $('btnLogin');
+            busy(btn, true, 'Memeriksa...');
+            try {
+                var res = await FD.sb.auth.signInWithPassword({ email: id, password: pass });
+                if (res.error) { show(FD.friendlyError(res.error)); return; }
+                await goToApp(res.data.user);
+            } catch (err) {
+                show(FD.friendlyError(err));
+            } finally {
+                busy(btn, false, 'Masuk');
+            }
+        });
+
+        // ---- Lupa password ----
+        $('toReset').addEventListener('click', function () {
+            panel('panelReset');
+            var id = $('loginId').value.trim();
+            if (id.indexOf('@') !== -1) $('resetEmail').value = id;
+            $('resetEmail').focus();
+        });
+        $('backToLogin').addEventListener('click', function () { panel('panelLogin'); $('loginId').focus(); });
+
+        $('formReset').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            clearMsg();
+            var email = $('resetEmail').value.trim();
+            if (email.indexOf('@') === -1) { show('Isi alamat email akunmu.'); return; }
+            if (!navigator.onLine) { show('Tidak ada koneksi internet.'); return; }
+            var btn = $('btnReset');
+            busy(btn, true, 'Mengirim...');
+            try {
+                var res = await FD.sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + FD.LOGIN_URL });
+                if (res.error) { show(FD.friendlyError(res.error)); return; }
+                show('Kalau email itu terdaftar, tautan sudah dikirim. Cek kotak masuk dan folder spam.', 'ok');
+            } catch (err) {
+                show(FD.friendlyError(err));
+            } finally {
+                busy(btn, false, 'Kirim tautan');
+            }
+        });
+
+        // ---- Password baru ----
+        $('formNewPass').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            clearMsg();
+            var p1 = $('newPass').value, p2 = $('newPass2').value;
+            if (p1.length < 8) { show('Password minimal 8 karakter.'); return; }
+            if (p1 !== p2) { show('Kedua password tidak sama.'); return; }
+            var btn = $('btnNewPass');
+            busy(btn, true, 'Menyimpan...');
+            try {
+                var res = await FD.sb.auth.updateUser({ password: p1 });
+                if (res.error) { show(FD.friendlyError(res.error)); return; }
+                show('Password baru tersimpan.', 'ok');
+                await goToApp(res.data.user);
+            } catch (err) {
+                show(FD.friendlyError(err));
+            } finally {
+                busy(btn, false, 'Simpan password');
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

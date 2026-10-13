@@ -1,0 +1,16 @@
+{
+  "trailingSlash": true,
+  "headers": [
+    {
+      "source": "/app/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "Service-Worker-Allowed", "value": "/app/" }
+      ]
+    },
+    {
+      "source": "/fd-auth.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    }
+  ]
+}
