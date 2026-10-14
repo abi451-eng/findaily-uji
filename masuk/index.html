@@ -177,7 +177,7 @@
         async function goToApp(user) {
             var member = await FD.fetchMember(user);
             if (!member) {
-                await FD.sb.auth.signOut({ scope: 'local' });
+                await (await FD.ready).auth.signOut({ scope: 'local' });
                 FD.saveMember(null);
                 show('Akun ini belum terhubung ke instansi mana pun. Hubungi admin instansimu.');
                 return false;
@@ -188,14 +188,16 @@
         }
 
         // Datang dari tautan reset password di email
-        FD.sb.auth.onAuthStateChange(function (event) {
-            if (event === 'PASSWORD_RECOVERY') panel('panelNewPass');
+        FD.ready.then(function (sb) {
+            sb.auth.onAuthStateChange(function (event) {
+                if (event === 'PASSWORD_RECOVERY') panel('panelNewPass');
+            });
         });
 
         // Sudah login sebelumnya? Langsung ke aplikasi
         (async function () {
             if (window.FD_IS_RECOVERY) { panel('panelNewPass'); return; }
-            var s = await FD.sb.auth.getSession();
+            var s = await (await FD.ready).auth.getSession();
             var session = s && s.data && s.data.session;
             if (!session) return;
             if (!navigator.onLine) {
@@ -217,7 +219,7 @@
             var btn = $('btnLogin');
             busy(btn, true, 'Memeriksa...');
             try {
-                var res = await FD.sb.auth.signInWithPassword({ email: id, password: pass });
+                var res = await (await FD.ready).auth.signInWithPassword({ email: id, password: pass });
                 if (res.error) { show(FD.friendlyError(res.error)); return; }
                 await goToApp(res.data.user);
             } catch (err) {
@@ -245,7 +247,7 @@
             var btn = $('btnReset');
             busy(btn, true, 'Mengirim...');
             try {
-                var res = await FD.sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + FD.LOGIN_URL });
+                var res = await (await FD.ready).auth.resetPasswordForEmail(email, { redirectTo: location.origin + FD.LOGIN_URL });
                 if (res.error) { show(FD.friendlyError(res.error)); return; }
                 show('Kalau email itu terdaftar, tautan sudah dikirim. Cek kotak masuk dan folder spam.', 'ok');
             } catch (err) {
@@ -265,7 +267,7 @@
             var btn = $('btnNewPass');
             busy(btn, true, 'Menyimpan...');
             try {
-                var res = await FD.sb.auth.updateUser({ password: p1 });
+                var res = await (await FD.ready).auth.updateUser({ password: p1 });
                 if (res.error) { show(FD.friendlyError(res.error)); return; }
                 show('Password baru tersimpan.', 'ok');
                 await goToApp(res.data.user);
