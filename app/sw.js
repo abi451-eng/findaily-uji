@@ -6,7 +6,7 @@
    PERNAH disimpan, supaya data selalu terbaru dan data satu akun tidak
    pernah tampil ke akun lain di HP yang sama. */
 
-const CACHE_NAME = 'findaily-uji-v7-0-0-a3';
+const CACHE_NAME = 'findaily-uji-v7-0-0-a4';
 
 // File inti aplikasi (same-origin), relatif terhadap /app/
 const APP_SHELL = [
@@ -108,4 +108,110 @@ self.addEventListener('fetch', (event) => {
         });
     })
   );
+});
+
+
+/* =====================================================================
+   KIRIM SAAT APLIKASI TERTUTUP (Background Sync, Android/Chrome)
+   Aplikasi menulis "kotak keluar" (outbox) dan sesi login ke IndexedDB.
+   Saat internet kembali, Android membangunkan service worker ini lewat
+   event 'sync', lalu isi kotak keluar dikirim ke Supabase.
+   - Hanya bertindak kalau aplikasi benar-benar tertutup (tidak ada jendela).
+   - Kunci masuk diperpanjang di sini bila perlu; kunci baru disimpan kembali
+     ke IndexedDB, dan aplikasi memakainya saat dibuka (lihat fd-auth.js).
+   ===================================================================== */
+const FD_SYNC_TAG = 'fd-push';
+
+function fdIdb(mode, fn) {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('findaily', 1);
+    r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains('kv')) r.result.createObjectStore('kv'); };
+    r.onerror = () => rej(r.error);
+    r.onsuccess = () => {
+      const db = r.result, tx = db.transaction('kv', mode), req = fn(tx.objectStore('kv'));
+      let out;
+      if (req) req.onsuccess = () => { out = req.result; };
+      tx.oncomplete = () => { db.close(); res(out); };
+      tx.onerror = tx.onabort = () => { db.close(); rej(tx.error); };
+    };
+  });
+}
+const fdGet = (k) => fdIdb('readonly', (s) => s.get(k));
+const fdSet = (k, v) => fdIdb('readwrite', (s) => s.put(v, k));
+const fdDel = (k) => fdIdb('readwrite', (s) => s.delete(k));
+
+// Kunci masuk yang masih berlaku. null = tidak bisa (harus login lewat aplikasi).
+// Melempar error kalau jaringan putus, supaya Android mencoba lagi nanti.
+async function fdToken(cfg, rec, force) {
+  const s = JSON.parse(rec.raw || '{}');
+  const now = Math.floor(Date.now() / 1000);
+  if (!force && s.access_token && (s.expires_at || 0) > now + 60) return s.access_token;
+  if (!s.refresh_token) return null;
+  const res = await fetch(cfg.url + '/auth/v1/token?grant_type=refresh_token', {
+    method: 'POST',
+    headers: { apikey: cfg.key, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: s.refresh_token })
+  });
+  if (!res.ok) return null;
+  const ns = await res.json();
+  if (!ns.expires_at && ns.expires_in) ns.expires_at = now + ns.expires_in;
+  if (!ns.user) ns.user = s.user;
+  await fdSet('session', { raw: JSON.stringify(ns), expires_at: ns.expires_at || 0, user_id: (ns.user && ns.user.id) || rec.user_id || null, saved: Date.now(), source: 'sw' });
+  return ns.access_token;
+}
+
+function fdSend(cfg, token, op) {
+  return fetch(cfg.url + '/rest/v1/' + op.path, {
+    method: op.m,
+    headers: {
+      apikey: cfg.key,
+      Authorization: 'Bearer ' + token,
+      'Content-Type': 'application/json',
+      Prefer: op.m === 'POST' ? 'resolution=merge-duplicates,return=representation' : 'return=representation'
+    },
+    body: op.body ? JSON.stringify(op.body) : undefined
+  });
+}
+
+async function fdBackgroundPush() {
+  // Aplikasi masih terbuka? Biarkan aplikasi sendiri yang mengirim.
+  const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  if (wins.length) return 'aplikasi-terbuka';
+
+  const [cfg, rec, box] = await Promise.all([fdGet('config'), fdGet('session'), fdGet('outbox')]);
+  if (!cfg || !rec || !box || !box.ops || !box.ops.length) return 'kosong';
+  if (rec.user_id && box.user_id && rec.user_id !== box.user_id) return 'beda-akun';
+
+  let token = await fdToken(cfg, rec, false);
+  if (!token) { await fdSet('outboxResult', { ok: false, at: Date.now(), error: 'login' }); return 'perlu-login'; }
+
+  for (const op of box.ops) {
+    let res = await fdSend(cfg, token, op);                       // jaringan putus: melempar, Android coba lagi
+    if (res.status === 401) {
+      token = await fdToken(cfg, await fdGet('session'), true);
+      if (!token) { await fdSet('outboxResult', { ok: false, at: Date.now(), error: 'login' }); return 'perlu-login'; }
+      res = await fdSend(cfg, token, op);
+    }
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      await fdSet('outboxResult', { ok: false, at: Date.now(), error: res.status + ' ' + txt.slice(0, 200) });
+      return 'ditolak';                                            // aplikasi menangani saat dibuka
+    }
+    if (op.expect) {
+      const rows = await res.json().catch(() => []);
+      if (!Array.isArray(rows) || rows.length < op.expect) {
+        await fdSet('outboxResult', { ok: false, at: Date.now(), error: 'izin' });
+        return 'ditolak';
+      }
+    }
+  }
+  // Hapus kotak keluar hanya kalau aplikasi belum menulis yang lebih baru selama pengiriman
+  const cur = await fdGet('outbox');
+  if (cur && cur.at === box.at) await fdDel('outbox');
+  await fdSet('outboxResult', { ok: true, at: Date.now(), count: box.count });
+  return 'terkirim';
+}
+
+self.addEventListener('sync', (event) => {
+  if (event.tag === FD_SYNC_TAG) event.waitUntil(fdBackgroundPush());
 });

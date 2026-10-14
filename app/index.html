@@ -3906,7 +3906,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.0.0-uji.3';
+        const APP_VERSION = 'v7.0.0-uji.4';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -7630,12 +7630,59 @@
             var desc = document.getElementById('fdSyncDesc');
             if (desc) {
                 desc.textContent = label + (st.lastSync ? ' · terakhir ' + new Date(st.lastSync).toLocaleString('id-ID') : '') +
-                    (s === 'error' && st.lastError ? ' · ' + st.lastError : '');
+                    (s === 'error' && st.lastError ? ' · ' + st.lastError : '') +
+                    ' · kirim saat aplikasi tertutup: ' + (bgSyncSupported() ? 'didukung' : 'tidak didukung di browser ini');
             }
         }
 
         // ---------- kirim ke server ----------
         function chunks(arr, n) { var out = []; for (var i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out; }
+
+        // ---------- kotak keluar untuk service worker (kirim saat aplikasi tertutup) ----------
+        // Isinya daftar permintaan siap kirim ke server. Aman terkirim dua kali:
+        // server mengenali data yang sama (upsert) dan riwayat tidak mencatat yang tidak berubah.
+        function buildOps(d) {
+            var U = st.usaha, ops = [];
+            if (d.cfgBkcm) ops.push({ m: 'PATCH', path: 'usaha?id=eq.' + U.bkcm + '&select=id', body: { pengaturan: JSON.parse(stable(cfgBkcm())) }, expect: 1 });
+            if (d.cfgIfc) ops.push({ m: 'PATCH', path: 'usaha?id=eq.' + U.ifc + '&select=id', body: { pengaturan: JSON.parse(stable(cfgIfc())) }, expect: 1 });
+            var curB = normBkcm(appData), curI = normIfc(irfanData), curK = normKas(kasSetoran), byId = {};
+            ((kasSetoran && kasSetoran.tx) || []).forEach(function (t) { byId[t.id] = t; });
+            chunks(d.bkcm.up, 500).forEach(function (b) {
+                ops.push({ m: 'POST', path: 'harian_warung?on_conflict=usaha_id,tanggal&select=id', expect: b.length,
+                           body: b.map(function (t) { return Object.assign({ usaha_id: U.bkcm, tanggal: t }, JSON.parse(curB[t])); }) });
+            });
+            chunks(d.bkcm.del, 200).forEach(function (b) {
+                ops.push({ m: 'DELETE', path: 'harian_warung?usaha_id=eq.' + U.bkcm + '&tanggal=in.(' + b.join(',') + ')&select=id' });
+            });
+            chunks(d.ifc.up, 500).forEach(function (b) {
+                ops.push({ m: 'POST', path: 'harian_kas?on_conflict=usaha_id,tanggal&select=id', expect: b.length,
+                           body: b.map(function (t) { return Object.assign({ usaha_id: U.ifc, tanggal: t }, JSON.parse(curI[t])); }) });
+            });
+            chunks(d.ifc.del, 200).forEach(function (b) {
+                ops.push({ m: 'DELETE', path: 'harian_kas?usaha_id=eq.' + U.ifc + '&tanggal=in.(' + b.join(',') + ')&select=id' });
+            });
+            chunks(d.kas.up, 500).forEach(function (b) {
+                ops.push({ m: 'POST', path: 'kas_setoran_tx?on_conflict=id&select=id', expect: b.length,
+                           body: b.map(function (id) { return Object.assign({ id: id, usaha_id: U.bkcm, dibuat_pada: byId[id].created }, JSON.parse(curK[id])); }) });
+            });
+            chunks(d.kas.del, 200).forEach(function (b) {
+                ops.push({ m: 'DELETE', path: 'kas_setoran_tx?id=in.(' + b.join(',') + ')&select=id' });
+            });
+            return ops;
+        }
+        function bgSyncSupported() { return 'serviceWorker' in navigator && 'SyncManager' in window; }
+        function registerBgSync() {
+            if (!bgSyncSupported()) return;
+            navigator.serviceWorker.ready.then(function (reg) { if (reg.sync) return reg.sync.register('fd-push'); }).catch(function () {});
+        }
+        async function syncOutbox() {
+            if (!window.FD || !FD.idb || !st.snap || !st.usaha || !st.member) return;
+            fixKasIds();
+            var d = computeDiff();
+            if (!d || d.count === 0) { await FD.idb.del('outbox'); return; }
+            await FD.idb.set('outbox', { user_id: st.member.user_id, instansi_id: st.member.instansi_id, ops: buildOps(d), count: d.count, at: Date.now() });
+            registerBgSync();
+        }
         async function check(res, expected) {
             if (res.error) throw res.error;
             if (expected !== undefined && (!res.data || res.data.length < expected)) {
@@ -7649,8 +7696,8 @@
             if (st.busy) { st.again = true; return false; }
             fixKasIds();
             var d = computeDiff();
-            if (!d || d.count === 0) { setStatus('idle'); return true; }
-            if (!navigator.onLine) { setStatus('idle'); return false; }
+            if (!d || d.count === 0) { setStatus('idle'); if (window.FD && FD.idb) FD.idb.del('outbox'); return true; }
+            if (!navigator.onLine) { setStatus('idle'); syncOutbox(); return false; }
             st.busy = true; setStatus('busy');
             var sb = FD.sb, U = st.usaha, s = st.snap;
             try {
@@ -7697,10 +7744,11 @@
                 st.lastSync = new Date().toISOString();
                 st.busy = false; setStatus('idle', '');
                 if (st.again) { st.again = false; return push(); }
+                if (window.FD && FD.idb) FD.idb.del('outbox');
                 return true;
             } catch (e) {
                 st.busy = false;
-                if (isNetErr(e)) { setStatus('idle'); return false; }
+                if (isNetErr(e)) { setStatus('idle'); syncOutbox(); return false; }
                 if (isPermErr(e)) {
                     setStatus('error', 'Akunmu tidak punya izin mengubah data');
                     alert('Akunmu hanya bisa melihat data. Perubahan dibatalkan dan data dikembalikan seperti di server.');
@@ -7853,8 +7901,19 @@
             }
             window.addEventListener('online', function () { pull(); });
             window.addEventListener('offline', function () { setStatus('idle'); });
-            document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') push(); });
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') push(); else syncOutbox();
+            });
+            window.addEventListener('pagehide', function () { syncOutbox(); });
             setStatus('idle');
+            try {
+                var r = await FD.idb.get('outboxResult');
+                if (r) {
+                    await FD.idb.del('outboxResult');
+                    if (r.ok && typeof showSuccessMessage === 'function')
+                        showSuccessMessage(r.count + ' perubahan sudah terkirim otomatis saat aplikasi tertutup.');
+                }
+            } catch (e) {}
             await pull();
         }
 
