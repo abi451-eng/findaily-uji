@@ -2,6 +2,9 @@
    FINDAILY - sambungan ke Supabase (dipakai /masuk/ dan /app/)
    Kunci di bawah adalah kunci PUBLIK (publishable): aman berada di sini.
    Jangan pernah menaruh kunci rahasia (sb_secret_ / service_role) di file ini.
+
+   v7.0.0-uji.4: sesi login dibagi dengan service worker lewat IndexedDB,
+   supaya catatan offline bisa terkirim walau aplikasi tertutup (Android).
    ===================================================================== */
 (function () {
     'use strict';
@@ -12,26 +15,68 @@
     var LOGIN_URL = '/masuk/';
     var APP_URL = '/app/';
     var MEMBER_KEY = 'fd_member';
+    var STORAGE_KEY = 'fd-auth';           // tempat pustaka Supabase menyimpan sesi
+    var DATA_KEYS = ['financialData', 'financialConfig', 'irfanData', 'irfanConfig', 'kasSetoran', 'fd_sync_snap'];
 
     if (!window.supabase || !window.supabase.createClient) {
         console.error('[FD] Pustaka Supabase belum termuat.');
         return;
     }
 
-    var sb = window.supabase.createClient(FD_SUPABASE_URL, FD_SUPABASE_KEY, {
-        auth: {
-            persistSession: true,      // tetap login walau aplikasi ditutup
-            autoRefreshToken: true,
-            detectSessionInUrl: true,  // untuk tautan reset password dari email
-            flowType: 'implicit',      // tautan email tetap jalan walau dibuka di browser lain
-            storageKey: 'fd-auth'
+    // ---------- IndexedDB kecil (dipakai bersama service worker) ----------
+    var idb = (function () {
+        function open() {
+            return new Promise(function (res, rej) {
+                if (!window.indexedDB) { rej(new Error('IndexedDB tidak tersedia')); return; }
+                var r = indexedDB.open('findaily', 1);
+                r.onupgradeneeded = function () { if (!r.result.objectStoreNames.contains('kv')) r.result.createObjectStore('kv'); };
+                r.onsuccess = function () { res(r.result); };
+                r.onerror = function () { rej(r.error); };
+            });
         }
-    });
+        function run(mode, fn) {
+            return open().then(function (db) {
+                return new Promise(function (res, rej) {
+                    var tx = db.transaction('kv', mode), store = tx.objectStore('kv'), out;
+                    var req = fn(store);
+                    if (req) req.onsuccess = function () { out = req.result; };
+                    tx.oncomplete = function () { db.close(); res(out); };
+                    tx.onerror = tx.onabort = function () { db.close(); rej(tx.error); };
+                });
+            });
+        }
+        return {
+            get: function (k) { return run('readonly', function (s) { return s.get(k); }).catch(function () { return undefined; }); },
+            set: function (k, v) { return run('readwrite', function (s) { return s.put(v, k); }).catch(function () {}); },
+            del: function (k) { return run('readwrite', function (s) { return s.delete(k); }).catch(function () {}); }
+        };
+    })();
 
-    // Pindah halaman (satu pintu, supaya mudah diuji)
-    function go(url) {
-        if (typeof window.__fdNavigate === 'function') return window.__fdNavigate(url);
-        location.replace(url);
+    function rawSession() { try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; } }
+    function parse(raw) { try { return JSON.parse(raw); } catch (e) { return null; } }
+
+    // Service worker mungkin sudah memperpanjang kunci saat aplikasi tertutup.
+    // Pakai sesi itu kalau lebih baru, SEBELUM pustaka Supabase membaca sesi.
+    async function adoptNewerSession() {
+        try {
+            var rec = await idb.get('session');
+            var cur = parse(rawSession());
+            if (!rec || !rec.raw || !cur) return false;         // belum/sudah keluar di HP ini: jangan dihidupkan lagi
+            var curUser = cur.user && cur.user.id;
+            if (rec.user_id && curUser && rec.user_id !== curUser) return false;
+            if ((rec.expires_at || 0) > (cur.expires_at || 0)) {
+                localStorage.setItem(STORAGE_KEY, rec.raw);
+                return true;
+            }
+        } catch (e) { /* tetap lanjut dengan sesi yang ada */ }
+        return false;
+    }
+
+    // Salin sesi terbaru ke IndexedDB supaya service worker bisa memakainya
+    function mirrorSession() {
+        var raw = rawSession(), s = parse(raw);
+        if (!s || !s.access_token) return idb.del('session');
+        return idb.set('session', { raw: raw, expires_at: s.expires_at || 0, user_id: (s.user && s.user.id) || null, saved: Date.now(), source: 'app' });
     }
 
     function readMember() {
@@ -41,8 +86,49 @@
         if (m) localStorage.setItem(MEMBER_KEY, JSON.stringify(m)); else localStorage.removeItem(MEMBER_KEY);
     }
 
+    // Pindah halaman (satu pintu, supaya mudah diuji)
+    function go(url) {
+        if (typeof window.__fdNavigate === 'function') return window.__fdNavigate(url);
+        location.replace(url);
+    }
+
+    var FD = {
+        sb: null,
+        LOGIN_URL: LOGIN_URL,
+        APP_URL: APP_URL,
+        idb: idb,
+        go: go,
+        readMember: readMember,
+        saveMember: saveMember
+    };
+    window.FD = FD;
+
+    FD.ready = (async function () {
+        await adoptNewerSession();
+        var sb = window.supabase.createClient(FD_SUPABASE_URL, FD_SUPABASE_KEY, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true,
+                flowType: 'implicit',
+                storageKey: STORAGE_KEY
+            }
+        });
+        FD.sb = sb;
+        idb.set('config', { url: FD_SUPABASE_URL, key: FD_SUPABASE_KEY });
+        sb.auth.onAuthStateChange(function (event) {
+            // pustaka menyimpan sesi dulu, baru memberi kabar: salin sesudahnya
+            setTimeout(function () {
+                if (event === 'SIGNED_OUT') { idb.del('session'); idb.del('outbox'); }
+                else mirrorSession();
+            }, 0);
+        });
+        return sb;
+    })();
+
     // Ambil keanggotaan akun ini dari server. Hasil: objek anggota, null (tidak terdaftar), atau melempar error jaringan.
-    async function fetchMember(user) {
+    FD.fetchMember = async function (user) {
+        var sb = await FD.ready;
         var res = await sb.from('anggota')
             .select('instansi_id, peran, nama, username, instansi:instansi_id ( nama )')
             .eq('user_id', user.id)
@@ -61,10 +147,10 @@
             nama: row.nama || row.username || user.email || '',
             diperbarui: new Date().toISOString()
         };
-    }
+    };
 
     // Terjemahkan pesan error Supabase ke bahasa yang dimengerti pengguna
-    function friendlyError(err) {
+    FD.friendlyError = function (err) {
         var msg = (err && (err.message || err.error_description || err.msg)) || String(err || '');
         var low = msg.toLowerCase();
         if (!navigator.onLine || low.indexOf('failed to fetch') !== -1 || low.indexOf('network') !== -1)
@@ -78,11 +164,12 @@
         if (low.indexOf('password should be') !== -1 || low.indexOf('at least') !== -1)
             return 'Password terlalu pendek. Gunakan minimal 8 karakter.';
         return 'Terjadi kesalahan: ' + msg;
-    }
+    };
 
     // Dipakai halaman /app/: pastikan sudah login dan terdaftar di instansi.
     // Bekerja saat offline: memakai sesi dan data keanggotaan yang tersimpan di HP.
-    async function requireAuth() {
+    FD.requireAuth = async function () {
+        var sb = await FD.ready;
         var s = await sb.auth.getSession();
         var session = s && s.data && s.data.session;
         if (!session) { saveMember(null); go(LOGIN_URL); return null; }
@@ -92,8 +179,8 @@
 
         if (navigator.onLine) {
             try {
-                var fresh = await fetchMember(session.user);
-                if (!fresh) { await signOut('Akun ini tidak lagi terdaftar di instansi mana pun.'); return null; }
+                var fresh = await FD.fetchMember(session.user);
+                if (!fresh) { await FD.signOut('Akun ini tidak lagi terdaftar di instansi mana pun.'); return null; }
                 saveMember(fresh);
                 return fresh;
             } catch (e) {
@@ -104,33 +191,21 @@
         if (cached) return cached;
         go(LOGIN_URL);
         return null;
-    }
+    };
 
-    // Keluar dari akun di HP ini saja (HP lain yang memakai akun sama tidak ikut keluar)
-    async function signOut(reason) {
-        try { await sb.auth.signOut({ scope: 'local' }); } catch (e) { /* tetap lanjut */ }
+    // Keluar dari akun di HP ini saja (HP lain yang memakai akun sama tidak ikut keluar).
+    // Data keuangan di HP ikut dihapus: semuanya aman di server.
+    FD.signOut = async function (reason) {
+        try { var sb = await FD.ready; await sb.auth.signOut({ scope: 'local' }); } catch (e) { /* tetap lanjut */ }
         saveMember(null);
-        ['financialData', 'financialConfig', 'irfanData', 'irfanConfig', 'kasSetoran', 'fd_sync_snap']
-            .forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
+        DATA_KEYS.forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        await idb.del('session'); await idb.del('outbox'); await idb.del('outboxResult');
         if (reason) sessionStorage.setItem('fd_logout_reason', reason);
         go(LOGIN_URL);
-    }
+    };
 
-    function roleLabel(peran) {
+    FD.roleLabel = function (peran) {
         return peran === 'admin' ? 'Admin' : (peran === 'pemantau' ? 'Pemantau' : '');
-    }
-
-    window.FD = {
-        sb: sb,
-        LOGIN_URL: LOGIN_URL,
-        APP_URL: APP_URL,
-        fetchMember: fetchMember,
-        readMember: readMember,
-        saveMember: saveMember,
-        requireAuth: requireAuth,
-        signOut: signOut,
-        friendlyError: friendlyError,
-        roleLabel: roleLabel,
-        go: go
     };
 })();
