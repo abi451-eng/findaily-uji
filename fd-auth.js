@@ -110,6 +110,8 @@
     async function signOut(reason) {
         try { await sb.auth.signOut({ scope: 'local' }); } catch (e) { /* tetap lanjut */ }
         saveMember(null);
+        ['financialData', 'financialConfig', 'irfanData', 'irfanConfig', 'kasSetoran', 'fd_sync_snap']
+            .forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
         if (reason) sessionStorage.setItem('fd_logout_reason', reason);
         go(LOGIN_URL);
     }
