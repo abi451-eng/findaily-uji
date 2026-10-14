@@ -2510,6 +2510,21 @@
         body.dark .ifc-my-m:hover { background: rgba(255,255,255,.08); }
         .ifc-my-m.active { background: linear-gradient(135deg, #A78BFA, #F472B6); color: #fff; }
 
+        /* v7.0.0: penanda sinkron server */
+        .topbar-live[data-state="busy"]    { color: #CFF7FD; background: rgba(34,211,238,.14); border-color: rgba(34,211,238,.32); }
+        .topbar-live[data-state="busy"] i  { background: #22D3EE; box-shadow: 0 0 8px #22D3EE; }
+        .topbar-live[data-state="pending"] { color: #FDE7B0; background: rgba(251,191,36,.14); border-color: rgba(251,191,36,.36); }
+        .topbar-live[data-state="pending"] i { background: #FBBF24; box-shadow: 0 0 8px #FBBF24; }
+        .topbar-live[data-state="offline"] { color: #D5DBEA; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18); }
+        .topbar-live[data-state="offline"] i { background: #9AA6C6; box-shadow: none; }
+        .topbar-live[data-state="error"]   { color: #FFD2D8; background: rgba(253,164,175,.14); border-color: rgba(253,164,175,.36); }
+        .topbar-live[data-state="error"] i { background: #FDA4AF; box-shadow: 0 0 8px #FDA4AF; }
+        @media (max-width: 1023px) {
+            .topbar-live[data-state="pending"], .topbar-live[data-state="offline"], .topbar-live[data-state="error"] {
+                display: inline-flex; font-size: 11px; padding: 5px 9px; max-width: 46vw; white-space: nowrap; overflow: hidden;
+            }
+        }
+
         /* ============================================================
            ===== v6.3.0: KAS SETORAN =====
            ============================================================ */
@@ -2610,7 +2625,7 @@
         <div class="brand-mini"><div class="brand-logo" id="brandLogo">BK</div><span class="brand-name" id="brandName">BKCM</span></div>
         <button class="header-search-btn" id="headerSearchBtn" onclick="openSearch()" aria-label="Cari" title="Cari data"><svg class="hdr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="hsb-text">Cari tanggal, nominal, atau keterangan…</span></button>
         <span class="topbar-spacer"></span>
-        <span class="topbar-live"><i></i>Tersinkron</span>
+        <span class="topbar-live" id="fdSyncPill" data-state="busy" role="status" aria-live="polite"><i></i><span id="fdSyncText">Memuat data...</span></span>
         <button class="topbar-bell" type="button" aria-label="Notifikasi"><span class="bell-dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
         <div class="topbar-profile"><div class="topbar-av" id="profileAv">BK</div><div class="topbar-pm"><b id="profileName">Abiyou</b><span>Pemilik</span></div></div>
     </div>
@@ -3418,6 +3433,14 @@
 
                 <div class="setting-row">
                     <div class="setting-info">
+                        <div class="setting-title"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg><span data-i18n="setting_sync_title">Data server</span></div>
+                        <div class="setting-desc" id="fdSyncDesc">-</div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="fdSyncReload()" data-i18n="fd_reload_btn">Muat ulang data</button>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
                         <div class="setting-title"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span data-i18n="setting_lang_title">Bahasa</span></div>
                         <div class="setting-desc" data-i18n="setting_lang_desc">Pilih bahasa tampilan aplikasi.</div>
                     </div>
@@ -3883,7 +3906,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.0.0-uji.1';
+        const APP_VERSION = 'v7.0.0-uji.3';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -3898,7 +3921,7 @@
 
         const I18N = {
             en: {
-                menu_title:'Menu', nav_input:'Data Entry', nav_kas:'Cash Deposit', nav_logout:'Log out', setting_account_title:'Account', fd_role_admin:'Admin', fd_role_pemantau:'Viewer', fd_logout_confirm:'Log out on this phone? Data already recorded on this phone stays saved.', nav_dashboard:'Dashboard', nav_pajak:'Tax Report', nav_ifc_input:'Daily Entry', nav_ifc_laporan:'Monthly Report', nav_ifc_export:'Export',
+                menu_title:'Menu', nav_input:'Data Entry', nav_kas:'Cash Deposit', nav_logout:'Log out', setting_account_title:'Account', fd_role_admin:'Admin', fd_role_pemantau:'Viewer', fd_logout_confirm:'Log out on this phone? All data is safe on the server.', fd_logout_pending:'There are still {n} changes not sent to the server. Connect to the internet and wait until it says "Synced" before logging out.', setting_sync_title:'Server data', fd_reload_btn:'Reload data', nav_dashboard:'Dashboard', nav_pajak:'Tax Report', nav_ifc_input:'Daily Entry', nav_ifc_laporan:'Monthly Report', nav_ifc_export:'Export',
                 nav_export:'Export', nav_install:'Install App', nav_setting:'Settings', nav_config:'Configuration',
                 cfg_title:'SYSTEM CONFIGURATION', cfg_business:'Business Name *', cfg_business_ph:'Business Name',
                 cfg_address:'Address/Location *', cfg_address_ph:'Address/Location', cfg_city:'City/Regency *', cfg_city_ph:'City/Regency',
@@ -3991,7 +4014,7 @@
                 kas_confirm_delete:'Delete "{k}" for {v}?', kas_confirm_delete_ifc:'Its entry in the IFC cash book will be deleted too.', kas_edit_note:'Editing the transaction on {d}.',
                 kas_err_start:'Fill in the start date.', kas_confirm_start:'There are {n} transactions before the new start date. They will no longer be counted.\n\nContinue?', kas_ok_cfg:'Cash Deposit starting setup saved.'
             },            id: {
-                menu_title:'Menu', nav_input:'Input Data', nav_kas:'Kas Setoran', nav_logout:'Keluar', setting_account_title:'Akun', fd_role_admin:'Admin', fd_role_pemantau:'Pemantau', fd_logout_confirm:'Keluar dari akun di HP ini? Data yang sudah tercatat di HP ini tetap tersimpan.', nav_dashboard:'Dasbor', nav_pajak:'Laporan Pajak', nav_ifc_input:'Input Harian', nav_ifc_laporan:'Laporan Bulanan', nav_ifc_export:'Export',
+                menu_title:'Menu', nav_input:'Input Data', nav_kas:'Kas Setoran', nav_logout:'Keluar', setting_account_title:'Akun', fd_role_admin:'Admin', fd_role_pemantau:'Pemantau', fd_logout_confirm:'Keluar dari akun di HP ini? Semua data sudah aman di server.', fd_logout_pending:'Masih ada {n} perubahan yang belum terkirim ke server. Sambungkan internet dan tunggu sampai tertulis "Tersinkron", baru keluar.', setting_sync_title:'Data server', fd_reload_btn:'Muat ulang data', nav_dashboard:'Dasbor', nav_pajak:'Laporan Pajak', nav_ifc_input:'Input Harian', nav_ifc_laporan:'Laporan Bulanan', nav_ifc_export:'Export',
                 nav_export:'Ekspor', nav_install:'Pasang Aplikasi', nav_setting:'Pengaturan', nav_config:'Konfigurasi',
                 cfg_title:'KONFIGURASI SISTEM', cfg_business:'Nama Bisnis/Warung *', cfg_business_ph:'Nama Bisnis/Warung',
                 cfg_address:'Alamat/Lokasi *', cfg_address_ph:'Alamat/Lokasi', cfg_city:'Kabupaten/Kota *', cfg_city_ph:'Kabupaten/Kota',
@@ -6596,7 +6619,7 @@
             const others = editing ? kasSetoran.tx.filter(x => x.id !== kasEditId) : kasSetoran.tx;
             const list = editing
                 ? kasSetoran.tx.map(x => x.id === kasEditId ? Object.assign({}, x, { date, type, amount, ket }) : x)
-                : kasSetoran.tx.concat([{ id: 'k' + Date.now() + Math.random().toString(36).slice(2, 6), date, type, amount, ket }]);
+                : kasSetoran.tx.concat([{ id: (window.fdUuid ? fdUuid() : 'k' + Date.now() + Math.random().toString(36).slice(2, 6)), date, type, amount, ket, created: new Date().toISOString() }]);
             const neg = kasNegativeAkun(list);
             if (neg) {
                 if (T.akun === neg && T.s === -1) alert(kasTr('kas_err_over', 'Jumlah melebihi sisa pinjaman ({v}).', { v: kasRp(kasPosisi(null, others)[neg]) }));
@@ -7448,6 +7471,406 @@
         });
     </script>
 
+
+    <!-- ===== v7.0.0: LAPISAN SINKRON SERVER (Supabase) =====
+         Logika aplikasi tidak diubah. Lapisan ini:
+         1. Saat dibuka: kirim perubahan tertunda, lalu ambil data terbaru dari server.
+         2. Setiap aplikasi menyimpan data keuangan ke HP: kirim selisihnya ke server.
+         Selisih dihitung dari "catatan terakhir di server" (fd_sync_snap), jadi
+         perubahan tidak hilang walau aplikasi ditutup sebelum sempat terkirim. -->
+    <script>
+    (function () {
+        'use strict';
+        var DATA_KEYS = { financialData: 1, financialConfig: 1, irfanData: 1, irfanConfig: 1, kasSetoran: 1 };
+        var SNAP_KEY = 'fd_sync_snap';
+        var PAGE = 1000;
+
+        var st = {
+            member: null, usaha: null, snap: null,
+            silent: false, busy: false, again: false, timer: null,
+            status: 'idle', pending: 0, lastError: '', lastSync: null
+        };
+
+        // ---------- penangkap penyimpanan ----------
+        var _setItem = Storage.prototype.setItem;
+        Storage.prototype.setItem = function (k, v) {
+            _setItem.call(this, k, v);
+            if (this === window.localStorage && DATA_KEYS[k] && !st.silent) schedule();
+        };
+        function silentSet(k, v) { st.silent = true; try { localStorage.setItem(k, v); } finally { st.silent = false; } }
+
+        // ---------- bantu ----------
+        function pad(n) { return String(n).padStart(2, '0'); }
+        // Tanggal benar-benar ada di kalender? (contoh: 29 Februari 2025 tidak ada)
+        function validDay(y, m, d) { return d >= 1 && d <= new Date(y, m, 0).getDate(); }
+        function num(v) { var n = Number(v) || 0; return Math.round(n * 100) / 100; }
+        function stable(v) {
+            if (Array.isArray(v)) return '[' + v.map(stable).join(',') + ']';
+            if (v && typeof v === 'object') return '{' + Object.keys(v).sort().map(function (k) { return JSON.stringify(k) + ':' + stable(v[k]); }).join(',') + '}';
+            return JSON.stringify(v === undefined ? null : v);
+        }
+        function isUuid(s) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(s || '')); }
+        function uuid() {
+            if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+        window.fdUuid = uuid;
+        function loadSnap() { try { return JSON.parse(localStorage.getItem(SNAP_KEY) || 'null'); } catch (e) { return null; } }
+        function saveSnap() { silentSet(SNAP_KEY, JSON.stringify(st.snap)); }
+        function isNetErr(e) {
+            var m = String((e && (e.message || e.details)) || e || '').toLowerCase();
+            return !navigator.onLine || m.indexOf('failed to fetch') !== -1 || m.indexOf('network') !== -1 || m.indexOf('load failed') !== -1;
+        }
+        function isPermErr(e) {
+            var code = e && e.code, m = String((e && e.message) || '').toLowerCase();
+            return code === '42501' || code === 'FD_PERM' || m.indexOf('row-level security') !== -1 || m.indexOf('permission denied') !== -1;
+        }
+
+        // ---------- bentuk baku: data di HP <-> baris server ----------
+        function bkcmRowFrom(e) {
+            return {
+                total_penjualan: num(e.totalPenjualan), tunai: num(e.tunai), qris: num(e.qris), edc: num(e.edc),
+                transfer: num(e.transfer), gojek: num(e.gojek), grab: num(e.grab), pesanan: num(e.pesanan),
+                belanja_pagi: num(e.belanjaPagi), belanja_sore: num(e.belanjaSore), daging: num(e.daging), dll: num(e.dll),
+                keterangan: String(e.keterangan || ''), is_libur: !!e.isLibur
+            };
+        }
+        function normBkcm(data) {
+            var out = {};
+            Object.keys(data || {}).forEach(function (key) {
+                var p = key.split('-').map(Number), y = p[0], m = p[1];
+                if (!y || !m || !Array.isArray(data[key])) return;
+                data[key].forEach(function (e) {
+                    if (!e || !validDay(y, m, e.day)) return;
+                    out[y + '-' + pad(m) + '-' + pad(e.day)] = stable(bkcmRowFrom(e));
+                });
+            });
+            return out;
+        }
+        function ifcRowFrom(e) {
+            return { pemasukan: num(e.pemasukan), pengeluaran: num(e.pengeluaran), keterangan: String(e.keterangan || ''), is_libur: !!e.isLibur };
+        }
+        function normIfc(data) {
+            var out = {};
+            Object.keys(data || {}).forEach(function (key) {
+                var p = key.split('-').map(Number), y = p[0], m = p[1];
+                var ent = data[key] && data[key].entries;
+                if (!y || !m || !ent) return;
+                Object.keys(ent).forEach(function (d) {
+                    var day = Number(d);
+                    if (!validDay(y, m, day) || !ent[d]) return;
+                    out[y + '-' + pad(m) + '-' + pad(day)] = stable(ifcRowFrom(ent[d]));
+                });
+            });
+            return out;
+        }
+        function kasRowFrom(t) {
+            var ifc = (t.type === 'ifc_pinjam' || t.type === 'ifc_kembali');
+            return { tanggal: t.date, tipe: t.type, jumlah: num(t.amount), keterangan: String(t.ket || ''),
+                     mitra_usaha_id: ifc && st.usaha ? st.usaha.ifc : null };
+        }
+        function normKas(ks) {
+            var out = {};
+            ((ks && ks.tx) || []).forEach(function (t) { if (t && t.id) out[t.id] = stable(kasRowFrom(t)); });
+            return out;
+        }
+        function cfgBkcm() { return { financialConfig: configSettings, kasSetoran: (kasSetoran && kasSetoran.config) || null }; }
+        function cfgIfc() { return { irfanConfig: irfanConfig }; }
+
+        // Transaksi Kas Setoran lama (id bukan UUID, misalnya dari backup) diberi id baru sebelum dikirim
+        function fixKasIds() {
+            var changed = false;
+            ((kasSetoran && kasSetoran.tx) || []).forEach(function (t) {
+                if (!isUuid(t.id)) { t.id = uuid(); changed = true; }
+                if (!t.created) { t.created = new Date().toISOString(); changed = true; }
+            });
+            if (changed) silentSet('kasSetoran', JSON.stringify(kasSetoran));
+        }
+
+        // ---------- selisih HP vs catatan server ----------
+        function diffMap(cur, snap) {
+            var up = [], del = [];
+            Object.keys(cur).forEach(function (k) { if (snap[k] !== cur[k]) up.push(k); });
+            Object.keys(snap).forEach(function (k) { if (!(k in cur)) del.push(k); });
+            return { up: up, del: del };
+        }
+        function computeDiff() {
+            if (!st.snap || !st.usaha) return null;
+            var s = st.snap;
+            var d = {
+                bkcm: diffMap(normBkcm(appData), s.bkcm || {}),
+                ifc: diffMap(normIfc(irfanData), s.ifc || {}),
+                kas: diffMap(normKas(kasSetoran), s.kas || {}),
+                cfgBkcm: (s.cfg && s.cfg.bkcm !== undefined) && stable(cfgBkcm()) !== s.cfg.bkcm,
+                cfgIfc: (s.cfg && s.cfg.ifc !== undefined) && stable(cfgIfc()) !== s.cfg.ifc
+            };
+            d.count = d.bkcm.up.length + d.bkcm.del.length + d.ifc.up.length + d.ifc.del.length +
+                      d.kas.up.length + d.kas.del.length + (d.cfgBkcm ? 1 : 0) + (d.cfgIfc ? 1 : 0);
+            return d;
+        }
+
+        // ---------- status di layar ----------
+        function setStatus(s, err) {
+            st.status = s; if (err !== undefined) st.lastError = err;
+            var d = computeDiff(); st.pending = d ? d.count : 0;
+            var pill = document.getElementById('fdSyncPill'), txt = document.getElementById('fdSyncText');
+            var label;
+            if (s === 'busy') label = 'Menyinkronkan...';
+            else if (s === 'loading') label = 'Memuat data...';
+            else if (s === 'error') label = 'Gagal sinkron';
+            else if (st.pending > 0) label = (navigator.onLine ? '' : 'Offline · ') + st.pending + ' belum terkirim';
+            else if (!navigator.onLine) label = 'Offline';
+            else label = 'Tersinkron';
+            if (pill) {
+                pill.dataset.state = (s === 'busy' || s === 'loading') ? 'busy' : (s === 'error' ? 'error' : (st.pending > 0 ? 'pending' : (navigator.onLine ? 'ok' : 'offline')));
+                if (txt) txt.textContent = label;
+            }
+            var desc = document.getElementById('fdSyncDesc');
+            if (desc) {
+                desc.textContent = label + (st.lastSync ? ' · terakhir ' + new Date(st.lastSync).toLocaleString('id-ID') : '') +
+                    (s === 'error' && st.lastError ? ' · ' + st.lastError : '');
+            }
+        }
+
+        // ---------- kirim ke server ----------
+        function chunks(arr, n) { var out = []; for (var i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out; }
+        async function check(res, expected) {
+            if (res.error) throw res.error;
+            if (expected !== undefined && (!res.data || res.data.length < expected)) {
+                var e = new Error('Server menolak perubahan'); e.code = 'FD_PERM'; throw e;
+            }
+            return res.data;
+        }
+
+        async function push() {
+            if (!st.snap || !st.usaha) return true;
+            if (st.busy) { st.again = true; return false; }
+            fixKasIds();
+            var d = computeDiff();
+            if (!d || d.count === 0) { setStatus('idle'); return true; }
+            if (!navigator.onLine) { setStatus('idle'); return false; }
+            st.busy = true; setStatus('busy');
+            var sb = FD.sb, U = st.usaha, s = st.snap;
+            try {
+                if (d.cfgBkcm) {
+                    var c1 = JSON.parse(stable(cfgBkcm()));
+                    await check(await sb.from('usaha').update({ pengaturan: c1 }).eq('id', U.bkcm).select('id'), 1);
+                    s.cfg.bkcm = stable(cfgBkcm()); saveSnap();
+                }
+                if (d.cfgIfc) {
+                    var c2 = JSON.parse(stable(cfgIfc()));
+                    await check(await sb.from('usaha').update({ pengaturan: c2 }).eq('id', U.ifc).select('id'), 1);
+                    s.cfg.ifc = stable(cfgIfc()); saveSnap();
+                }
+                var curB = normBkcm(appData);
+                for (var b of chunks(d.bkcm.up, 500)) {
+                    await check(await sb.from('harian_warung').upsert(b.map(function (t) { return Object.assign({ usaha_id: U.bkcm, tanggal: t }, JSON.parse(curB[t])); }), { onConflict: 'usaha_id,tanggal' }).select('id'), b.length);
+                    b.forEach(function (t) { s.bkcm[t] = curB[t]; }); saveSnap();
+                }
+                for (var b2 of chunks(d.bkcm.del, 200)) {
+                    await check(await sb.from('harian_warung').delete().eq('usaha_id', U.bkcm).in('tanggal', b2).select('id'));
+                    b2.forEach(function (t) { delete s.bkcm[t]; }); saveSnap();
+                }
+                var curI = normIfc(irfanData);
+                for (var i1 of chunks(d.ifc.up, 500)) {
+                    await check(await sb.from('harian_kas').upsert(i1.map(function (t) { return Object.assign({ usaha_id: U.ifc, tanggal: t }, JSON.parse(curI[t])); }), { onConflict: 'usaha_id,tanggal' }).select('id'), i1.length);
+                    i1.forEach(function (t) { s.ifc[t] = curI[t]; }); saveSnap();
+                }
+                for (var i2 of chunks(d.ifc.del, 200)) {
+                    await check(await sb.from('harian_kas').delete().eq('usaha_id', U.ifc).in('tanggal', i2).select('id'));
+                    i2.forEach(function (t) { delete s.ifc[t]; }); saveSnap();
+                }
+                var curK = normKas(kasSetoran), byId = {};
+                kasSetoran.tx.forEach(function (t) { byId[t.id] = t; });
+                for (var k1 of chunks(d.kas.up, 500)) {
+                    await check(await sb.from('kas_setoran_tx').upsert(k1.map(function (id) {
+                        return Object.assign({ id: id, usaha_id: U.bkcm, dibuat_pada: byId[id].created }, JSON.parse(curK[id]));
+                    }), { onConflict: 'id' }).select('id'), k1.length);
+                    k1.forEach(function (id) { s.kas[id] = curK[id]; }); saveSnap();
+                }
+                for (var k2 of chunks(d.kas.del, 200)) {
+                    await check(await sb.from('kas_setoran_tx').delete().in('id', k2).select('id'));
+                    k2.forEach(function (id) { delete s.kas[id]; }); saveSnap();
+                }
+                st.lastSync = new Date().toISOString();
+                st.busy = false; setStatus('idle', '');
+                if (st.again) { st.again = false; return push(); }
+                return true;
+            } catch (e) {
+                st.busy = false;
+                if (isNetErr(e)) { setStatus('idle'); return false; }
+                if (isPermErr(e)) {
+                    setStatus('error', 'Akunmu tidak punya izin mengubah data');
+                    alert('Akunmu hanya bisa melihat data. Perubahan dibatalkan dan data dikembalikan seperti di server.');
+                    await pull(true);
+                    return false;
+                }
+                setStatus('error', (e && e.message) || String(e));
+                console.error('[FD sync] push', e);
+                return false;
+            }
+        }
+        function schedule() {
+            clearTimeout(st.timer);
+            st.timer = setTimeout(function () { push(); }, 400);
+            setTimeout(function () { setStatus(st.busy ? 'busy' : 'idle'); }, 0);
+        }
+
+        // ---------- ambil dari server ----------
+        async function fetchAll(table, cols, usahaId, orderCol) {
+            var all = [], from = 0;
+            while (true) {
+                var res = await FD.sb.from(table).select(cols).eq('usaha_id', usahaId).order(orderCol, { ascending: true }).order('id', { ascending: true }).range(from, from + PAGE - 1);
+                if (res.error) throw res.error;
+                all = all.concat(res.data || []);
+                if (!res.data || res.data.length < PAGE) break;
+                from += PAGE;
+            }
+            return all;
+        }
+
+        async function pull(force) {
+            if (!navigator.onLine) { setStatus('idle'); return false; }
+            if (!force) { var d0 = computeDiff(); if (d0 && d0.count > 0) { var ok = await push(); if (!ok) return false; } }
+            st.busy = true; setStatus('loading');
+            try {
+                var sb = FD.sb;
+                var ur = await sb.from('usaha').select('id, kode, pengaturan').eq('instansi_id', st.member.instansi_id);
+                if (ur.error) throw ur.error;
+                var U = {}, P = {};
+                (ur.data || []).forEach(function (r) { U[r.kode] = r.id; P[r.kode] = r.pengaturan || {}; });
+                if (!U.bkcm || !U.ifc) throw new Error('Usaha BKCM/IFC belum disiapkan di server.');
+                st.usaha = U;
+
+                var rowsB = await fetchAll('harian_warung', '*', U.bkcm, 'tanggal');
+                var rowsI = await fetchAll('harian_kas', '*', U.ifc, 'tanggal');
+                var rowsK = await fetchAll('kas_setoran_tx', '*', U.bkcm, 'dibuat_pada');
+
+                // BKCM -> appData
+                var nb = {};
+                rowsB.forEach(function (r) {
+                    var p = r.tanggal.split('-').map(Number), key = p[0] + '-' + p[1];
+                    var e = {
+                        day: p[2], totalPenjualan: num(r.total_penjualan), tunai: num(r.tunai), qris: num(r.qris), edc: num(r.edc),
+                        transfer: num(r.transfer), gojek: num(r.gojek), grab: num(r.grab), pesanan: num(r.pesanan),
+                        belanjaPagi: num(r.belanja_pagi), belanjaSore: num(r.belanja_sore), daging: num(r.daging), dll: num(r.dll),
+                        keterangan: r.keterangan || '', saldo: 0, isLibur: !!r.is_libur
+                    };
+                    e.totalPengeluaran = e.belanjaPagi + e.belanjaSore + e.daging + e.dll;
+                    (nb[key] = nb[key] || []).push(e);
+                });
+                Object.keys(nb).forEach(function (key) { nb[key].sort(function (a, b) { return a.day - b.day; }); });
+                appData = nb;
+                Object.keys(appData).forEach(function (key) { recalcBalances(key); });
+
+                // IFC -> irfanData
+                var ni = {};
+                rowsI.forEach(function (r) {
+                    var p = r.tanggal.split('-').map(Number), key = p[0] + '-' + p[1];
+                    var e = { pemasukan: num(r.pemasukan), pengeluaran: num(r.pengeluaran), keterangan: r.keterangan || '' };
+                    if (r.is_libur) e.isLibur = true;
+                    (ni[key] = ni[key] || { entries: {} }).entries[p[2]] = e;
+                });
+                irfanData = ni;
+
+                // Kas Setoran
+                kasSetoran = {
+                    config: (P.bkcm && P.bkcm.kasSetoran) || null,
+                    tx: rowsK.map(function (r) { return { id: r.id, date: r.tanggal, type: r.tipe, amount: num(r.jumlah), ket: r.keterangan || '', created: r.dibuat_pada }; })
+                };
+
+                // Pengaturan (yang belum pernah disimpan di server tetap memakai isian di HP)
+                if (P.bkcm && P.bkcm.financialConfig) Object.assign(configSettings, P.bkcm.financialConfig);
+                if (P.ifc && P.ifc.irfanConfig) Object.assign(irfanConfig, P.ifc.irfanConfig);
+
+                // Simpan ke HP tanpa memicu pengiriman
+                silentSet('financialData', JSON.stringify(appData));
+                silentSet('irfanData', JSON.stringify(irfanData));
+                silentSet('kasSetoran', JSON.stringify(kasSetoran));
+                silentSet('financialConfig', JSON.stringify(configSettings));
+                silentSet('irfanConfig', JSON.stringify(irfanConfig));
+
+                st.snap = {
+                    user_id: st.member.user_id, instansi_id: st.member.instansi_id, usaha: U,
+                    bkcm: normBkcm(appData), ifc: normIfc(irfanData), kas: normKas(kasSetoran),
+                    cfg: {
+                        bkcm: (P.bkcm && P.bkcm.financialConfig) ? stable(cfgBkcm()) : stable({ financialConfig: null, kasSetoran: (P.bkcm && P.bkcm.kasSetoran) || null }),
+                        ifc: (P.ifc && P.ifc.irfanConfig) ? stable(cfgIfc()) : stable({ irfanConfig: null })
+                    }
+                };
+                saveSnap();
+                st.lastSync = new Date().toISOString();
+                st.busy = false;
+                refreshUI();
+                setStatus('idle', '');
+                // Pengaturan yang belum ada di server (pertama kali) langsung dikirim
+                var d1 = computeDiff(); if (d1 && d1.count > 0) push();
+                return true;
+            } catch (e) {
+                st.busy = false;
+                if (isNetErr(e)) { setStatus('idle'); return false; }
+                setStatus('error', (e && e.message) || String(e));
+                console.error('[FD sync] pull', e);
+                return false;
+            }
+        }
+
+        function refreshUI() {
+            var safe = function (fn) { try { fn(); } catch (e) { console.warn('[FD sync] refresh', e); } };
+            safe(function () { loadConfig(); });
+            safe(function () { updateUI(); });
+            safe(function () { if (typeof ifcRefreshForm === 'function') ifcRefreshForm(); });
+            safe(function () { var p = document.getElementById('view-ifc-laporan'); if (p && p.classList.contains('active')) ifcRenderLaporan(); });
+            safe(function () { var p = document.getElementById('view-kas'); if (p && p.classList.contains('active')) kasRender(); });
+        }
+
+        // ---------- mulai ----------
+        var DATA_LIST = ['financialData', 'financialConfig', 'irfanData', 'irfanConfig', 'kasSetoran'];
+        function wipeLocalData() {
+            st.silent = true;
+            try { DATA_LIST.forEach(function (k) { localStorage.removeItem(k); }); } finally { st.silent = false; }
+        }
+        function reloadPage() {
+            if (typeof window.__fdReload === 'function') return window.__fdReload();
+            location.reload();
+        }
+
+        async function start(member) {
+            st.member = member;
+            var snap = loadSnap();
+            if (!snap || snap.user_id !== member.user_id || snap.instansi_id !== member.instansi_id) {
+                // HP ini belum pernah sinkron dengan akun ini: bersihkan data lain, lalu muat dari server
+                var hadData = DATA_LIST.some(function (k) { return localStorage.getItem(k) !== null; });
+                wipeLocalData();
+                st.snap = { user_id: member.user_id, instansi_id: member.instansi_id, bkcm: {}, ifc: {}, kas: {}, cfg: {} };
+                saveSnap();
+                if (hadData) { reloadPage(); return; }
+            } else {
+                st.snap = snap;
+                st.usaha = snap.usaha || null;
+            }
+            window.addEventListener('online', function () { pull(); });
+            window.addEventListener('offline', function () { setStatus('idle'); });
+            document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') push(); });
+            setStatus('idle');
+            await pull();
+        }
+
+        window.fdSync = {
+            start: start,
+            push: push,
+            pull: pull,
+            reload: function () { return pull(); },
+            pendingCount: function () { var d = computeDiff(); return d ? d.count : 0; },
+            wipe: function () { wipeLocalData(); silentSet(SNAP_KEY, 'null'); localStorage.removeItem(SNAP_KEY); },
+            state: st,
+            _normBkcm: normBkcm, _normIfc: normIfc
+        };
+    })();
+    </script>
+
     <!-- ===== v7.0.0: penjaga login (Supabase) ===== -->
     <script>
         window.FD_MEMBER = null;
@@ -7467,11 +7890,20 @@
             if (d) d.textContent = (m.nama || '') + ' (' + fdRoleText() + ')' + (m.instansi_nama ? ', ' + m.instansi_nama : '') + (m.email ? ' · ' + m.email : '');
         }
         function fdLogout() {
-            var q = (typeof t === 'function')
-                ? t('fd_logout_confirm', 'Keluar dari akun di HP ini? Data yang sudah tercatat di HP ini tetap tersimpan.')
-                : 'Keluar dari akun di HP ini?';
-            if (!confirm(q)) return;
+            var tr = function (k, fb) { return (typeof t === 'function') ? t(k, fb) : fb; };
+            var n = window.fdSync ? fdSync.pendingCount() : 0;
+            if (n > 0) {
+                alert(tr('fd_logout_pending', 'Masih ada {n} perubahan yang belum terkirim ke server. Sambungkan internet dan tunggu sampai tertulis "Tersinkron", baru keluar.').replace('{n}', n));
+                if (navigator.onLine && window.fdSync) fdSync.push();
+                return;
+            }
+            if (!confirm(tr('fd_logout_confirm', 'Keluar dari akun di HP ini? Semua data sudah aman di server.'))) return;
+            if (window.fdSync) fdSync.wipe();
             FD.signOut();
+        }
+        function fdSyncReload() {
+            if (!navigator.onLine) { alert('Tidak ada koneksi internet.'); return; }
+            if (window.fdSync) fdSync.reload();
         }
         (function () {
             var gateMsg = document.getElementById('fdAuthGateMsg');
@@ -7483,6 +7915,7 @@
                 if (!m) return; // sedang diarahkan ke halaman masuk
                 fdApplyMember(m);
                 document.documentElement.classList.remove('fd-auth-pending');
+                if (window.fdSync) fdSync.start(m);
             }).catch(function (e) {
                 gateMsg.innerHTML = 'Akun belum bisa diperiksa. ' + (navigator.onLine ? 'Coba lagi sebentar lagi, lalu ' : 'Sambungkan internet, lalu ') + '<a href="">muat ulang</a>.';
                 console.error('[FD] requireAuth', e);
