@@ -2525,6 +2525,46 @@
             }
         }
 
+        /* v7.0.0: mode lihat saja (pemantau) */
+        .fd-viewer-pill { display: none; align-items: center; font-size: 11.5px; font-weight: 700; padding: 6px 11px; border-radius: 999px;
+            color: #E2D8FF; background: rgba(167,139,250,.18); border: 1px solid rgba(167,139,250,.38); white-space: nowrap; flex-shrink: 0; }
+        html.fd-viewer .fd-viewer-pill { display: inline-flex; }
+        html.fd-viewer .fd-admin-only,
+        html.fd-viewer #fdBackupSection, html.fd-viewer #fdDriveSection, html.fd-viewer #backupReminder,
+        html.fd-viewer #kasSetupSection, html.fd-viewer .kas-2col > .form-section:first-child,
+        html.fd-viewer #ifcSaldoAwalSection, html.fd-viewer .action-buttons, html.fd-viewer .kas-actions,
+        html.fd-viewer .kas-open-item .btn,
+        html.fd-viewer [onclick^="saveData"], html.fd-viewer [onclick^="toggleLibur"], html.fd-viewer [onclick^="resetForm"],
+        html.fd-viewer [onclick^="showPreview"], html.fd-viewer [onclick^="editData"], html.fd-viewer [onclick^="deleteData"],
+        html.fd-viewer [onclick^="copyFieldLast"], html.fd-viewer [onclick^="saveConfig"],
+        html.fd-viewer [onclick^="saveIfcEntry"], html.fd-viewer [onclick^="ifcSetoran"], html.fd-viewer [onclick^="ifcToggleLibur"],
+        html.fd-viewer [onclick^="ifcResetForm"], html.fd-viewer [onclick^="saveIfcSaldoAwal"],
+        html.fd-viewer [onclick^="kasAddTx"], html.fd-viewer [onclick^="kasEditTx"], html.fd-viewer [onclick^="kasDeleteTx"],
+        html.fd-viewer [onclick^="kasEditConfig"], html.fd-viewer [onclick^="kasQuickReturn"], html.fd-viewer [onclick^="kasCancelEdit"],
+        html.fd-viewer [onclick^="kasSaveConfig"], html.fd-viewer [onclick^="kasCancelSetup"],
+        html.fd-viewer [onclick^="backupToDrive"], html.fd-viewer [onclick^="restoreFromDrive"], html.fd-viewer [onclick^="exportBackupJSON"],
+        html.fd-viewer [onclick^="goBackupNow"], html.fd-viewer [onclick^="dismissBackupReminder"] { display: none !important; }
+        html.fd-viewer input[readonly], html.fd-viewer textarea[readonly] { opacity: .8; cursor: default; }
+
+        .fd-pm-panel { margin: -4px 0 16px; padding: 16px; border-radius: 14px; border: 1px solid #e3e9ec; background: #f7f9fa; }
+        body.dark .fd-pm-panel { border-color: var(--stroke); background: rgba(255,255,255,.04); }
+        .fd-pm-h { margin: 18px 0 10px; font-size: 15px; }
+        .fd-pm-hint { font-size: 12.5px; opacity: .75; margin: 10px 0 0; }
+        .fd-pm-msg { display: none; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; margin-bottom: 12px; }
+        .fd-pm-msg.show { display: block; }
+        .fd-pm-msg.err { background: rgba(192,57,43,.10); color: #a3271c; }
+        .fd-pm-msg.ok { background: rgba(21,128,61,.10); color: #126b34; }
+        body.dark .fd-pm-msg.err { background: rgba(253,164,175,.12); color: #FFD2D8; }
+        body.dark .fd-pm-msg.ok { background: rgba(110,231,183,.12); color: #C9F6E4; }
+        .fd-pm-item { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 12px 0; border-bottom: 1px solid #e3e9ec; }
+        body.dark .fd-pm-item { border-bottom-color: var(--stroke); }
+        .fd-pm-who { flex: 1 1 200px; display: flex; flex-direction: column; gap: 2px; }
+        .fd-pm-who span { font-size: 12.5px; opacity: .75; }
+        .fd-pm-off strong { text-decoration: line-through; opacity: .6; }
+        .fd-pm-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+        .fd-pm-actions .btn { padding: 8px 12px; font-size: 13px; min-height: 40px; }
+        .fd-pm-empty { padding: 10px 0; font-size: 13.5px; opacity: .75; }
+
         /* ============================================================
            ===== v6.3.0: KAS SETORAN =====
            ============================================================ */
@@ -2625,6 +2665,7 @@
         <div class="brand-mini"><div class="brand-logo" id="brandLogo">BK</div><span class="brand-name" id="brandName">BKCM</span></div>
         <button class="header-search-btn" id="headerSearchBtn" onclick="openSearch()" aria-label="Cari" title="Cari data"><svg class="hdr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="hsb-text">Cari tanggal, nominal, atau keterangan…</span></button>
         <span class="topbar-spacer"></span>
+        <span class="fd-viewer-pill" data-i18n="fd_viewer_pill">Mode lihat saja</span>
         <span class="topbar-live" id="fdSyncPill" data-state="busy" role="status" aria-live="polite"><i></i><span id="fdSyncText">Memuat data...</span></span>
         <button class="topbar-bell" type="button" aria-label="Notifikasi"><span class="bell-dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
         <div class="topbar-profile"><div class="topbar-av" id="profileAv">BK</div><div class="topbar-pm"><b id="profileName">Abiyou</b><span>Pemilik</span></div></div>
@@ -3366,7 +3407,7 @@
         </div>
 
         <!-- Backup & Restore (SELALU tampil) -->
-        <div class="data-section" style="margin-top: 20px;">
+        <div class="data-section" id="fdBackupSection" style="margin-top: 20px;">
             <h2 class="sec-title"><svg class="sec-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg><span data-i18n="backup_title">BACKUP & RESTORE DATA</span></h2>
             <div class="export-options">
                 <button class="export-btn" onclick="exportBackupJSON()">
@@ -3392,7 +3433,7 @@
         </div>
 
         <!-- Google Drive Sync (Fase 5.0) -->
-        <div class="data-section" style="margin-top: 20px;">
+        <div class="data-section" id="fdDriveSection" style="margin-top: 20px;">
             <h2 class="sec-title"><svg class="sec-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg><span data-i18n="drive_title">GOOGLE DRIVE</span></h2>
             <p style="font-size:13px; color:#888; margin:-6px 0 16px;" data-i18n="drive_hint">Simpan & ambil data dari Google Drive — praktis untuk pindah perangkat.</p>
             <div class="export-options">
@@ -3437,6 +3478,26 @@
                         <div class="setting-desc" id="fdSyncDesc">-</div>
                     </div>
                     <button type="button" class="btn btn-secondary" onclick="fdSyncReload()" data-i18n="fd_reload_btn">Muat ulang data</button>
+                </div>
+
+                <div class="setting-row fd-admin-only">
+                    <div class="setting-info">
+                        <div class="setting-title"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-i18n="setting_pm_title">Akun pemantau</span></div>
+                        <div class="setting-desc" data-i18n="setting_pm_desc">Bos dan karyawan masuk dengan nama pengguna. Mereka bisa melihat semua menu dan mengunduh laporan, tapi tidak bisa mengubah data.</div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="fdPmToggle()" data-i18n="fd_pm_manage">Kelola</button>
+                </div>
+                <div class="fd-pm-panel fd-admin-only" id="fdPmPanel" hidden>
+                    <div id="fdPmMsg" class="fd-pm-msg" role="status" aria-live="polite"></div>
+                    <div id="fdPmList" class="fd-pm-list"></div>
+                    <h3 class="fd-pm-h" data-i18n="fd_pm_add_title">Tambah pemantau</h3>
+                    <div class="form-grid">
+                        <div class="form-group"><label for="fdPmNama" data-i18n="fd_pm_nama">Nama</label><input id="fdPmNama" type="text" autocomplete="off" data-i18n-ph="fd_pm_nama_ph" placeholder="Contoh: Pak Joko"></div>
+                        <div class="form-group"><label for="fdPmUser" data-i18n="fd_pm_user">Nama pengguna</label><input id="fdPmUser" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="bos.warung"></div>
+                        <div class="form-group"><label for="fdPmPass" data-i18n="fd_pm_pass">Password (minimal 8 karakter)</label><input id="fdPmPass" type="text" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="fdPmAddBtn" onclick="fdPmAdd()" data-i18n="fd_pm_add_btn">Buat akun pemantau</button>
+                    <p class="fd-pm-hint" data-i18n="fd_pm_hint">Berikan nama pengguna dan password ini ke orangnya. Mereka masuk di halaman masuk seperti biasa, tanpa email.</p>
                 </div>
 
                 <div class="setting-row">
@@ -3906,7 +3967,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.0.0-uji.4';
+        const APP_VERSION = 'v7.0.0-uji.5';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -3921,7 +3982,7 @@
 
         const I18N = {
             en: {
-                menu_title:'Menu', nav_input:'Data Entry', nav_kas:'Cash Deposit', nav_logout:'Log out', setting_account_title:'Account', fd_role_admin:'Admin', fd_role_pemantau:'Viewer', fd_logout_confirm:'Log out on this phone? All data is safe on the server.', fd_logout_pending:'There are still {n} changes not sent to the server. Connect to the internet and wait until it says "Synced" before logging out.', setting_sync_title:'Server data', fd_reload_btn:'Reload data', nav_dashboard:'Dashboard', nav_pajak:'Tax Report', nav_ifc_input:'Daily Entry', nav_ifc_laporan:'Monthly Report', nav_ifc_export:'Export',
+                menu_title:'Menu', nav_input:'Data Entry', nav_kas:'Cash Deposit', nav_logout:'Log out', setting_account_title:'Account', fd_viewer_pill:'View only', setting_pm_title:'Viewer accounts', setting_pm_desc:'The boss and staff log in with a username. They can see every menu and download reports, but cannot change data.', fd_pm_manage:'Manage', fd_pm_add_title:'Add viewer', fd_pm_nama:'Name', fd_pm_nama_ph:'Example: Mr. Joko', fd_pm_user:'Username', fd_pm_pass:'Password (at least 8 characters)', fd_pm_add_btn:'Create viewer account', fd_pm_hint:'Give this username and password to the person. They log in on the normal login page, no email needed.', fd_pm_offline:'An internet connection is required.', fd_pm_unreachable:'The server function "kelola-pemantau" is not installed or cannot be reached.', fd_pm_loading:'Loading list...', fd_pm_empty:'No viewer accounts yet.', fd_pm_never:'never', fd_pm_active:'Active', fd_pm_revoked:'Access revoked', fd_pm_last:'last login', fd_pm_reset:'Change password', fd_pm_revoke:'Revoke access', fd_pm_restore:'Restore access', fd_pm_err_nama:'Fill in the viewer name.', fd_pm_err_user:'Username 3 to 30 characters: lowercase letters, numbers, dot, underscore, or dash.', fd_pm_err_pass:'Password must be at least 8 characters.', fd_pm_created:'Account created. Username: {u}. Also give them the password you entered.', fd_pm_new_pass:'New password for {u} (at least 8 characters):', fd_pm_pass_ok:'Password for {u} has been changed.', fd_pm_restore_q:'Restore access for {u}?', fd_pm_revoke_q:'Revoke access for {u}? They will immediately stop seeing the data.', fd_pm_restored:'Access for {u} restored.', fd_pm_revoked_ok:'Access for {u} revoked.', fd_role_admin:'Admin', fd_role_pemantau:'Viewer', fd_logout_confirm:'Log out on this phone? All data is safe on the server.', fd_logout_pending:'There are still {n} changes not sent to the server. Connect to the internet and wait until it says "Synced" before logging out.', setting_sync_title:'Server data', fd_reload_btn:'Reload data', nav_dashboard:'Dashboard', nav_pajak:'Tax Report', nav_ifc_input:'Daily Entry', nav_ifc_laporan:'Monthly Report', nav_ifc_export:'Export',
                 nav_export:'Export', nav_install:'Install App', nav_setting:'Settings', nav_config:'Configuration',
                 cfg_title:'SYSTEM CONFIGURATION', cfg_business:'Business Name *', cfg_business_ph:'Business Name',
                 cfg_address:'Address/Location *', cfg_address_ph:'Address/Location', cfg_city:'City/Regency *', cfg_city_ph:'City/Regency',
@@ -4014,7 +4075,7 @@
                 kas_confirm_delete:'Delete "{k}" for {v}?', kas_confirm_delete_ifc:'Its entry in the IFC cash book will be deleted too.', kas_edit_note:'Editing the transaction on {d}.',
                 kas_err_start:'Fill in the start date.', kas_confirm_start:'There are {n} transactions before the new start date. They will no longer be counted.\n\nContinue?', kas_ok_cfg:'Cash Deposit starting setup saved.'
             },            id: {
-                menu_title:'Menu', nav_input:'Input Data', nav_kas:'Kas Setoran', nav_logout:'Keluar', setting_account_title:'Akun', fd_role_admin:'Admin', fd_role_pemantau:'Pemantau', fd_logout_confirm:'Keluar dari akun di HP ini? Semua data sudah aman di server.', fd_logout_pending:'Masih ada {n} perubahan yang belum terkirim ke server. Sambungkan internet dan tunggu sampai tertulis "Tersinkron", baru keluar.', setting_sync_title:'Data server', fd_reload_btn:'Muat ulang data', nav_dashboard:'Dasbor', nav_pajak:'Laporan Pajak', nav_ifc_input:'Input Harian', nav_ifc_laporan:'Laporan Bulanan', nav_ifc_export:'Export',
+                menu_title:'Menu', nav_input:'Input Data', nav_kas:'Kas Setoran', nav_logout:'Keluar', setting_account_title:'Akun', fd_viewer_pill:'Mode lihat saja', setting_pm_title:'Akun pemantau', setting_pm_desc:'Bos dan karyawan masuk dengan nama pengguna. Mereka bisa melihat semua menu dan mengunduh laporan, tapi tidak bisa mengubah data.', fd_pm_manage:'Kelola', fd_pm_add_title:'Tambah pemantau', fd_pm_nama:'Nama', fd_pm_nama_ph:'Contoh: Pak Joko', fd_pm_user:'Nama pengguna', fd_pm_pass:'Password (minimal 8 karakter)', fd_pm_add_btn:'Buat akun pemantau', fd_pm_hint:'Berikan nama pengguna dan password ini ke orangnya. Mereka masuk di halaman masuk seperti biasa, tanpa email.', fd_role_admin:'Admin', fd_role_pemantau:'Pemantau', fd_logout_confirm:'Keluar dari akun di HP ini? Semua data sudah aman di server.', fd_logout_pending:'Masih ada {n} perubahan yang belum terkirim ke server. Sambungkan internet dan tunggu sampai tertulis "Tersinkron", baru keluar.', setting_sync_title:'Data server', fd_reload_btn:'Muat ulang data', nav_dashboard:'Dasbor', nav_pajak:'Laporan Pajak', nav_ifc_input:'Input Harian', nav_ifc_laporan:'Laporan Bulanan', nav_ifc_export:'Export',
                 nav_export:'Ekspor', nav_install:'Pasang Aplikasi', nav_setting:'Pengaturan', nav_config:'Konfigurasi',
                 cfg_title:'KONFIGURASI SISTEM', cfg_business:'Nama Bisnis/Warung *', cfg_business_ph:'Nama Bisnis/Warung',
                 cfg_address:'Alamat/Lokasi *', cfg_address_ph:'Alamat/Lokasi', cfg_city:'Kabupaten/Kota *', cfg_city_ph:'Kabupaten/Kota',
@@ -7939,8 +8000,19 @@
             if (typeof t === 'function') return r === 'admin' ? t('fd_role_admin', 'Admin') : t('fd_role_pemantau', 'Pemantau');
             return FD.roleLabel(r);
         }
+        // Pemantau: tandai halaman, kunci isian (tombol pengubah disembunyikan lewat CSS)
+        function fdApplyRole(m) {
+            var viewer = !!(m && m.peran !== 'admin');
+            document.documentElement.classList.toggle('fd-viewer', viewer);
+            var sel = '#view-input .form-section input, #view-input .form-section textarea, #view-ifc-input input, #view-ifc-input textarea, #view-export .config-group input, #namaTransfer';
+            document.querySelectorAll(sel).forEach(function (el) {
+                if (viewer) { el.setAttribute('readonly', ''); el.dataset.fdRo = '1'; }
+                else if (el.dataset.fdRo) { el.removeAttribute('readonly'); delete el.dataset.fdRo; }
+            });
+        }
         function fdApplyMember(m) {
             window.FD_MEMBER = m;
+            fdApplyRole(m);
             var nm = document.getElementById('profileName');
             if (nm) nm.textContent = m.nama || m.email;
             var rl = document.querySelector('.topbar-pm span');
@@ -7959,6 +8031,79 @@
             if (!confirm(tr('fd_logout_confirm', 'Keluar dari akun di HP ini? Semua data sudah aman di server.'))) return;
             if (window.fdSync) fdSync.wipe();
             FD.signOut();
+        }
+        // ===== v7.0.0: kelola akun pemantau (khusus admin, lewat Edge Function kelola-pemantau) =====
+        function fdTr(k, fb, v) { var s = (typeof t === 'function') ? t(k, fb) : fb; if (v) Object.keys(v).forEach(function (x) { s = s.split('{' + x + '}').join(v[x]); }); return s; }
+        function fdEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]; }); }
+        function fdPmMsg(text, kind) { var el = document.getElementById('fdPmMsg'); el.textContent = text || ''; el.className = 'fd-pm-msg' + (text ? ' show ' + (kind || 'err') : ''); }
+        async function fdPmCall(body) {
+            if (!navigator.onLine) throw new Error(fdTr('fd_pm_offline', 'Butuh koneksi internet.'));
+            var sb = await FD.ready;
+            var res = await sb.functions.invoke('kelola-pemantau', { body: Object.assign({ instansi_id: window.FD_MEMBER.instansi_id }, body) });
+            if (res.error) {
+                var msg = res.error.message || String(res.error);
+                try { var ctx = res.error.context; if (ctx && typeof ctx.json === 'function') { var j = await ctx.json(); if (j && j.error) msg = j.error; } } catch (e) {}
+                if (/failed to send|failed to fetch|not found|404/i.test(msg)) msg = fdTr('fd_pm_unreachable', 'Fungsi server "kelola-pemantau" belum terpasang atau tidak bisa dijangkau.');
+                throw new Error(msg);
+            }
+            return res.data || {};
+        }
+        function fdPmToggle() {
+            if (!window.FD_MEMBER || window.FD_MEMBER.peran !== 'admin') return;
+            var p = document.getElementById('fdPmPanel');
+            p.hidden = !p.hidden;
+            if (!p.hidden) { fdPmMsg(''); fdPmLoad(); }
+        }
+        async function fdPmLoad() {
+            var list = document.getElementById('fdPmList');
+            list.innerHTML = '<div class="fd-pm-empty">' + fdTr('fd_pm_loading', 'Memuat daftar...') + '</div>';
+            try {
+                var rows = (await fdPmCall({ action: 'list' })).pemantau || [];
+                if (!rows.length) { list.innerHTML = '<div class="fd-pm-empty">' + fdTr('fd_pm_empty', 'Belum ada akun pemantau.') + '</div>'; return; }
+                list.innerHTML = rows.map(function (p) {
+                    var last = p.terakhir_masuk ? new Date(p.terakhir_masuk).toLocaleString('id-ID') : fdTr('fd_pm_never', 'belum pernah');
+                    var status = p.aktif ? fdTr('fd_pm_active', 'Aktif') : fdTr('fd_pm_revoked', 'Akses dicabut');
+                    var id = fdEsc(p.user_id), un = fdEsc(p.username);
+                    return '<div class="fd-pm-item' + (p.aktif ? '' : ' fd-pm-off') + '"><div class="fd-pm-who"><strong>' + fdEsc(p.nama) + '</strong>' +
+                        '<span>' + un + ' · ' + status + ' · ' + fdTr('fd_pm_last', 'terakhir masuk') + ' ' + fdEsc(last) + '</span></div>' +
+                        '<div class="fd-pm-actions">' +
+                        '<button type="button" class="btn btn-secondary" onclick="fdPmPass(\'' + id + '\',\'' + un + '\')">' + fdTr('fd_pm_reset', 'Ganti password') + '</button>' +
+                        (p.aktif
+                            ? '<button type="button" class="btn btn-danger" onclick="fdPmActive(\'' + id + '\',false,\'' + un + '\')">' + fdTr('fd_pm_revoke', 'Cabut akses') + '</button>'
+                            : '<button type="button" class="btn btn-secondary" onclick="fdPmActive(\'' + id + '\',true,\'' + un + '\')">' + fdTr('fd_pm_restore', 'Pulihkan akses') + '</button>') +
+                        '</div></div>';
+                }).join('');
+            } catch (e) { list.innerHTML = ''; fdPmMsg(e.message, 'err'); }
+        }
+        async function fdPmAdd() {
+            var nama = document.getElementById('fdPmNama').value.trim();
+            var user = document.getElementById('fdPmUser').value.trim().toLowerCase();
+            var pass = document.getElementById('fdPmPass').value;
+            if (!nama) { fdPmMsg(fdTr('fd_pm_err_nama', 'Isi nama pemantau.')); return; }
+            if (!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(user)) { fdPmMsg(fdTr('fd_pm_err_user', 'Nama pengguna 3 sampai 30 karakter: huruf kecil, angka, titik, garis bawah, atau strip.')); return; }
+            if (pass.length < 8) { fdPmMsg(fdTr('fd_pm_err_pass', 'Password minimal 8 karakter.')); return; }
+            var btn = document.getElementById('fdPmAddBtn'); btn.disabled = true;
+            try {
+                await fdPmCall({ action: 'create', nama: nama, username: user, password: pass });
+                fdPmMsg(fdTr('fd_pm_created', 'Akun dibuat. Nama pengguna: {u}. Berikan juga password yang tadi kamu isi.', { u: user }), 'ok');
+                ['fdPmNama', 'fdPmUser', 'fdPmPass'].forEach(function (i) { document.getElementById(i).value = ''; });
+                fdPmLoad();
+            } catch (e) { fdPmMsg(e.message, 'err'); }
+            finally { btn.disabled = false; }
+        }
+        async function fdPmPass(id, user) {
+            var p = prompt(fdTr('fd_pm_new_pass', 'Password baru untuk {u} (minimal 8 karakter):', { u: user }));
+            if (p === null) return;
+            if (p.length < 8) { fdPmMsg(fdTr('fd_pm_err_pass', 'Password minimal 8 karakter.')); return; }
+            try { await fdPmCall({ action: 'set_password', user_id: id, password: p }); fdPmMsg(fdTr('fd_pm_pass_ok', 'Password {u} sudah diganti.', { u: user }), 'ok'); }
+            catch (e) { fdPmMsg(e.message, 'err'); }
+        }
+        async function fdPmActive(id, aktif, user) {
+            var q = aktif ? fdTr('fd_pm_restore_q', 'Pulihkan akses {u}?', { u: user })
+                          : fdTr('fd_pm_revoke_q', 'Cabut akses {u}? Dia langsung tidak bisa melihat data lagi.', { u: user });
+            if (!confirm(q)) return;
+            try { await fdPmCall({ action: 'set_active', user_id: id, aktif: aktif }); fdPmMsg(aktif ? fdTr('fd_pm_restored', 'Akses {u} dipulihkan.', { u: user }) : fdTr('fd_pm_revoked_ok', 'Akses {u} dicabut.', { u: user }), 'ok'); fdPmLoad(); }
+            catch (e) { fdPmMsg(e.message, 'err'); }
         }
         function fdSyncReload() {
             if (!navigator.onLine) { alert('Tidak ada koneksi internet.'); return; }
