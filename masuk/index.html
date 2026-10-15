@@ -214,12 +214,13 @@
             clearMsg();
             var id = $('loginId').value.trim(), pass = $('loginPass').value;
             if (!id || !pass) { show('Isi email atau nama pengguna, dan password.'); return; }
-            if (id.indexOf('@') === -1) { show('Masuk dengan nama pengguna aktif setelah akun pemantau dibuat. Untuk saat ini, masuk dengan email.', 'info'); return; }
+            var email = FD.loginEmail(id);
+            if (!email) { show('Nama pengguna hanya boleh huruf kecil, angka, titik, garis bawah, atau strip (3 sampai 30 karakter).'); return; }
             if (!navigator.onLine) { show('Tidak ada koneksi internet. Masuk pertama kali butuh internet.'); return; }
             var btn = $('btnLogin');
             busy(btn, true, 'Memeriksa...');
             try {
-                var res = await (await FD.ready).auth.signInWithPassword({ email: id, password: pass });
+                var res = await (await FD.ready).auth.signInWithPassword({ email: email, password: pass });
                 if (res.error) { show(FD.friendlyError(res.error)); return; }
                 await goToApp(res.data.user);
             } catch (err) {
