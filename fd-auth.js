@@ -12,6 +12,12 @@
     var FD_SUPABASE_URL = 'https://tuuvczsfjigfaahqdmnv.supabase.co';
     var FD_SUPABASE_KEY = 'sb_publishable_zF2OPmjYVJqgSeLnch1urw_F5ZrnAKu';
 
+    // Pemantau masuk dengan nama pengguna; di server memakai email semu ini.
+    // HARUS sama dengan PEMANTAU_PREFIX / PEMANTAU_DOMAIN di Edge Function kelola-pemantau.
+    var FD_PEMANTAU_PREFIX = 'pmt.';
+    var FD_PEMANTAU_DOMAIN = 'bintangwahyu.my.id';
+    var USERNAME_RE = /^[a-z0-9][a-z0-9._-]{2,29}$/;
+
     var LOGIN_URL = '/masuk/';
     var APP_URL = '/app/';
     var MEMBER_KEY = 'fd_member';
@@ -98,6 +104,13 @@
         APP_URL: APP_URL,
         idb: idb,
         go: go,
+        // Email untuk login: email asli (admin) atau nama pengguna pemantau. null = format nama pengguna tidak sah.
+        loginEmail: function (id) {
+            id = String(id || '').trim();
+            if (id.indexOf('@') !== -1) return id;
+            var u = id.toLowerCase();
+            return USERNAME_RE.test(u) ? FD_PEMANTAU_PREFIX + u + '@' + FD_PEMANTAU_DOMAIN : null;
+        },
         readMember: readMember,
         saveMember: saveMember
     };
@@ -156,7 +169,9 @@
         if (!navigator.onLine || low.indexOf('failed to fetch') !== -1 || low.indexOf('network') !== -1)
             return 'Tidak ada koneksi internet. Sambungkan internet, lalu coba lagi.';
         if (low.indexOf('invalid login credentials') !== -1)
-            return 'Email atau password salah.';
+            return 'Email/nama pengguna atau password salah.';
+        if (low.indexOf('banned') !== -1)
+            return 'Akses akun ini sudah dicabut. Hubungi admin instansimu.';
         if (low.indexOf('email not confirmed') !== -1)
             return 'Akun ini belum dikonfirmasi. Minta admin mengonfirmasi akun di Supabase.';
         if (low.indexOf('rate limit') !== -1 || low.indexOf('too many') !== -1)
