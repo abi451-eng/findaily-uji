@@ -3187,6 +3187,83 @@
         body.dark .topbar-live[data-state="busy"] { color: #DDD6FE; background: rgba(167,139,250,.14); border-color: rgba(167,139,250,.3); }
         body.dark .topbar-live[data-state="busy"] i { background: #C4B5FD; }
 
+        /* ============================================================
+           ===== v7.1e: warna naik/turun lebih cerah, nama usaha di tengah, lonceng notifikasi =====
+           ============================================================ */
+        :root { --up: #16A34A; --down: #DC2626; }
+        body.dark { --up: #4ADE80; --down: #F87171; }
+        .mc-change.up, body.dark .mc-change.up { color: var(--up); }
+        .mc-change.down, body.dark .mc-change.down { color: var(--down); }
+        .fd-hero .mc-change.up { color: #4ADE80; }
+        .fd-hero .mc-change.down { color: #F87171; }
+        #kasLedgerTable td.kas-in, body.dark #kasLedgerTable td.kas-in { color: var(--up); }
+        #kasLedgerTable td.kas-out, body.dark #kasLedgerTable td.kas-out { color: var(--down); }
+        .data-table .btn-danger, .data-table [onclick^="deleteData"] { color: #DC2626; border-color: #FCA5A5; }
+        body.dark .data-table .btn-danger, body.dark .data-table [onclick^="deleteData"] { color: #F87171; border-color: rgba(248,113,113,.45); }
+        .row-libur td { background: #FEF2F2 !important; color: #DC2626; }
+        body.dark .row-libur td { background: rgba(239,68,68,.12) !important; color: #F87171; }
+
+        /* Nama usaha di tengah header, logo bulat dihapus; pencarian menempel ke tombol menu */
+        .brand-logo { display: none !important; }
+        .brand-mini { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 1; }
+        .brand-name, body.dark .brand-name { display: block !important; font-size: 19px; letter-spacing: .06em; color: var(--ink); }
+        @media (min-width: 1024px) {
+            .header-search-btn { flex: 0 1 340px; }
+        }
+        @media (max-width: 1023px) {
+            .topbar-live { display: none !important; }
+            .brand-name { font-size: 17px; }
+        }
+
+        /* Lonceng: angka data yang belum terupload */
+        .topbar-bell { position: relative; }
+        .bell-dot { display: none; }
+        .bell-badge {
+            position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; box-sizing: border-box;
+            border-radius: 999px; background: #DC2626; color: #fff; font: 700 11px/20px 'Inter', sans-serif; text-align: center;
+            border: 2px solid var(--surface); font-variant-numeric: tabular-nums;
+        }
+        .bell-badge[hidden] { display: none; }
+        .topbar-bell.has-pending { color: var(--accent); border-color: var(--accent-soft); background: var(--accent-soft); }
+
+        /* Panel notifikasi */
+        .fd-notif {
+            position: fixed; top: 72px; right: 16px; z-index: 2700; width: 380px; max-width: calc(100vw - 24px);
+            max-height: min(70vh, 560px); display: flex; flex-direction: column;
+            background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 18px;
+            box-shadow: 0 18px 48px rgba(23,18,42,.22);
+        }
+        .fd-notif[hidden] { display: none; }
+        .fd-notif-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px 16px 10px; border-bottom: 1px solid var(--line); }
+        .fd-notif-title { margin: 0; font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+        .fd-notif-status { margin: 4px 0 0; font-size: 13px; color: var(--ink-2); line-height: 1.4; }
+        .fd-notif[data-state="offline"] .fd-notif-status, .fd-notif[data-state="pending"] .fd-notif-status { color: #B45309; }
+        body.dark .fd-notif[data-state="offline"] .fd-notif-status, body.dark .fd-notif[data-state="pending"] .fd-notif-status { color: #FBBF24; }
+        .fd-notif[data-state="error"] .fd-notif-status { color: var(--down); }
+        .fd-notif[data-state="ok"] .fd-notif-status { color: var(--up); }
+        .fd-notif-close { flex: none; width: 36px; height: 36px; border: 0; border-radius: 10px; background: var(--surface-2); color: var(--ink-2); display: grid; place-items: center; cursor: pointer; }
+        .fd-notif-list { list-style: none; margin: 0; padding: 4px 8px; overflow-y: auto; flex: 1; min-height: 0; }
+        .fd-notif-item { display: flex; align-items: center; gap: 10px; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+        .fd-notif-item:last-child { border-bottom: 0; }
+        .fd-notif-biz { flex: none; min-width: 44px; text-align: center; font-size: 11px; font-weight: 700; padding: 4px 6px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); }
+        .fd-notif-body { flex: 1; min-width: 0; }
+        .fd-notif-name { font-size: 14px; font-weight: 600; }
+        .fd-notif-sub { font-size: 12.5px; color: var(--ink-3); overflow-wrap: anywhere; }
+        .fd-notif-tag { flex: none; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: #FEF3C7; color: #92400E; white-space: nowrap; }
+        .fd-notif-item.is-del .fd-notif-tag { background: #FEE2E2; color: #B91C1C; }
+        body.dark .fd-notif-tag { background: rgba(251,191,36,.14); color: #FCD34D; }
+        body.dark .fd-notif-item.is-del .fd-notif-tag { background: rgba(248,113,113,.14); color: #FCA5A5; }
+        .fd-notif-empty { display: flex; align-items: center; gap: 10px; padding: 18px 8px; font-size: 14px; color: var(--ink-2); }
+        .fd-notif-empty svg { width: 22px; height: 22px; padding: 6px; border-radius: 999px; background: rgba(22,163,74,.12); color: var(--up); flex: none; }
+        .fd-notif-more { padding: 10px 8px; font-size: 12.5px; color: var(--ink-3); text-align: center; }
+        .fd-notif-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px 16px 16px; border-top: 1px solid var(--line); }
+        .fd-notif-foot[hidden] { display: none; }
+        .fd-notif-when { font-size: 12px; color: var(--ink-3); }
+        .fd-notif-send { min-height: 42px; padding: 0 16px; margin-left: auto; }
+        @media (max-width: 1023px) {
+            .fd-notif { top: 68px; left: 12px; right: 12px; width: auto; max-width: none; max-height: calc(100vh - 68px - var(--bnav-h) - 32px); }
+        }
+
         /* ----- Menu bawah (HP & tablet) ----- */
         .fd-bnav { display: none; }
         @media (max-width: 1023px) {
@@ -3290,8 +3367,22 @@
         <span class="topbar-spacer"></span>
         <span class="fd-viewer-pill" data-i18n="fd_viewer_pill">Mode lihat saja</span>
         <span class="topbar-live" id="fdSyncPill" data-state="busy" role="status" aria-live="polite"><i></i><span id="fdSyncText">Memuat data...</span></span>
-        <button class="topbar-bell" type="button" aria-label="Notifikasi"><span class="bell-dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+        <button class="topbar-bell" id="fdBell" type="button" aria-label="Notifikasi: tidak ada data tertunda" aria-haspopup="dialog" aria-expanded="false" aria-controls="fdNotif" onclick="fdNotifToggle()"><span class="bell-badge" id="fdBellBadge" hidden>0</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
         <div class="topbar-profile"><div class="topbar-av" id="profileAv">BK</div><div class="topbar-pm"><b id="profileName">Abiyou</b><span>Pemilik</span></div></div>
+    </div>
+
+
+    <!-- v7.1: panel notifikasi data yang belum terupload -->
+    <div class="fd-notif" id="fdNotif" role="dialog" aria-modal="false" aria-labelledby="fdNotifTitle" hidden>
+        <div class="fd-notif-head">
+            <div>
+                <h2 class="fd-notif-title" id="fdNotifTitle">Notifikasi</h2>
+                <p class="fd-notif-status" id="fdNotifStatus">Memeriksa…</p>
+            </div>
+            <button type="button" class="fd-notif-close" onclick="fdNotifToggle(false)" aria-label="Tutup notifikasi"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <ul class="fd-notif-list" id="fdNotifList"></ul>
+        <div class="fd-notif-foot" id="fdNotifFoot"></div>
     </div>
 
     <!-- ===== SEARCH OVERLAY ===== -->
@@ -4631,7 +4722,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.1.0-uji.4';
+        const APP_VERSION = 'v7.1.0-uji.5';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -8357,6 +8448,8 @@
                 pill.dataset.state = (s === 'busy' || s === 'loading') ? 'busy' : (s === 'error' ? 'error' : (st.pending > 0 ? 'pending' : (navigator.onLine ? 'ok' : 'offline')));
                 if (txt) txt.textContent = label;
             }
+            // v7.1: kabari lonceng notifikasi (hanya tampilan; tidak mengubah alur sinkron)
+            try { document.dispatchEvent(new CustomEvent('fd-sync-status', { detail: { status: s, pending: st.pending, label: label, lastSync: st.lastSync || null } })); } catch (e) {}
             var desc = document.getElementById('fdSyncDesc');
             if (desc) {
                 desc.textContent = label + (st.lastSync ? ' · terakhir ' + new Date(st.lastSync).toLocaleString('id-ID') : '') +
@@ -8653,6 +8746,7 @@
             pull: pull,
             reload: function () { return pull(); },
             pendingCount: function () { var d = computeDiff(); return d ? d.count : 0; },
+            pendingDetail: function () { return computeDiff(); },
             wipe: function () { wipeLocalData(); silentSet(SNAP_KEY, 'null'); localStorage.removeItem(SNAP_KEY); },
             state: st,
             _normBkcm: normBkcm, _normIfc: normIfc
@@ -9011,6 +9105,136 @@
         var mo = new MutationObserver(sync);
         document.querySelectorAll('.sidebar-item[data-view]').forEach(function (b) { mo.observe(b, { attributes: true, attributeFilter: ['class'] }); });
         sync();
+    })();
+    </script>
+    <script>
+    // v7.1: lonceng notifikasi — daftar data yang belum terupload ke server.
+    // Hanya membaca selisih dari fdSync; pengiriman tetap diurus modul sinkron (otomatis saat online).
+    (function () {
+        var bell = document.getElementById('fdBell'), badge = document.getElementById('fdBellBadge');
+        var panel = document.getElementById('fdNotif'), list = document.getElementById('fdNotifList');
+        var statusEl = document.getElementById('fdNotifStatus'), foot = document.getElementById('fdNotifFoot');
+        if (!bell || !panel) return;
+        var last = { status: 'loading', pending: 0, lastSync: null };
+        var MAX = 50;
+
+        function rp(n) { return 'Rp ' + Math.round(Number(n) || 0).toLocaleString('id-ID'); }
+        function tgl(iso) {
+            var p = String(iso || '').split('-').map(Number);
+            if (!p[0] || !p[1] || !p[2]) return String(iso || '');
+            return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+        function bkcmEntry(iso) {
+            var p = iso.split('-').map(Number);
+            var arr = (typeof appData !== 'undefined' && appData && appData[p[0] + '-' + p[1]]) || [];
+            for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].day === p[2]) return arr[i];
+            return null;
+        }
+        function ifcEntry(iso) {
+            var p = iso.split('-').map(Number);
+            var m = typeof irfanData !== 'undefined' && irfanData && irfanData[p[0] + '-' + p[1]];
+            return (m && m.entries && m.entries[p[2]]) || null;
+        }
+        function kasTx(id) {
+            var tx = (typeof kasSetoran !== 'undefined' && kasSetoran && kasSetoran.tx) || [];
+            for (var i = 0; i < tx.length; i++) if (tx[i] && tx[i].id === id) return tx[i];
+            return null;
+        }
+
+        function collect() {
+            var d = (window.fdSync && typeof fdSync.pendingDetail === 'function') ? fdSync.pendingDetail() : null;
+            var out = [];
+            if (!d) return out;
+            d.bkcm.up.forEach(function (k) {
+                var e = bkcmEntry(k);
+                out.push({ biz: 'BKCM', del: false, sort: k, title: tgl(k),
+                           sub: e ? (e.isLibur ? 'Ditandai libur' : 'Penjualan ' + rp(e.totalPenjualan) + ' · Pengeluaran ' + rp(e.totalPengeluaran)) : 'Data harian' });
+            });
+            d.bkcm.del.forEach(function (k) { out.push({ biz: 'BKCM', del: true, sort: k, title: tgl(k), sub: 'Data harian dihapus' }); });
+            d.ifc.up.forEach(function (k) {
+                var e = ifcEntry(k);
+                out.push({ biz: 'IFC', del: false, sort: k, title: tgl(k),
+                           sub: e ? (e.isLibur ? 'Ditandai libur' : 'Masuk ' + rp(e.pemasukan) + ' · Keluar ' + rp(e.pengeluaran)) : 'Data harian' });
+            });
+            d.ifc.del.forEach(function (k) { out.push({ biz: 'IFC', del: true, sort: k, title: tgl(k), sub: 'Data harian dihapus' }); });
+            d.kas.up.forEach(function (id) {
+                var t = kasTx(id);
+                out.push({ biz: 'Kas', del: false, sort: t ? t.date : '', title: t ? tgl(t.date) : 'Transaksi kas setoran',
+                           sub: 'Kas setoran' + (t ? ' · ' + rp(t.amount) : '') });
+            });
+            d.kas.del.forEach(function () { out.push({ biz: 'Kas', del: true, sort: '', title: 'Transaksi kas setoran', sub: 'Transaksi dihapus' }); });
+            if (d.cfgBkcm) out.push({ biz: 'BKCM', del: false, sort: '9999', title: 'Pengaturan diubah', sub: 'Pengaturan usaha BKCM' });
+            if (d.cfgIfc) out.push({ biz: 'IFC', del: false, sort: '9999', title: 'Pengaturan diubah', sub: 'Pengaturan usaha IFC' });
+            out.sort(function (a, b) { return String(b.sort).localeCompare(String(a.sort)); });
+            return out;
+        }
+
+        function el(tag, cls, text) { var x = document.createElement(tag); if (cls) x.className = cls; if (text !== undefined) x.textContent = text; return x; }
+
+        function render() {
+            var its = collect(), n = its.length, online = navigator.onLine, err = last.status === 'error';
+            badge.hidden = n === 0 && !err;
+            badge.textContent = (err && n === 0) ? '!' : (n > 99 ? '99+' : String(n));
+            bell.classList.toggle('has-pending', n > 0);
+            bell.classList.toggle('is-error', err);
+            bell.setAttribute('aria-label', n ? 'Notifikasi: ' + n + ' data belum terupload' : 'Notifikasi: semua data sudah terupload');
+
+            var s;
+            if (last.status === 'busy') s = 'Sedang mengupload ke server…';
+            else if (last.status === 'loading') s = 'Memuat data dari server…';
+            else if (err) s = 'Upload gagal. Akan dicoba lagi otomatis.';
+            else if (n && !online) s = 'Offline · data tersimpan di HP dan akan terupload otomatis saat online.';
+            else if (n) s = 'Online · data menunggu diupload.';
+            else s = online ? 'Semua data sudah terupload ke server.' : 'Offline · tidak ada data tertunda.';
+            statusEl.textContent = s;
+            panel.dataset.state = err ? 'error' : (n ? (online ? 'pending' : 'offline') : 'ok');
+
+            list.textContent = '';
+            if (!n) {
+                var empty = el('li', 'fd-notif-empty');
+                empty.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+                empty.appendChild(el('span', '', 'Tidak ada data yang belum terupload'));
+                list.appendChild(empty);
+            } else {
+                its.slice(0, MAX).forEach(function (it) {
+                    var li = el('li', 'fd-notif-item' + (it.del ? ' is-del' : ''));
+                    li.appendChild(el('span', 'fd-notif-biz', it.biz));
+                    var body = el('div', 'fd-notif-body');
+                    body.appendChild(el('div', 'fd-notif-name', it.title));
+                    body.appendChild(el('div', 'fd-notif-sub', it.sub));
+                    li.appendChild(body);
+                    li.appendChild(el('span', 'fd-notif-tag', it.del ? 'Hapus tertunda' : 'Belum terupload'));
+                    list.appendChild(li);
+                });
+                if (n > MAX) list.appendChild(el('li', 'fd-notif-more', 'dan ' + (n - MAX) + ' data lainnya'));
+            }
+
+            foot.textContent = '';
+            if (last.lastSync) foot.appendChild(el('span', 'fd-notif-when', 'Terakhir terupload: ' + new Date(last.lastSync).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })));
+            if (n && online && last.status !== 'busy' && window.fdSync && typeof fdSync.push === 'function') {
+                var btn = el('button', 'btn btn-primary fd-notif-send', 'Upload sekarang');
+                btn.type = 'button';
+                btn.onclick = function () { btn.disabled = true; btn.textContent = 'Mengupload…'; Promise.resolve(fdSync.push()).then(render, render); };
+                foot.appendChild(btn);
+            }
+            foot.hidden = !foot.childNodes.length;
+        }
+
+        window.fdNotifToggle = function (open) {
+            var willOpen = typeof open === 'boolean' ? open : panel.hidden;
+            if (willOpen) render();
+            panel.hidden = !willOpen;
+            bell.setAttribute('aria-expanded', String(willOpen));
+            if (willOpen) { var c = panel.querySelector('.fd-notif-close'); if (c) c.focus(); }
+        };
+        document.addEventListener('fd-sync-status', function (ev) { if (ev.detail) last = ev.detail; render(); });
+        window.addEventListener('online', render);
+        window.addEventListener('offline', render);
+        document.addEventListener('click', function (e) {
+            if (!panel.hidden && !panel.contains(e.target) && !bell.contains(e.target)) fdNotifToggle(false);
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { fdNotifToggle(false); bell.focus(); } });
+        render();
     })();
     </script>
 </body>
