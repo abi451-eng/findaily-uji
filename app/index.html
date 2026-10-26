@@ -2967,6 +2967,139 @@
         .backup-reminder .brb-later { background: var(--surface-2); color: var(--ink-2); }
         .update-banner.show { bottom: 88px; }
 
+
+        /* ============================================================
+           ===== v7.1b: DASHBOARD — susunan baru (kartu utama + insight) =====
+           ============================================================ */
+        #dashboardSection.dashboard-section, body.dark #dashboardSection.dashboard-section {
+            background: transparent; border: 0; padding: 0; box-shadow: none;
+            -webkit-backdrop-filter: none; backdrop-filter: none;
+        }
+        body.dark #dashboardSection.dashboard-section::after { display: none; }
+        .fd-dash-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        #dashboardSection .fd-dash-head h2 { margin: 0; font-size: 22px; font-weight: 800; }
+        .fd-dash-head .sec-ic { display: none; }
+        .fd-dash-top { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; align-items: stretch; margin-bottom: 16px; }
+
+        .fd-hero {
+            background: var(--hero); color: #fff; border-radius: 20px; padding: 22px;
+            display: flex; flex-direction: column; min-width: 0;
+        }
+        .fd-hero-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        .fd-hero-label { font-size: 13px; color: var(--hero-ink-2); }
+        .fd-hero-pill {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+            padding: 5px 10px; border-radius: 999px; background: rgba(18,183,106,.18); color: #6CE9A6;
+        }
+        .fd-hero-pill i { width: 6px; height: 6px; border-radius: 999px; background: currentColor; }
+        .fd-hero-sep { opacity: .7; }
+        .fd-hero-value {
+            margin-top: 4px; font-family: var(--font-display); font-weight: 800; font-size: 36px; letter-spacing: -0.02em;
+            line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
+        }
+        .fd-hero-grid {
+            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
+            margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12);
+        }
+        .fd-hero-k { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--hero-ink-2); }
+        .fd-hero-k svg { width: 14px; height: 14px; }
+        .fd-hero-v { margin-top: 2px; font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+        .fd-hero-v.fd-neg { color: #FDA29B; }
+        /* Perbandingan bulan lalu, di dalam kartu utama */
+        .fd-hero .month-compare, body.dark .fd-hero .month-compare {
+            margin: 14px 0 0; padding: 12px 0 0; background: transparent; border: 0; border-top: 1px solid rgba(255,255,255,.12); border-radius: 0;
+        }
+        .fd-hero .mc-title { color: var(--hero-ink-2); font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+        .fd-hero .mc-grid { gap: 8px; }
+        .fd-hero .mc-item { text-align: left; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,.07); }
+        .fd-hero .mc-label { color: var(--hero-ink-2); font-size: 11.5px; font-weight: 500; }
+        .fd-hero .mc-change { font-size: 15px; font-weight: 700; }
+        .fd-hero .mc-change.up { color: #6CE9A6; } .fd-hero .mc-change.down { color: #FDA29B; } .fd-hero .mc-change.flat { color: #D5E2DF; }
+        .fd-hero .mc-change .mc-sub { color: var(--hero-ink-2); font-weight: 500; font-size: 11px; }
+
+        /* Insight: baris berikon */
+        .fd-dash-top .insight-card { margin: 0; padding: 18px 20px; }
+        .insight-list { counter-reset: none; }
+        .insight-list li { align-items: center; gap: 12px; padding: 10px 0; line-height: 1.4; color: var(--ink); }
+        .insight-list li span.ic-dot {
+            flex: 0 0 36px; width: 36px; height: 36px; border-radius: 10px; font-size: 0; color: transparent;
+            background-color: var(--accent-soft); background-repeat: no-repeat; background-position: center; background-size: 18px;
+        }
+        .insight-list li:nth-child(1) span.ic-dot { background-color: #FEF3F2; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B42318' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14M5 12l7 7 7-7'/%3E%3C/svg%3E"); }
+        .insight-list li:nth-child(2) span.ic-dot { background-color: #E6F2F0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230F766E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 17l6-6 4 4 8-8M15 7h6v6'/%3E%3C/svg%3E"); }
+        .insight-list li:nth-child(3) span.ic-dot { background-color: #EFF8FF; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23175CD3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20V10M10 20V4M16 20v-7M22 20H2'/%3E%3C/svg%3E"); }
+        .insight-list li:nth-child(4) span.ic-dot { background-color: #FFFAEB; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B54708' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='19' y1='5' x2='5' y2='19'/%3E%3Ccircle cx='6.5' cy='6.5' r='2.5'/%3E%3Ccircle cx='17.5' cy='17.5' r='2.5'/%3E%3C/svg%3E"); }
+        body.dark .insight-list li:nth-child(1) span.ic-dot { background-color: rgba(240,68,56,.14); }
+        body.dark .insight-list li:nth-child(2) span.ic-dot { background-color: rgba(45,212,191,.14); }
+        body.dark .insight-list li:nth-child(3) span.ic-dot { background-color: rgba(46,144,250,.16); }
+        body.dark .insight-list li:nth-child(4) span.ic-dot { background-color: rgba(247,144,9,.16); }
+        body.dark .insight-list li { color: var(--ink); }
+
+        /* Pesan "HEALTHY" sudah tampil sebagai label di kartu utama; peringatan tetap tampil */
+        #trendAlert.success { display: none !important; }
+        #trendAlert.trend-alert { margin: 0 0 16px; }
+
+        /* Kartu grafik */
+        .fd-chart-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 16px; }
+        .fd-chart-head { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+        .fd-chart-card .chart-toggle { margin: 0; }
+        .fd-chart-card .chart-container, body.dark .fd-chart-card .chart-container { border: 0; padding: 0; margin: 0; background: transparent; border-radius: 0; }
+        .fd-chart-card #trendInfo { margin: 12px 0 0 !important; padding: 12px 14px !important; font-size: 13px; }
+
+        /* Ringkasan tahunan */
+        #dashboardSection .annual-summary { border-top: 0; margin-top: 8px; padding-top: 0; }
+        .annual-table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; overflow-x: auto; }
+        .annual-table { margin: 0; }
+        .annual-table td:last-child { font-weight: 700; }
+        .annual-table .annual-total-row td, body.dark .annual-table .annual-total-row td { background: var(--accent-soft); color: var(--ink); border-top: 1px solid var(--line); }
+
+        @media (max-width: 900px) {
+            .fd-dash-top { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .fd-hero { padding: 18px; border-radius: 18px; }
+            .fd-hero-value { font-size: 30px; }
+            .fd-hero-v { font-size: 16px; }
+            .fd-hero .mc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .fd-hero .mc-item { padding: 8px; }
+            .fd-hero .mc-change { font-size: 14px; }
+            .fd-chart-card { padding: 12px; }
+            .annual-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            /* Tabel bulanan jadi daftar per bulan di HP */
+            .annual-table-wrap { overflow: hidden; }
+            .annual-table, .annual-table tbody { display: block; width: 100%; min-width: 0; }
+            .annual-table thead { display: none; }
+            .annual-table tr.annual-row-empty { display: none; }
+            .annual-table tr {
+                display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+                grid-template-areas: "m laba margin" "rev exp margin";
+                align-items: center; gap: 2px 10px; padding: 12px 14px; border-top: 1px solid var(--line);
+            }
+            .annual-table tr:first-child { border-top: 0; }
+            .annual-table td { display: block; padding: 0 !important; border: 0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left !important; }
+            .annual-table td:nth-child(1) { grid-area: m; font-weight: 700; font-size: 14px; }
+            .annual-table td:nth-child(2) { grid-area: rev; font-size: 12px; color: var(--ink-3); }
+            .annual-table td:nth-child(3) { grid-area: exp; font-size: 12px; color: var(--ink-3); }
+            .annual-table td:nth-child(4) { grid-area: laba; font-weight: 700; font-size: 14px; text-align: right !important; }
+            .annual-table td:nth-child(5) {
+                grid-area: margin; min-width: 52px; text-align: center !important; font-size: 12px; font-weight: 700;
+                padding: 5px 8px !important; border-radius: 999px !important; background: var(--accent-soft); color: var(--accent);
+            }
+            .annual-table td:nth-child(2)::before { content: "Masuk "; }
+            .annual-table td:nth-child(3)::before { content: "Keluar "; }
+            .annual-table td:nth-child(3) { text-align: right !important; }
+            .annual-table .annual-total-row td { background: transparent !important; }
+            .annual-table tr.annual-total-row { background: var(--accent-soft); }
+        }
+        /* Mode gelap: timpa sisa latar lama (#1e2a32 !important) & bingkai neon */
+        body.dark .config-section, body.dark .form-section, body.dark .data-section,
+        body.dark .preview-section, body.dark .calendar-popup, body.dark .sidebar { background: var(--surface) !important; }
+        body.dark .month-selector, body.dark #dashboardSection.dashboard-section { background: transparent !important; box-shadow: none !important; border: 0 !important; }
+        body.dark .kpi-card::after, body.dark .insight-card::after, body.dark .setting-row::after,
+        body.dark .ifc-sum-card::after, body.dark .transfer-box::after, body.dark .mc-item::after { display: none !important; }
+        body.dark .fd-dash-head h2, body.dark #dashboardSection .fd-dash-head h2 { color: var(--ink); }
+        body.dark .chart-container { background: transparent; }
+
         /* ----- Menu bawah (HP & tablet) ----- */
         .fd-bnav { display: none; }
         @media (max-width: 1023px) {
@@ -3559,75 +3692,74 @@
         <div class="view-panel" id="view-dashboard">
         <!-- Financial Dashboard Section -->
         <div id="dashboardSection" style="display:none;" class="dashboard-section">
-            <h2 class="sec-title"><svg class="sec-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span data-i18n="dash_title">FINANCIAL DASHBOARD</span></h2>
-
-            <!-- Kartu Insight -->
-            <div class="insight-card" id="insightCard" style="display:none;">
-                <div class="insight-title" data-i18n="insight_title">Insight Bulan Ini</div>
-                <ul class="insight-list" id="insightList"></ul>
+            <!-- v7.1: susunan dashboard baru (ID tetap sama, hanya tata letak) -->
+            <div class="fd-dash-head">
+                <h2 class="sec-title"><svg class="sec-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span data-i18n="dash_title">FINANCIAL DASHBOARD</span></h2>
             </div>
 
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-label"><svg class="kpi-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg><span data-i18n="kpi_revenue">Total Revenue</span></div>
-                    <div class="kpi-value" id="kpiRevenue">Rp 0</div>
-                    <div class="kpi-trend" id="kpiRevenueTrend">-</div>
-                </div>
+            <div class="fd-dash-top">
+                <!-- Kartu utama: laba bersih + pemasukan/pengeluaran + perbandingan bulan lalu -->
+                <section class="fd-hero" aria-label="Ringkasan bulan ini">
+                    <div class="fd-hero-row">
+                        <span class="fd-hero-label" data-i18n="kpi_profit">Net Profit</span>
+                        <span class="fd-hero-pill"><i aria-hidden="true"></i><span id="kpiMarginStatus">-</span><span class="fd-hero-sep" aria-hidden="true">·</span><span id="kpiMargin">0%</span></span>
+                    </div>
+                    <div class="fd-hero-value" id="kpiProfit">Rp 0</div>
+                    <div class="fd-hero-grid">
+                        <div class="fd-hero-stat">
+                            <div class="fd-hero-k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span data-i18n="kpi_revenue">Total Revenue</span></div>
+                            <div class="fd-hero-v" id="kpiRevenue">Rp 0</div>
+                        </div>
+                        <div class="fd-hero-stat">
+                            <div class="fd-hero-k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg><span data-i18n="kpi_expense">Total Expense</span></div>
+                            <div class="fd-hero-v fd-neg" id="kpiExpense">Rp 0</div>
+                        </div>
+                    </div>
+                    <div class="month-compare" id="monthCompare" style="display:none;">
+                        <div class="mc-title" id="mcTitle">vs Bulan Lalu</div>
+                        <div class="mc-grid">
+                            <div class="mc-item">
+                                <div class="mc-label" data-i18n="mc_revenue">Pemasukan</div>
+                                <div class="mc-change" id="mcRevenue">—</div>
+                            </div>
+                            <div class="mc-item">
+                                <div class="mc-label" data-i18n="mc_expense">Pengeluaran</div>
+                                <div class="mc-change" id="mcExpense">—</div>
+                            </div>
+                            <div class="mc-item">
+                                <div class="mc-label" data-i18n="mc_profit">Laba</div>
+                                <div class="mc-change" id="mcProfit">—</div>
+                            </div>
+                        </div>
+                    </div>
+                    <span hidden id="kpiRevenueTrend"></span><span hidden id="kpiExpenseTrend"></span><span hidden id="kpiProfitTrend"></span>
+                </section>
 
-                <div class="kpi-card">
-                    <div class="kpi-label"><svg class="kpi-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 12 4 4 4-4"/><path d="M12 8v8"/></svg><span data-i18n="kpi_expense">Total Expense</span></div>
-                    <div class="kpi-value" id="kpiExpense">Rp 0</div>
-                    <div class="kpi-trend" id="kpiExpenseTrend">-</div>
-                </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-label"><svg class="kpi-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg><span data-i18n="kpi_profit">Net Profit</span></div>
-                    <div class="kpi-value" id="kpiProfit">Rp 0</div>
-                    <div class="kpi-trend" id="kpiProfitTrend">-</div>
-                </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-label"><svg class="kpi-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span data-i18n="kpi_margin">Profit Margin</span></div>
-                    <div class="kpi-value" id="kpiMargin">0%</div>
-                    <div class="kpi-trend" id="kpiMarginStatus">-</div>
+                <!-- Kartu Insight -->
+                <div class="insight-card" id="insightCard" style="display:none;">
+                    <div class="insight-title" data-i18n="insight_title">Insight Bulan Ini</div>
+                    <ul class="insight-list" id="insightList"></ul>
                 </div>
             </div>
 
             <div id="trendAlert" style="display:none;"></div>
 
-            <!-- ===== PERBANDINGAN BULAN (vs bulan lalu) ===== -->
-            <div class="month-compare" id="monthCompare" style="display:none;">
-                <div class="mc-title" id="mcTitle">vs Bulan Lalu</div>
-                <div class="mc-grid">
-                    <div class="mc-item">
-                        <div class="mc-label" data-i18n="mc_revenue">Pemasukan</div>
-                        <div class="mc-change" id="mcRevenue">—</div>
-                    </div>
-                    <div class="mc-item">
-                        <div class="mc-label" data-i18n="mc_expense">Pengeluaran</div>
-                        <div class="mc-change" id="mcExpense">—</div>
-                    </div>
-                    <div class="mc-item">
-                        <div class="mc-label" data-i18n="mc_profit">Laba</div>
-                        <div class="mc-change" id="mcProfit">—</div>
+            <!-- Grafik (tetap Chart.js seperti semula) -->
+            <section class="fd-chart-card">
+                <div class="fd-chart-head">
+                    <div class="chart-toggle">
+                    <button type="button" class="chart-toggle-btn active" id="toggleHarian" onclick="setChartMode('harian')"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span data-i18n="toggle_harian">Harian</span></button>
+                    <button type="button" class="chart-toggle-btn" id="toggleBulanan" onclick="setChartMode('bulanan')"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span data-i18n="toggle_bulanan">Bulanan</span></button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Toggle Harian / Bulanan -->
-            <div class="chart-toggle">
-                <button type="button" class="chart-toggle-btn active" id="toggleHarian" onclick="setChartMode('harian')"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span data-i18n="toggle_harian">Harian</span></button>
-                <button type="button" class="chart-toggle-btn" id="toggleBulanan" onclick="setChartMode('bulanan')"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span data-i18n="toggle_bulanan">Bulanan</span></button>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="financialChart"></canvas>
-            </div>
-
-            <div id="trendInfo" style="display:none; background: #f0f4f7; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                <strong>Trend Analysis:</strong>
-                <p id="trendText" style="margin-top: 10px;"></p>
-            </div>
+                <div class="chart-container">
+                    <canvas id="financialChart"></canvas>
+                </div>
+                <div id="trendInfo" style="display:none;">
+                    <strong>Trend Analysis:</strong>
+                    <p id="trendText" style="margin-top: 10px;"></p>
+                </div>
+            </section>
 
             <!-- ===== RINGKASAN TAHUNAN ===== -->
             <div class="annual-summary">
@@ -4412,7 +4544,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.1.0-uji.1';
+        const APP_VERSION = 'v7.1.0-uji.2';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
