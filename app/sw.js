@@ -6,7 +6,7 @@
    PERNAH disimpan, supaya data selalu terbaru dan data satu akun tidak
    pernah tampil ke akun lain di HP yang sama. */
 
-const CACHE_NAME = 'findaily-uji-v7-1-0-a2';
+const CACHE_NAME = 'findaily-uji-v7-1-0-a3';
 
 // File inti aplikasi (same-origin), relatif terhadap /app/
 const APP_SHELL = [
@@ -18,6 +18,8 @@ const APP_SHELL = [
   './icon-maskable-512.png',
   './favicon.png',
   './apple-touch-icon.png',
+  './img/app-bg-desktop.webp',
+  './img/app-bg-mobile.webp',
   '../fd-auth.js'
 ];
 

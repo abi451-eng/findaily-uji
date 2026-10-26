@@ -3100,6 +3100,49 @@
         body.dark .fd-dash-head h2, body.dark #dashboardSection .fd-dash-head h2 { color: var(--ink); }
         body.dark .chart-container { background: transparent; }
 
+        /* ============================================================
+           ===== v7.1c: latar foto buram + sidebar buka/tutup di semua layar =====
+           ============================================================ */
+        /* Lapisan .fx-bg dipakai ulang untuk foto danau senja (sudah diburamkan) */
+        .fx-bg, body.dark .fx-bg {
+            display: block; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background: linear-gradient(rgba(255,255,255,.48), rgba(255,255,255,.48)), url('./img/app-bg-desktop.webp') center / cover no-repeat;
+        }
+        body.dark .fx-bg { background: linear-gradient(rgba(10,8,20,.66), rgba(10,8,20,.66)), url('./img/app-bg-desktop.webp') center / cover no-repeat; }
+        @media (max-width: 700px), (orientation: portrait) {
+            .fx-bg { background: linear-gradient(rgba(255,255,255,.48), rgba(255,255,255,.48)), url('./img/app-bg-mobile.webp') center / cover no-repeat; }
+            body.dark .fx-bg { background: linear-gradient(rgba(10,8,20,.66), rgba(10,8,20,.66)), url('./img/app-bg-mobile.webp') center / cover no-repeat; }
+        }
+        .fx-blob, .fx-mesh, body.dark .fx-blob, body.dark .fx-mesh { display: none; }
+        body, body.dark { background: #E9E4F3; }
+        body.dark { background: #0F0D18; }
+        /* Header & menu bawah semi-transparan di atas foto */
+        .sticky-header, body.dark .sticky-header {
+            background: rgba(255,255,255,.80); -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2);
+        }
+        body.dark .sticky-header { background: rgba(21,28,31,.78); }
+        .fd-bnav { background: rgba(255,255,255,.86); -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2); }
+        body.dark .fd-bnav { background: rgba(21,28,31,.84); }
+        /* Teks yang langsung di atas latar tetap terbaca */
+        #dashboardSection .fd-dash-head h2, .annual-title { text-shadow: 0 1px 12px rgba(255,255,255,.6); }
+        body.dark #dashboardSection .fd-dash-head h2, body.dark .annual-title { text-shadow: 0 1px 12px rgba(0,0,0,.5); }
+
+        /* Sidebar: tersembunyi di PC juga, dibuka lewat tombol menu di header */
+        @media (min-width: 1024px) {
+            body { padding-left: 0; }
+            .hamburger-btn { display: inline-flex; }
+            .sidebar-close { display: inline-flex; }
+            .sidebar {
+                transform: translateX(-100%); visibility: hidden; box-shadow: none;
+                transition: transform .28s ease, visibility 0s .28s;
+            }
+            .sidebar.open, body.dark .sidebar.open {
+                transform: translateX(0); visibility: visible; transition: transform .28s ease;
+                box-shadow: 12px 0 36px rgba(14,26,26,.18);
+            }
+            .sidebar-overlay { display: block !important; }
+        }
+
         /* ----- Menu bawah (HP & tablet) ----- */
         .fd-bnav { display: none; }
         @media (max-width: 1023px) {
@@ -4544,7 +4587,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.1.0-uji.2';
+        const APP_VERSION = 'v7.1.0-uji.3';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
