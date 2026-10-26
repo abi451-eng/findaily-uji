@@ -3181,7 +3181,8 @@
         .kas-jenis.active, body.dark .kas-jenis.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
         .kas-jenis:hover, body.dark .kas-jenis:hover { border-color: var(--accent); }
 
-        .money-cell .rp, body.dark .money-cell .rp { color: var(--ink-3); font-weight: 500; }
+        .money-cell .rp, body.dark .money-cell .rp, .currency .money-cell .rp, body.dark .currency .money-cell .rp { color: var(--ink-3); font-weight: 500; }
+        body.dark .ppn-jumlah-row td .rp { color: var(--ink-2) !important; }
         .topbar-live[data-state="busy"] { color: #5B21B6; background: #F1EBFE; border-color: #DDD6FE; }
         .topbar-live[data-state="busy"] i { background: #7C3AED; }
         body.dark .topbar-live[data-state="busy"] { color: #DDD6FE; background: rgba(167,139,250,.14); border-color: rgba(167,139,250,.3); }
@@ -3262,6 +3263,39 @@
         .fd-notif-send { min-height: 42px; padding: 0 16px; margin-left: auto; }
         @media (max-width: 1023px) {
             .fd-notif { top: 68px; left: 12px; right: 12px; width: auto; max-width: none; max-height: calc(100vh - 68px - var(--bnav-h) - 32px); }
+        }
+
+        /* ============================================================
+           ===== v7.1f: avatar akun + menu Kas rapi di desktop =====
+           ============================================================ */
+        .topbar-av { overflow: hidden; color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+        body.dark .topbar-av { color: #fff; border: 0; }
+        .topbar-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .topbar-av.has-photo { background: var(--surface-2) !important; }
+
+        /* Kartu ringkasan Kas: semua sama (tanpa kartu gelap) */
+        .kas-kpi .kpi-card:nth-child(n), body.dark .kas-kpi .kpi-card:nth-child(n) { background: var(--surface); border-color: var(--line); order: 0; grid-column: auto; }
+        .kas-kpi .kpi-card:nth-child(n) .kpi-label { color: var(--ink-3); }
+        .kas-kpi .kpi-card:nth-child(n) .kpi-value { color: var(--ink); font-size: 26px; }
+        .kas-kpi .kpi-card:nth-child(n) .kpi-trend { background: var(--surface-2); color: var(--ink-2); }
+        .kpi-grid .kpi-card:nth-child(n) .kpi-ic, body.dark .kpi-grid .kpi-card:nth-child(n) .kpi-ic { background: var(--accent-soft); color: var(--accent); }
+        .kas-kpi { align-items: stretch; }
+        .kas-kpi .kpi-card { display: flex; flex-direction: column; }
+        .kas-kpi .kpi-card .kpi-trend { margin-top: auto; align-self: flex-start; }
+
+        /* Dua kartu Catat transaksi | Belum selesai sama tinggi */
+        .kas-2col { align-items: stretch; }
+        .kas-2col > .form-section { display: flex; flex-direction: column; }
+
+        /* Baris tabel sama tinggi: tombol aksi di tabel dibuat ringkas */
+        .data-table .btn, #kasLedgerTable .btn, .data-table .kas-actions .btn {
+            min-height: 34px; height: 34px; padding: 0 12px; font-size: 13px; border-radius: 10px; line-height: 1;
+        }
+        .data-table td, #kasLedgerTable td { height: 52px; padding-top: 6px; padding-bottom: 6px; vertical-align: middle; box-sizing: border-box; }
+        .data-table .kas-actions, #kasLedgerTable .kas-actions { flex-wrap: nowrap; }
+
+        @media (max-width: 768px) {
+            .kas-kpi .kpi-card:nth-child(n) .kpi-value { font-size: 18px; }
         }
 
         /* ----- Menu bawah (HP & tablet) ----- */
@@ -3368,7 +3402,7 @@
         <span class="fd-viewer-pill" data-i18n="fd_viewer_pill">Mode lihat saja</span>
         <span class="topbar-live" id="fdSyncPill" data-state="busy" role="status" aria-live="polite"><i></i><span id="fdSyncText">Memuat data...</span></span>
         <button class="topbar-bell" id="fdBell" type="button" aria-label="Notifikasi: tidak ada data tertunda" aria-haspopup="dialog" aria-expanded="false" aria-controls="fdNotif" onclick="fdNotifToggle()"><span class="bell-badge" id="fdBellBadge" hidden>0</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
-        <div class="topbar-profile"><div class="topbar-av" id="profileAv">BK</div><div class="topbar-pm"><b id="profileName">Abiyou</b><span>Pemilik</span></div></div>
+        <div class="topbar-profile"><div class="topbar-av" id="profileAv" aria-hidden="true"></div><div class="topbar-pm"><b id="profileName">Abiyou</b><span>Pemilik</span></div></div>
     </div>
 
 
@@ -4722,7 +4756,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.1.0-uji.5';
+        const APP_VERSION = 'v7.1.0-uji.6';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -7896,7 +7930,7 @@
             if (h1) h1.textContent = (activeBusiness === 'ifc') ? 'Laporan Kas IFC' : 'Financial Daily Report BKCM';
             const _bn = document.getElementById('brandName'); if (_bn) _bn.textContent = (activeBusiness === 'ifc') ? 'IFC' : 'BKCM';
             const _bl = document.getElementById('brandLogo'); if (_bl) _bl.textContent = (activeBusiness === 'ifc') ? 'IF' : 'BK';
-            const _av = document.getElementById('profileAv'); if (_av) _av.textContent = (activeBusiness === 'ifc') ? 'IF' : 'BK';
+            if (typeof fdRenderAvatar === 'function') fdRenderAvatar();
             const _rl = document.querySelector('.topbar-pm span'); if (_rl) _rl.textContent = fdRoleText() || ((activeBusiness === 'ifc') ? 'Pengelola' : 'Pemilik');
             document.body.classList.toggle('ifc-mode', activeBusiness === 'ifc');
         }
@@ -8773,9 +8807,42 @@
                 else if (el.dataset.fdRo) { el.removeAttribute('readonly'); delete el.dataset.fdRo; }
             });
         }
+        // v7.1: avatar akun = foto profil akun (kalau ada), selain itu huruf depan nama akun
+        var FD_AV_COLORS = ['#7C3AED', '#6D28D9', '#9333EA', '#5B21B6', '#A855F7', '#7E22CE', '#8B5CF6', '#C026D3'];
+        function fdInitial(name) {
+            var s = String(name || '').trim();
+            if (s.indexOf('@') > 0) s = s.split('@')[0];
+            var m = s.match(/[A-Za-z0-9]/);
+            return m ? m[0].toUpperCase() : '?';
+        }
+        function fdRenderAvatar() {
+            var av = document.getElementById('profileAv');
+            if (!av) return;
+            var m = window.FD_MEMBER;
+            av.textContent = '';
+            av.classList.remove('has-photo');
+            av.style.background = '';
+            if (!m) return;
+            var name = m.nama || m.email || '';
+            var ch = fdInitial(name);
+            av.title = name;
+            av.style.background = FD_AV_COLORS[ch.charCodeAt(0) % FD_AV_COLORS.length];
+            if (m.foto && /^https:\/\//.test(m.foto)) {
+                var img = new Image();
+                img.alt = '';
+                img.referrerPolicy = 'no-referrer';
+                img.onerror = function () { av.classList.remove('has-photo'); av.textContent = ch; };
+                img.src = m.foto;
+                av.appendChild(img);
+                av.classList.add('has-photo');
+            } else {
+                av.textContent = ch;
+            }
+        }
         function fdApplyMember(m) {
             window.FD_MEMBER = m;
             fdApplyRole(m);
+            fdRenderAvatar();
             var nm = document.getElementById('profileName');
             if (nm) nm.textContent = m.nama || m.email;
             var rl = document.querySelector('.topbar-pm span');

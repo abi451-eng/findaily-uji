@@ -158,6 +158,7 @@
             instansi_nama: (row.instansi && row.instansi.nama) || '',
             peran: row.peran,
             nama: row.nama || row.username || user.email || '',
+            foto: (user.user_metadata && (user.user_metadata.avatar_url || user.user_metadata.picture)) || '',
             diperbarui: new Date().toISOString()
         };
     };
