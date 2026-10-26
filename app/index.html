@@ -3298,6 +3298,25 @@
             .kas-kpi .kpi-card:nth-child(n) .kpi-value { font-size: 18px; }
         }
 
+        /* v7.1g: kartu foto profil di Setting */
+        .fd-avatar-row { gap: 16px; flex-wrap: wrap; }
+        .fd-avatar-row .setting-info { flex: 1 1 220px; min-width: 0; }
+        .fd-avatar-preview {
+            flex: none; width: 64px; height: 64px; border-radius: 999px; overflow: hidden; display: grid; place-items: center;
+            color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 26px; background: var(--accent);
+        }
+        .fd-avatar-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .fd-avatar-preview.has-photo { background: var(--surface-2) !important; }
+        .fd-avatar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+        .fd-avatar-actions .btn { min-height: 42px; padding: 0 16px; }
+        #fdAvatarDesc.is-error { color: var(--down); }
+        .fd-avatar-actions .btn[hidden] { display: none; }
+        @media (max-width: 1023px) {
+            /* Label pemantau di HP: di bawah header agar tidak menimpa nama usaha */
+            html.fd-viewer .fd-viewer-pill { position: fixed; top: 66px; left: 50%; transform: translateX(-50%); z-index: 990; box-shadow: 0 4px 14px rgba(23,18,42,.12); }
+            html.fd-viewer body { padding-top: 92px; }
+        }
+
         /* ----- Menu bawah (HP & tablet) ----- */
         .fd-bnav { display: none; }
         @media (max-width: 1023px) {
@@ -4261,6 +4280,20 @@
                     <button type="button" class="btn btn-secondary" onclick="fdLogout()" data-i18n="nav_logout">Keluar</button>
                 </div>
 
+                <!-- v7.1: foto profil akun (semua akun, termasuk pemantau) -->
+                <div class="setting-row fd-avatar-row" id="fdAvatarRow">
+                    <div class="fd-avatar-preview" id="fdAvatarPreview" aria-hidden="true"></div>
+                    <div class="setting-info">
+                        <div class="setting-title">Foto profil</div>
+                        <div class="setting-desc" id="fdAvatarDesc" role="status" aria-live="polite">Tampil di pojok kanan atas. Foto otomatis diperkecil dan dipotong persegi sebelum diunggah.</div>
+                    </div>
+                    <div class="fd-avatar-actions">
+                        <input type="file" id="fdAvatarFile" accept="image/*" hidden onchange="fdAvatarPick(this)">
+                        <button type="button" class="btn btn-primary" id="fdAvatarPickBtn" onclick="document.getElementById('fdAvatarFile').click()">Pilih foto</button>
+                        <button type="button" class="btn btn-secondary" id="fdAvatarDelBtn" onclick="fdAvatarRemove()" hidden>Hapus foto</button>
+                    </div>
+                </div>
+
                 <div class="setting-row">
                     <div class="setting-info">
                         <div class="setting-title"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg><span data-i18n="setting_sync_title">Data server</span></div>
@@ -4756,7 +4789,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.1.0-uji.6';
+        const APP_VERSION = 'v7.1.0-uji.7';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -8815,13 +8848,11 @@
             var m = s.match(/[A-Za-z0-9]/);
             return m ? m[0].toUpperCase() : '?';
         }
-        function fdRenderAvatar() {
-            var av = document.getElementById('profileAv');
-            if (!av) return;
-            var m = window.FD_MEMBER;
+        function fdPaintAvatar(av, m) {
             av.textContent = '';
             av.classList.remove('has-photo');
             av.style.background = '';
+            av.removeAttribute('title');
             if (!m) return;
             var name = m.nama || m.email || '';
             var ch = fdInitial(name);
@@ -8838,6 +8869,112 @@
             } else {
                 av.textContent = ch;
             }
+        }
+        function fdRenderAvatar() {
+            var m = window.FD_MEMBER;
+            ['profileAv', 'fdAvatarPreview'].forEach(function (id) { var av = document.getElementById(id); if (av) fdPaintAvatar(av, m); });
+            var del = document.getElementById('fdAvatarDelBtn');
+            if (del) del.hidden = !(m && m.foto);
+        }
+
+        // v7.1: unggah / hapus foto profil (Supabase Storage, bucket "avatar", folder = id akun)
+        var FD_AVATAR_BUCKET = 'avatar';
+        function fdAvatarMsg(text, isErr) {
+            var d = document.getElementById('fdAvatarDesc');
+            if (!d) return;
+            d.textContent = text;
+            d.classList.toggle('is-error', !!isErr);
+        }
+        function fdAvatarBusy(on) {
+            ['fdAvatarPickBtn', 'fdAvatarDelBtn'].forEach(function (id) { var b = document.getElementById(id); if (b) b.disabled = on; });
+        }
+        function fdAvatarErr(e) {
+            var m = String((e && (e.message || e.error)) || e || '').toLowerCase();
+            if (m.indexOf('bucket not found') !== -1) return 'Tempat penyimpanan foto belum disiapkan di server. Hubungi admin.';
+            if (m.indexOf('row-level security') !== -1 || m.indexOf('unauthorized') !== -1 || m.indexOf('not allowed') !== -1) return 'Server menolak unggahan foto ini.';
+            if (m.indexOf('too large') !== -1 || m.indexOf('exceeded') !== -1) return 'Ukuran foto terlalu besar.';
+            if (m.indexOf('mime') !== -1) return 'Jenis berkas tidak didukung. Pilih foto JPG atau PNG.';
+            if (!navigator.onLine || m.indexOf('failed to fetch') !== -1 || m.indexOf('network') !== -1) return 'Tidak ada internet. Coba lagi saat online.';
+            return 'Foto gagal disimpan: ' + ((e && e.message) || e);
+        }
+        // Perkecil & potong persegi 256 px di HP sebelum diunggah (WebP, cadangan JPEG)
+        function fdAvatarBlob(file) {
+            return new Promise(function (resolve, reject) {
+                var url = URL.createObjectURL(file), img = new Image();
+                img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Berkas bukan gambar yang bisa dibaca.')); };
+                img.onload = function () {
+                    URL.revokeObjectURL(url);
+                    var S = 256, side = Math.min(img.naturalWidth, img.naturalHeight);
+                    var c = document.createElement('canvas'); c.width = c.height = S;
+                    var ctx = c.getContext('2d');
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, S, S);
+                    c.toBlob(function (b) {
+                        if (b && b.type === 'image/webp') return resolve(b);
+                        c.toBlob(function (j) { j ? resolve(j) : reject(new Error('Foto gagal diproses.')); }, 'image/jpeg', 0.85);
+                    }, 'image/webp', 0.85);
+                };
+                img.src = url;
+            });
+        }
+        async function fdAvatarUser() {
+            var sb = await FD.ready;
+            var r = await sb.auth.getUser();
+            if (r.error || !r.data || !r.data.user) throw (r.error || new Error('Sesi login berakhir. Silakan masuk lagi.'));
+            return { sb: sb, uid: r.data.user.id };
+        }
+        async function fdAvatarCleanup(sb, uid, keep) {
+            var l = await sb.storage.from(FD_AVATAR_BUCKET).list(uid, { limit: 100 });
+            if (l.error || !l.data) return;
+            var del = l.data.map(function (f) { return uid + '/' + f.name; }).filter(function (p) { return p !== keep; });
+            if (del.length) await sb.storage.from(FD_AVATAR_BUCKET).remove(del);
+        }
+        function fdAvatarSet(url) {
+            var m = window.FD_MEMBER;
+            if (m) { m.foto = url || ''; try { FD.saveMember(m); } catch (e) {} }
+            fdRenderAvatar();
+        }
+        async function fdAvatarPick(input) {
+            var file = input.files && input.files[0];
+            input.value = '';
+            if (!file) return;
+            if (!window.FD || !window.FD_MEMBER) return fdAvatarMsg('Masuk ke akun dulu untuk mengganti foto.', true);
+            if (!navigator.onLine) return fdAvatarMsg('Butuh internet untuk mengunggah foto.', true);
+            if (file.size > 20 * 1024 * 1024) return fdAvatarMsg('Foto lebih dari 20 MB. Pilih foto lain.', true);
+            fdAvatarBusy(true); fdAvatarMsg('Mengunggah foto…');
+            try {
+                var blob = await fdAvatarBlob(file);
+                var a = await fdAvatarUser();
+                var path = a.uid + '/foto-' + Date.now() + (blob.type === 'image/webp' ? '.webp' : '.jpg');
+                var up = await a.sb.storage.from(FD_AVATAR_BUCKET).upload(path, blob, { contentType: blob.type, cacheControl: '31536000', upsert: false });
+                if (up.error) throw up.error;
+                var url = a.sb.storage.from(FD_AVATAR_BUCKET).getPublicUrl(path).data.publicUrl;
+                var upd = await a.sb.auth.updateUser({ data: { avatar_url: url } });
+                if (upd.error) throw upd.error;
+                try { await fdAvatarCleanup(a.sb, a.uid, path); } catch (e) {}
+                fdAvatarSet(url);
+                fdAvatarMsg('Foto profil tersimpan.');
+            } catch (e) {
+                console.error('[FD avatar]', e);
+                fdAvatarMsg(fdAvatarErr(e), true);
+            } finally { fdAvatarBusy(false); }
+        }
+        async function fdAvatarRemove() {
+            if (!window.FD || !window.FD_MEMBER) return;
+            if (!navigator.onLine) return fdAvatarMsg('Butuh internet untuk menghapus foto.', true);
+            if (!confirm('Hapus foto profil? Avatar akan kembali menampilkan huruf depan nama.')) return;
+            fdAvatarBusy(true); fdAvatarMsg('Menghapus foto…');
+            try {
+                var a = await fdAvatarUser();
+                var upd = await a.sb.auth.updateUser({ data: { avatar_url: null } });
+                if (upd.error) throw upd.error;
+                try { await fdAvatarCleanup(a.sb, a.uid, null); } catch (e) {}
+                fdAvatarSet('');
+                fdAvatarMsg('Foto profil dihapus.');
+            } catch (e) {
+                console.error('[FD avatar]', e);
+                fdAvatarMsg(fdAvatarErr(e), true);
+            } finally { fdAvatarBusy(false); }
         }
         function fdApplyMember(m) {
             window.FD_MEMBER = m;
