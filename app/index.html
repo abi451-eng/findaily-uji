@@ -3227,6 +3227,15 @@
         .bell-badge[hidden] { display: none; }
         .topbar-bell.has-pending { color: var(--accent); border-color: var(--accent-soft); background: var(--accent-soft); }
 
+        /* v7.1: banner "Versi baru" & pengingat backup tidak melayang lagi; tampil di panel lonceng */
+        .update-banner, .backup-reminder, .update-banner.show, .backup-reminder.show { display: none !important; }
+        .fd-notif-sys { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 12px 8px; border-bottom: 1px solid var(--line); }
+        .fd-notif-sys .fd-notif-body { flex: 1 1 180px; }
+        .fd-notif-sys-ic { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+        .fd-notif-sys-ic svg { width: 18px; height: 18px; }
+        .fd-notif-sys-act { display: flex; gap: 6px; margin-left: auto; }
+        .fd-notif-sys-act .btn { min-height: 36px; height: 36px; padding: 0 14px; font-size: 13px; }
+
         /* Panel notifikasi */
         .fd-notif {
             position: fixed; top: 72px; right: 16px; z-index: 2700; width: 380px; max-width: calc(100vw - 24px);
@@ -3429,11 +3438,7 @@
             .bk-sa-value { font-size: 30px; }
             .button-group { gap: 10px; }
             .button-group .btn { flex: 1 1 140px; }
-            #view-input .form-section > .button-group {
-                position: sticky; bottom: calc(var(--bnav-h) + env(safe-area-inset-bottom) + 8px); z-index: 5;
-                margin: 18px -8px -8px; padding: 10px 8px 8px; border-radius: 14px;
-                background: var(--surface); box-shadow: 0 -10px 18px -10px rgba(14,26,26,.18);
-            }
+            #view-input .form-section > .button-group { margin-top: 18px; }
             #view-input .form-section > .button-group .btn { flex: 1 1 auto; padding: 0 12px; font-size: 14px; }
             #view-input .form-section > .button-group .btn-primary { flex-grow: 2; }
 
@@ -4874,7 +4879,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.1.0-uji.9';
+        const APP_VERSION = 'v7.1.0-uji.10';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -4981,7 +4986,7 @@
                 kas_ok_saved:'Transaction saved.', kas_ok_saved_ifc:'Transaction saved and recorded in the IFC cash book.', kas_ok_updated:'Changes saved.', kas_ok_deleted:'Transaction deleted.',
                 kas_confirm_delete:'Delete "{k}" for {v}?', kas_confirm_delete_ifc:'Its entry in the IFC cash book will be deleted too.', kas_edit_note:'Editing the transaction on {d}.',
                 kas_err_start:'Fill in the start date.', kas_confirm_start:'There are {n} transactions before the new start date. They will no longer be counted.\n\nContinue?', kas_ok_cfg:'Cash Deposit starting setup saved.',
-                foto_btn:'Take photo', foto_file_btn:'Choose photo file', foto_hint:'Photograph the whole daily sheet, including notes in the margin.', foto_title:'Photo reading result', foto_close:'Close', foto_note:'Not saved yet. Check every marked field, then press Save Data.', foto_reading:'Reading photo...', foto_done:'The form has been filled from the photo. Check it before saving.', foto_offline:'An internet connection is required to read the photo. Fill it in manually.', foto_unreachable:'The server function "baca-catatan" is not installed or cannot be reached.', foto_move_date:'Go to {d}', foto_reapply:'Fill in again from photo', foto_bad_file:'The file is not a readable image.', foto_lvl_ok:'Match', foto_lvl_info:'Info', foto_lvl_peringatan:'Check', foto_lvl_error:'Wrong', foto_cek_TGL_KOSONG:'The date on the sheet could not be read. Make sure the form date is correct.', foto_cek_TGL_BEDA:'The sheet date is {tgl}, different from the form date {form}.', foto_cek_HARI_BEDA:'The day name on the sheet "{hari}" does not match the date {tgl} (should be {benar}).', foto_cek_RINCIAN_BEDA:'The sum of the sales details {a} is not equal to Total Sales {b}.', foto_cek_PENGELUARAN_BEDA:'The sum of the expense rows {a} is not equal to Total Expenses on the sheet {b}.', foto_cek_PPN_TERTUKAR:'Total sales may have been swapped with the VAT figure ({a}).', foto_cek_PPN_BEDA:'VAT on the sheet is {a}, it should be {b} ({r}% of Total Sales {c}).', foto_cek_SETOR_BEDA:'Deposited {a} is not equal to Final Balance + VAT ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) is larger than Total Sales ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'The payment total on the sheet is {a}, while QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'The online ride total on the sheet is {a}, while GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'GoJek/Grab notes are usually on the Sunday sheet, but this sheet is {hari}.', foto_cek_PENJUALAN_KECIL:'Total Sales {a} is far below usual this month (median {b}). Check the figure again.', foto_cek_ADA_DATA:'This date already has data. Saving will overwrite it.', foto_cek_RAGU:'Unclear handwriting in: {kolom}. Check the fields marked in red.', foto_cek_SEMUA_COCOK:'All figures match each other.', foto_cek_TOTAL_DARI_RINCIAN:'Total sales was empty, the sum of the details was used.', foto_cek_TUNAI_DARI_SALDO:'Final Balance was empty, Balance was used.', foto_cek_RAGU_TANGGAL:'The date or day name on the sheet is unclear.'
+                notif_update_sub:'Press Update to use the latest version of the app.', notif_backup_title:'Backup reminder', foto_btn:'Take photo', foto_file_btn:'Choose photo file', foto_hint:'Photograph the whole daily sheet, including notes in the margin.', foto_title:'Photo reading result', foto_close:'Close', foto_note:'Not saved yet. Check every marked field, then press Save Data.', foto_reading:'Reading photo...', foto_done:'The form has been filled from the photo. Check it before saving.', foto_offline:'An internet connection is required to read the photo. Fill it in manually.', foto_unreachable:'The server function "baca-catatan" is not installed or cannot be reached.', foto_move_date:'Go to {d}', foto_reapply:'Fill in again from photo', foto_bad_file:'The file is not a readable image.', foto_lvl_ok:'Match', foto_lvl_info:'Info', foto_lvl_peringatan:'Check', foto_lvl_error:'Wrong', foto_cek_TGL_KOSONG:'The date on the sheet could not be read. Make sure the form date is correct.', foto_cek_TGL_BEDA:'The sheet date is {tgl}, different from the form date {form}.', foto_cek_HARI_BEDA:'The day name on the sheet "{hari}" does not match the date {tgl} (should be {benar}).', foto_cek_RINCIAN_BEDA:'The sum of the sales details {a} is not equal to Total Sales {b}.', foto_cek_PENGELUARAN_BEDA:'The sum of the expense rows {a} is not equal to Total Expenses on the sheet {b}.', foto_cek_PPN_TERTUKAR:'Total sales may have been swapped with the VAT figure ({a}).', foto_cek_PPN_BEDA:'VAT on the sheet is {a}, it should be {b} ({r}% of Total Sales {c}).', foto_cek_SETOR_BEDA:'Deposited {a} is not equal to Final Balance + VAT ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) is larger than Total Sales ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'The payment total on the sheet is {a}, while QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'The online ride total on the sheet is {a}, while GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'GoJek/Grab notes are usually on the Sunday sheet, but this sheet is {hari}.', foto_cek_PENJUALAN_KECIL:'Total Sales {a} is far below usual this month (median {b}). Check the figure again.', foto_cek_ADA_DATA:'This date already has data. Saving will overwrite it.', foto_cek_RAGU:'Unclear handwriting in: {kolom}. Check the fields marked in red.', foto_cek_SEMUA_COCOK:'All figures match each other.', foto_cek_TOTAL_DARI_RINCIAN:'Total sales was empty, the sum of the details was used.', foto_cek_TUNAI_DARI_SALDO:'Final Balance was empty, Balance was used.', foto_cek_RAGU_TANGGAL:'The date or day name on the sheet is unclear.'
             },            id: {
                 menu_title:'Menu', nav_input:'Input Data', nav_kas:'Kas Setoran', nav_logout:'Keluar', setting_account_title:'Akun', nav_riwayat:'Riwayat', hist_title:'Riwayat perubahan', hist_hint:'Setiap tambah, ubah, dan hapus dicatat otomatis oleh server, dan catatannya tidak bisa diubah atau dihapus.', hist_all_types:'Semua jenis', hist_t_bkcm:'Input BKCM', hist_t_ifc:'Input IFC', hist_t_kas:'Kas Setoran', hist_t_cfg:'Pengaturan', hist_t_akun:'Akun pemantau', hist_all_people:'Semua orang', hist_more:'Muat lebih banyak', fd_viewer_pill:'Mode lihat saja', setting_pm_title:'Akun pemantau', setting_pm_desc:'Bos dan karyawan masuk dengan nama pengguna. Mereka bisa melihat semua menu dan mengunduh laporan, tapi tidak bisa mengubah data.', fd_pm_manage:'Kelola', fd_pm_add_title:'Tambah pemantau', fd_pm_nama:'Nama', fd_pm_nama_ph:'Contoh: Pak Joko', fd_pm_user:'Nama pengguna', fd_pm_pass:'Password (minimal 8 karakter)', fd_pm_add_btn:'Buat akun pemantau', fd_pm_hint:'Berikan nama pengguna dan password ini ke orangnya. Mereka masuk di halaman masuk seperti biasa, tanpa email.', fd_role_admin:'Admin', fd_role_pemantau:'Pemantau', fd_logout_confirm:'Keluar dari akun di HP ini? Semua data sudah aman di server.', fd_logout_pending:'Masih ada {n} perubahan yang belum terkirim ke server. Sambungkan internet dan tunggu sampai tertulis "Tersinkron", baru keluar.', setting_sync_title:'Data server', fd_reload_btn:'Muat ulang data', nav_dashboard:'Dasbor', nav_pajak:'Laporan Pajak', nav_ifc_input:'Input Harian', nav_ifc_laporan:'Laporan Bulanan', nav_ifc_export:'Export',
                 nav_export:'Ekspor', nav_install:'Pasang Aplikasi', nav_setting:'Pengaturan', nav_config:'Konfigurasi',
@@ -5058,7 +5063,7 @@
                 kas_lbl_amount:'Jumlah', kas_lbl_ket:'Keterangan', kas_ph_ket:'Contoh: giling daging', kas_btn_cancel_edit:'Batal ubah',
                 kas_open_title:'Belum selesai', kas_open_hint:'Pinjaman yang masih harus dikembalikan, posisi saat ini.', kas_open_note:'Pinjaman dari IFC dan pengembaliannya otomatis tercatat juga di buku kas IFC.',
                 kas_th_date:'Tanggal', kas_th_ket:'Keterangan', kas_th_jenis:'Jenis', kas_th_in:'Masuk', kas_th_out:'Keluar', kas_th_sisa:'Sisa', kas_th_aksi:'Aksi',
-                foto_btn:'Ambil foto', foto_file_btn:'Pilih file foto', foto_hint:'Foto seluruh lembar catatan harian, termasuk catatan di pinggir.', foto_title:'Hasil baca foto', foto_close:'Tutup', foto_note:'Belum tersimpan. Periksa setiap kolom bertanda, lalu tekan Simpan Data.', foto_reading:'Membaca foto...', foto_done:'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.', foto_offline:'Butuh koneksi internet untuk membaca foto. Isi manual dulu.', foto_unreachable:'Fungsi server "baca-catatan" belum terpasang atau tidak bisa dijangkau.', foto_move_date:'Pindah ke {d}', foto_reapply:'Isi lagi dari foto', foto_bad_file:'Berkas bukan gambar yang bisa dibaca.', foto_lvl_ok:'Cocok', foto_lvl_info:'Info', foto_lvl_peringatan:'Periksa', foto_lvl_error:'Salah', foto_cek_TGL_KOSONG:'Tanggal di kertas tidak terbaca. Pastikan tanggal formulir sudah benar.', foto_cek_TGL_BEDA:'Tanggal di kertas {tgl}, berbeda dengan tanggal formulir {form}.', foto_cek_HARI_BEDA:'Nama hari di kertas "{hari}" tidak cocok dengan tanggal {tgl} (seharusnya {benar}).', foto_cek_RINCIAN_BEDA:'Jumlah rincian penjualan {a} tidak sama dengan Total Penjualan {b}.', foto_cek_PENGELUARAN_BEDA:'Jumlah baris pengeluaran {a} tidak sama dengan Total Pengeluaran di kertas {b}.', foto_cek_PPN_TERTUKAR:'Total penjualan mungkin tertukar dengan angka PPN ({a}).', foto_cek_PPN_BEDA:'PPN di kertas {a}, seharusnya {b} ({r}% dari Total Penjualan {c}).', foto_cek_SETOR_BEDA:'Disetorkan {a} tidak sama dengan Saldo Akhir + PPN ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) lebih besar dari Total Penjualan ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'Total pembayaran di kertas {a}, sedangkan QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'Total ojek online di kertas {a}, sedangkan GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'Catatan GoJek/Grab biasanya ada di lembar hari Minggu, tapi lembar ini hari {hari}.', foto_cek_PENJUALAN_KECIL:'Total Penjualan {a} jauh di bawah biasanya bulan ini (median {b}). Periksa lagi angkanya.', foto_cek_ADA_DATA:'Tanggal ini sudah punya data. Menyimpan akan menimpanya.', foto_cek_RAGU:'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.', foto_cek_SEMUA_COCOK:'Semua angka saling cocok.', foto_cek_TOTAL_DARI_RINCIAN:'Total penjualan kosong, dipakai jumlah rincian.', foto_cek_TUNAI_DARI_SALDO:'Saldo Akhir kosong, dipakai Saldo.', foto_cek_RAGU_TANGGAL:'Tanggal atau nama hari di kertas kurang jelas.'
+                notif_update_sub:'Tekan Update untuk memakai versi terbaru aplikasi.', notif_backup_title:'Pengingat backup', foto_btn:'Ambil foto', foto_file_btn:'Pilih file foto', foto_hint:'Foto seluruh lembar catatan harian, termasuk catatan di pinggir.', foto_title:'Hasil baca foto', foto_close:'Tutup', foto_note:'Belum tersimpan. Periksa setiap kolom bertanda, lalu tekan Simpan Data.', foto_reading:'Membaca foto...', foto_done:'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.', foto_offline:'Butuh koneksi internet untuk membaca foto. Isi manual dulu.', foto_unreachable:'Fungsi server "baca-catatan" belum terpasang atau tidak bisa dijangkau.', foto_move_date:'Pindah ke {d}', foto_reapply:'Isi lagi dari foto', foto_bad_file:'Berkas bukan gambar yang bisa dibaca.', foto_lvl_ok:'Cocok', foto_lvl_info:'Info', foto_lvl_peringatan:'Periksa', foto_lvl_error:'Salah', foto_cek_TGL_KOSONG:'Tanggal di kertas tidak terbaca. Pastikan tanggal formulir sudah benar.', foto_cek_TGL_BEDA:'Tanggal di kertas {tgl}, berbeda dengan tanggal formulir {form}.', foto_cek_HARI_BEDA:'Nama hari di kertas "{hari}" tidak cocok dengan tanggal {tgl} (seharusnya {benar}).', foto_cek_RINCIAN_BEDA:'Jumlah rincian penjualan {a} tidak sama dengan Total Penjualan {b}.', foto_cek_PENGELUARAN_BEDA:'Jumlah baris pengeluaran {a} tidak sama dengan Total Pengeluaran di kertas {b}.', foto_cek_PPN_TERTUKAR:'Total penjualan mungkin tertukar dengan angka PPN ({a}).', foto_cek_PPN_BEDA:'PPN di kertas {a}, seharusnya {b} ({r}% dari Total Penjualan {c}).', foto_cek_SETOR_BEDA:'Disetorkan {a} tidak sama dengan Saldo Akhir + PPN ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) lebih besar dari Total Penjualan ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'Total pembayaran di kertas {a}, sedangkan QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'Total ojek online di kertas {a}, sedangkan GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'Catatan GoJek/Grab biasanya ada di lembar hari Minggu, tapi lembar ini hari {hari}.', foto_cek_PENJUALAN_KECIL:'Total Penjualan {a} jauh di bawah biasanya bulan ini (median {b}). Periksa lagi angkanya.', foto_cek_ADA_DATA:'Tanggal ini sudah punya data. Menyimpan akan menimpanya.', foto_cek_RAGU:'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.', foto_cek_SEMUA_COCOK:'Semua angka saling cocok.', foto_cek_TOTAL_DARI_RINCIAN:'Total penjualan kosong, dipakai jumlah rincian.', foto_cek_TUNAI_DARI_SALDO:'Saldo Akhir kosong, dipakai Saldo.', foto_cek_RAGU_TANGGAL:'Tanggal atau nama hari di kertas kurang jelas.'
             }
         };
 
@@ -9462,13 +9467,36 @@
 
         function el(tag, cls, text) { var x = document.createElement(tag); if (cls) x.className = cls; if (text !== undefined) x.textContent = text; return x; }
 
+        // Pemberitahuan dari banner asli (Versi baru, Pengingat backup). Banner disembunyikan lewat CSS;
+        // tombol di panel memanggil fungsi aslinya (applyUpdate, goBackupNow, dismissBackupReminder).
+        var IC_UPDATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>';
+        var IC_BACKUP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+        function tr(k, fb) { return (typeof t === 'function') ? t(k, fb) : fb; }
+        function sysNotices() {
+            var out = [];
+            var up = document.getElementById('updateBanner');
+            if (up && up.classList.contains('show')) {
+                out.push({ ic: IC_UPDATE, title: tr('update_text', 'Versi baru tersedia'), sub: tr('notif_update_sub', 'Tekan Update untuk memakai versi terbaru aplikasi.'),
+                           acts: [{ label: tr('update_btn', 'Update'), primary: true, fn: function () { if (typeof applyUpdate === 'function') applyUpdate(); } }] });
+            }
+            var bk = document.getElementById('backupReminder');
+            if (bk && bk.classList.contains('show') && !document.documentElement.classList.contains('fd-viewer')) {
+                var txt = document.getElementById('backupReminderText');
+                out.push({ ic: IC_BACKUP, title: tr('notif_backup_title', 'Pengingat backup'), sub: txt ? txt.textContent : '',
+                           acts: [{ label: tr('backup_now', 'Backup'), primary: true, fn: function () { fdNotifToggle(false); if (typeof goBackupNow === 'function') goBackupNow(); } },
+                                  { label: tr('backup_later', 'Nanti'), fn: function () { if (typeof dismissBackupReminder === 'function') dismissBackupReminder(); } }] });
+            }
+            return out;
+        }
+
         function render() {
             var its = collect(), n = its.length, online = navigator.onLine, err = last.status === 'error';
-            badge.hidden = n === 0 && !err;
-            badge.textContent = (err && n === 0) ? '!' : (n > 99 ? '99+' : String(n));
-            bell.classList.toggle('has-pending', n > 0);
+            var sys = sysNotices(), total = n + sys.length;
+            badge.hidden = total === 0 && !err;
+            badge.textContent = (err && total === 0) ? '!' : (total > 99 ? '99+' : String(total));
+            bell.classList.toggle('has-pending', total > 0);
             bell.classList.toggle('is-error', err);
-            bell.setAttribute('aria-label', n ? 'Notifikasi: ' + n + ' data belum terupload' : 'Notifikasi: semua data sudah terupload');
+            bell.setAttribute('aria-label', total ? 'Notifikasi: ' + total + ' pemberitahuan' : 'Notifikasi: semua data sudah terupload');
 
             var s;
             if (last.status === 'busy') s = 'Sedang mengupload ke server…';
@@ -9481,7 +9509,24 @@
             panel.dataset.state = err ? 'error' : (n ? (online ? 'pending' : 'offline') : 'ok');
 
             list.textContent = '';
-            if (!n) {
+            sys.forEach(function (s) {
+                var li = el('li', 'fd-notif-sys');
+                var ic = el('span', 'fd-notif-sys-ic'); ic.innerHTML = s.ic; li.appendChild(ic);
+                var body = el('div', 'fd-notif-body');
+                body.appendChild(el('div', 'fd-notif-name', s.title));
+                if (s.sub) body.appendChild(el('div', 'fd-notif-sub', s.sub));
+                li.appendChild(body);
+                var act = el('div', 'fd-notif-sys-act');
+                s.acts.forEach(function (a) {
+                    var b = el('button', 'btn ' + (a.primary ? 'btn-primary' : 'btn-secondary'), a.label);
+                    b.type = 'button'; b.onclick = a.fn; act.appendChild(b);
+                });
+                li.appendChild(act);
+                list.appendChild(li);
+            });
+            if (!n && sys.length) {
+                // tidak ada data tertunda: cukup pemberitahuan di atas
+            } else if (!n) {
                 var empty = el('li', 'fd-notif-empty');
                 empty.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
                 empty.appendChild(el('span', '', 'Tidak ada data yang belum terupload'));
@@ -9519,6 +9564,11 @@
             if (willOpen) { var c = panel.querySelector('.fd-notif-close'); if (c) c.focus(); }
         };
         document.addEventListener('fd-sync-status', function (ev) { if (ev.detail) last = ev.detail; render(); });
+        // Banner asli muncul/hilang -> perbarui lonceng
+        ['updateBanner', 'backupReminder'].forEach(function (id) {
+            var b = document.getElementById(id);
+            if (b && 'MutationObserver' in window) new MutationObserver(render).observe(b, { attributes: true, attributeFilter: ['class'] });
+        });
         window.addEventListener('online', render);
         window.addEventListener('offline', render);
         document.addEventListener('click', function (e) {
