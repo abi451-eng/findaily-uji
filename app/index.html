@@ -3307,19 +3307,6 @@
             .kas-kpi .kpi-card:nth-child(n) .kpi-value { font-size: 18px; }
         }
 
-        /* v7.1g: kartu foto profil di Setting */
-        .fd-avatar-row { gap: 16px; flex-wrap: wrap; }
-        .fd-avatar-row .setting-info { flex: 1 1 220px; min-width: 0; }
-        .fd-avatar-preview {
-            flex: none; width: 64px; height: 64px; border-radius: 999px; overflow: hidden; display: grid; place-items: center;
-            color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 26px; background: var(--accent);
-        }
-        .fd-avatar-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .fd-avatar-preview.has-photo { background: var(--surface-2) !important; }
-        .fd-avatar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-        .fd-avatar-actions .btn { min-height: 42px; padding: 0 16px; }
-        #fdAvatarDesc.is-error { color: var(--down); }
-        .fd-avatar-actions .btn[hidden] { display: none; }
         @media (max-width: 1023px) {
             /* Label pemantau di HP: di bawah header agar tidak menimpa nama usaha */
             html.fd-viewer .fd-viewer-pill { position: fixed; top: 66px; left: 50%; transform: translateX(-50%); z-index: 990; box-shadow: 0 4px 14px rgba(23,18,42,.12); }
@@ -3441,6 +3428,40 @@
         .fd-profil-av { flex: none; width: 72px; height: 72px; border-radius: 999px; overflow: hidden; display: grid; place-items: center;
             background: var(--accent); color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 30px; border: 3px solid rgba(255,255,255,.25); }
         .fd-profil-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .fd-profil-av.has-photo { background: var(--surface-2); }
+        /* Foto profil bisa diketuk: lencana kamera + pop-up Ambil foto / Galeri / Hapus */
+        .fd-profil-avwrap { position: relative; flex: none; }
+        .fd-profil-avbtn { position: relative; display: block; padding: 0; border: 0; background: none; border-radius: 999px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .fd-profil-avbtn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+        .fd-profil-avbtn:disabled { cursor: progress; }
+        .fd-profil-avbtn:disabled .fd-profil-av { opacity: .55; }
+        .fd-profil-avbtn .fd-profil-av { transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+        .fd-profil-avbtn:active .fd-profil-av { transform: scale(.94); }
+        .fd-profil-avcam { position: absolute; right: -2px; bottom: -2px; width: 28px; height: 28px; border-radius: 999px; display: grid; place-items: center;
+            background: #fff; color: var(--accent); box-shadow: 0 3px 10px rgba(23,18,42,.25); }
+        .fd-profil-avcam svg { width: 15px; height: 15px; }
+        .fd-av-pop { position: absolute; top: calc(100% + 12px); left: -6px; z-index: 40; min-width: 210px; padding: 6px; border-radius: 16px;
+            background: var(--surface); border: 1px solid var(--line); box-shadow: 0 16px 36px rgba(23,18,42,.24);
+            transform-origin: 30px 0; animation: fdAvIn .24s cubic-bezier(.34,1.56,.64,1) both; }
+        .fd-av-pop[hidden] { display: none; }
+        .fd-av-pop::before { content: ''; position: absolute; top: -7px; left: 36px; width: 14px; height: 14px; background: var(--surface);
+            border-left: 1px solid var(--line); border-top: 1px solid var(--line); transform: rotate(45deg); border-radius: 2px; }
+        .fd-av-opt { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 46px; padding: 0 12px; border: 0; border-radius: 12px;
+            background: transparent; color: var(--ink); font: 500 14.5px 'Inter', sans-serif; text-align: left; cursor: pointer; }
+        .fd-av-opt svg { width: 20px; height: 20px; flex: none; color: var(--accent); }
+        .fd-av-opt:hover, .fd-av-opt:active { background: var(--accent-soft); }
+        .fd-av-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+        .fd-av-opt[hidden] { display: none; }
+        .fd-av-opt-del { color: var(--down); }
+        .fd-av-opt-del svg { color: var(--down); }
+        .fd-av-opt-del:hover, .fd-av-opt-del:active { background: rgba(220,38,38,.08); }
+        /* Di PC kamera tidak bisa dibuka lewat browser: cukup pilih dari file */
+        @media (hover: hover) and (pointer: fine) { .fd-av-opt-cam { display: none; } }
+        .fd-profil-msg { display: inline-block; margin-top: 8px; padding: 4px 10px; border-radius: 999px; font-size: 12.5px; background: rgba(255,255,255,.16); color: #fff; }
+        .fd-profil-msg:empty { display: none; }
+        .fd-profil-msg.is-error { background: rgba(248,113,113,.28); color: #FFE8E8; }
+        @keyframes fdAvIn { from { opacity: 0; transform: translateY(-8px) scale(.85); } to { opacity: 1; transform: none; } }
+        @media (prefers-reduced-motion: reduce) { .fd-av-pop { animation: none; } .fd-profil-avbtn .fd-profil-av { transition: none; } }
         .fd-profil-id { min-width: 0; }
         .fd-profil-nama { margin: 0; font-family: var(--font-display); font-size: 20px; font-weight: 800; overflow-wrap: anywhere; }
         .fd-profil-peran { display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,.14); color: #E4DCF7; }
@@ -4458,11 +4479,25 @@
         <div class="view-panel" id="view-profil">
             <div class="fd-profil">
                 <section class="fd-profil-card">
-                    <div class="fd-profil-av" id="fdProfilAv" aria-hidden="true"></div>
+                    <!-- v7.1: ketuk foto untuk mengganti (unggah/hapus memakai fungsi fdAvatarPick / fdAvatarRemove yang lama) -->
+                    <div class="fd-profil-avwrap">
+                        <button type="button" class="fd-profil-avbtn" id="fdProfilAvBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="fdAvPop" aria-label="Ganti foto profil" onclick="fdAvPopToggle()">
+                            <span class="fd-profil-av" id="fdProfilAv" aria-hidden="true"></span>
+                            <span class="fd-profil-avcam" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+                        </button>
+                        <div class="fd-av-pop" id="fdAvPop" role="menu" hidden>
+                            <button type="button" role="menuitem" class="fd-av-opt fd-av-opt-cam" id="fdAvatarCamBtn" onclick="fdAvPilih('kamera')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span data-i18n="profil_foto_kamera">Ambil foto</span></button>
+                            <button type="button" role="menuitem" class="fd-av-opt" id="fdAvatarPickBtn" onclick="fdAvPilih('galeri')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span data-i18n="profil_foto_galeri">Pilih dari galeri</span></button>
+                            <button type="button" role="menuitem" class="fd-av-opt fd-av-opt-del" id="fdAvatarDelBtn" onclick="fdAvPilih('hapus')" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg><span data-i18n="profil_foto_hapus">Hapus foto</span></button>
+                        </div>
+                        <input type="file" id="fdAvatarFile" accept="image/*" hidden onchange="fdAvatarPick(this)">
+                        <input type="file" id="fdAvatarCam" accept="image/*" capture="user" hidden onchange="fdAvatarPick(this)">
+                    </div>
                     <div class="fd-profil-id">
                         <h2 class="fd-profil-nama" id="fdProfilNama">-</h2>
                         <div class="fd-profil-peran" id="fdProfilPeran"></div>
                         <div class="fd-profil-sub" id="fdProfilSub"></div>
+                        <div class="fd-profil-msg" id="fdAvatarDesc" role="status" aria-live="polite"></div>
                     </div>
                 </section>
 
@@ -4499,20 +4534,6 @@
                         <div class="setting-desc" id="fdAccountDesc">-</div>
                     </div>
                     <button type="button" class="btn btn-secondary" onclick="fdLogout()" data-i18n="nav_logout">Keluar</button>
-                </div>
-
-                <!-- v7.1: foto profil akun (semua akun, termasuk pemantau) -->
-                <div class="setting-row fd-avatar-row" id="fdAvatarRow">
-                    <div class="fd-avatar-preview" id="fdAvatarPreview" aria-hidden="true"></div>
-                    <div class="setting-info">
-                        <div class="setting-title">Foto profil</div>
-                        <div class="setting-desc" id="fdAvatarDesc" role="status" aria-live="polite">Tampil di pojok kanan atas. Foto otomatis diperkecil dan dipotong persegi sebelum diunggah.</div>
-                    </div>
-                    <div class="fd-avatar-actions">
-                        <input type="file" id="fdAvatarFile" accept="image/*" hidden onchange="fdAvatarPick(this)">
-                        <button type="button" class="btn btn-primary" id="fdAvatarPickBtn" onclick="document.getElementById('fdAvatarFile').click()">Pilih foto</button>
-                        <button type="button" class="btn btn-secondary" id="fdAvatarDelBtn" onclick="fdAvatarRemove()" hidden>Hapus foto</button>
-                    </div>
                 </div>
 
                 <div class="setting-row">
@@ -5010,7 +5031,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.1.0-uji.11';
+        const APP_VERSION = 'v7.1.0-uji.12';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -5117,7 +5138,7 @@
                 kas_ok_saved:'Transaction saved.', kas_ok_saved_ifc:'Transaction saved and recorded in the IFC cash book.', kas_ok_updated:'Changes saved.', kas_ok_deleted:'Transaction deleted.',
                 kas_confirm_delete:'Delete "{k}" for {v}?', kas_confirm_delete_ifc:'Its entry in the IFC cash book will be deleted too.', kas_edit_note:'Editing the transaction on {d}.',
                 kas_err_start:'Fill in the start date.', kas_confirm_start:'There are {n} transactions before the new start date. They will no longer be counted.\n\nContinue?', kas_ok_cfg:'Cash Deposit starting setup saved.',
-                fab_kamera:'Photo', fab_file:'Choose file', profil_usaha:'Business', profil_bkcm_sub:'Meatball stall', profil_ifc_sub:'IFC cash book', profil_menu:'Menu', notif_update_sub:'Press Update to use the latest version of the app.', notif_backup_title:'Backup reminder', foto_btn:'Take photo', foto_file_btn:'Choose photo file', foto_hint:'Photograph the whole daily sheet, including notes in the margin.', foto_title:'Photo reading result', foto_close:'Close', foto_note:'Not saved yet. Check every marked field, then press Save Data.', foto_reading:'Reading photo...', foto_done:'The form has been filled from the photo. Check it before saving.', foto_offline:'An internet connection is required to read the photo. Fill it in manually.', foto_unreachable:'The server function "baca-catatan" is not installed or cannot be reached.', foto_move_date:'Go to {d}', foto_reapply:'Fill in again from photo', foto_bad_file:'The file is not a readable image.', foto_lvl_ok:'Match', foto_lvl_info:'Info', foto_lvl_peringatan:'Check', foto_lvl_error:'Wrong', foto_cek_TGL_KOSONG:'The date on the sheet could not be read. Make sure the form date is correct.', foto_cek_TGL_BEDA:'The sheet date is {tgl}, different from the form date {form}.', foto_cek_HARI_BEDA:'The day name on the sheet "{hari}" does not match the date {tgl} (should be {benar}).', foto_cek_RINCIAN_BEDA:'The sum of the sales details {a} is not equal to Total Sales {b}.', foto_cek_PENGELUARAN_BEDA:'The sum of the expense rows {a} is not equal to Total Expenses on the sheet {b}.', foto_cek_PPN_TERTUKAR:'Total sales may have been swapped with the VAT figure ({a}).', foto_cek_PPN_BEDA:'VAT on the sheet is {a}, it should be {b} ({r}% of Total Sales {c}).', foto_cek_SETOR_BEDA:'Deposited {a} is not equal to Final Balance + VAT ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) is larger than Total Sales ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'The payment total on the sheet is {a}, while QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'The online ride total on the sheet is {a}, while GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'GoJek/Grab notes are usually on the Sunday sheet, but this sheet is {hari}.', foto_cek_PENJUALAN_KECIL:'Total Sales {a} is far below usual this month (median {b}). Check the figure again.', foto_cek_ADA_DATA:'This date already has data. Saving will overwrite it.', foto_cek_RAGU:'Unclear handwriting in: {kolom}. Check the fields marked in red.', foto_cek_SEMUA_COCOK:'All figures match each other.', foto_cek_TOTAL_DARI_RINCIAN:'Total sales was empty, the sum of the details was used.', foto_cek_TUNAI_DARI_SALDO:'Final Balance was empty, Balance was used.', foto_cek_RAGU_TANGGAL:'The date or day name on the sheet is unclear.'
+                fab_kamera:'Photo', fab_file:'Choose file', profil_usaha:'Business', profil_bkcm_sub:'Meatball stall', profil_ifc_sub:'IFC cash book', profil_menu:'Menu', profil_foto_kamera:'Take photo', profil_foto_galeri:'Choose from gallery', profil_foto_hapus:'Remove photo', notif_update_sub:'Press Update to use the latest version of the app.', notif_backup_title:'Backup reminder', foto_btn:'Take photo', foto_file_btn:'Choose photo file', foto_hint:'Photograph the whole daily sheet, including notes in the margin.', foto_title:'Photo reading result', foto_close:'Close', foto_note:'Not saved yet. Check every marked field, then press Save Data.', foto_reading:'Reading photo...', foto_done:'The form has been filled from the photo. Check it before saving.', foto_offline:'An internet connection is required to read the photo. Fill it in manually.', foto_unreachable:'The server function "baca-catatan" is not installed or cannot be reached.', foto_move_date:'Go to {d}', foto_reapply:'Fill in again from photo', foto_bad_file:'The file is not a readable image.', foto_lvl_ok:'Match', foto_lvl_info:'Info', foto_lvl_peringatan:'Check', foto_lvl_error:'Wrong', foto_cek_TGL_KOSONG:'The date on the sheet could not be read. Make sure the form date is correct.', foto_cek_TGL_BEDA:'The sheet date is {tgl}, different from the form date {form}.', foto_cek_HARI_BEDA:'The day name on the sheet "{hari}" does not match the date {tgl} (should be {benar}).', foto_cek_RINCIAN_BEDA:'The sum of the sales details {a} is not equal to Total Sales {b}.', foto_cek_PENGELUARAN_BEDA:'The sum of the expense rows {a} is not equal to Total Expenses on the sheet {b}.', foto_cek_PPN_TERTUKAR:'Total sales may have been swapped with the VAT figure ({a}).', foto_cek_PPN_BEDA:'VAT on the sheet is {a}, it should be {b} ({r}% of Total Sales {c}).', foto_cek_SETOR_BEDA:'Deposited {a} is not equal to Final Balance + VAT ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) is larger than Total Sales ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'The payment total on the sheet is {a}, while QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'The online ride total on the sheet is {a}, while GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'GoJek/Grab notes are usually on the Sunday sheet, but this sheet is {hari}.', foto_cek_PENJUALAN_KECIL:'Total Sales {a} is far below usual this month (median {b}). Check the figure again.', foto_cek_ADA_DATA:'This date already has data. Saving will overwrite it.', foto_cek_RAGU:'Unclear handwriting in: {kolom}. Check the fields marked in red.', foto_cek_SEMUA_COCOK:'All figures match each other.', foto_cek_TOTAL_DARI_RINCIAN:'Total sales was empty, the sum of the details was used.', foto_cek_TUNAI_DARI_SALDO:'Final Balance was empty, Balance was used.', foto_cek_RAGU_TANGGAL:'The date or day name on the sheet is unclear.'
             },            id: {
                 menu_title:'Menu', nav_input:'Input Data', nav_kas:'Kas Setoran', nav_logout:'Keluar', setting_account_title:'Akun', nav_riwayat:'Riwayat', hist_title:'Riwayat perubahan', hist_hint:'Setiap tambah, ubah, dan hapus dicatat otomatis oleh server, dan catatannya tidak bisa diubah atau dihapus.', hist_all_types:'Semua jenis', hist_t_bkcm:'Input BKCM', hist_t_ifc:'Input IFC', hist_t_kas:'Kas Setoran', hist_t_cfg:'Pengaturan', hist_t_akun:'Akun pemantau', hist_all_people:'Semua orang', hist_more:'Muat lebih banyak', fd_viewer_pill:'Mode lihat saja', setting_pm_title:'Akun pemantau', setting_pm_desc:'Bos dan karyawan masuk dengan nama pengguna. Mereka bisa melihat semua menu dan mengunduh laporan, tapi tidak bisa mengubah data.', fd_pm_manage:'Kelola', fd_pm_add_title:'Tambah pemantau', fd_pm_nama:'Nama', fd_pm_nama_ph:'Contoh: Pak Joko', fd_pm_user:'Nama pengguna', fd_pm_pass:'Password (minimal 8 karakter)', fd_pm_add_btn:'Buat akun pemantau', fd_pm_hint:'Berikan nama pengguna dan password ini ke orangnya. Mereka masuk di halaman masuk seperti biasa, tanpa email.', fd_role_admin:'Admin', fd_role_pemantau:'Pemantau', fd_logout_confirm:'Keluar dari akun di HP ini? Semua data sudah aman di server.', fd_logout_pending:'Masih ada {n} perubahan yang belum terkirim ke server. Sambungkan internet dan tunggu sampai tertulis "Tersinkron", baru keluar.', setting_sync_title:'Data server', fd_reload_btn:'Muat ulang data', nav_dashboard:'Dasbor', nav_pajak:'Laporan Pajak', nav_ifc_input:'Input Harian', nav_ifc_laporan:'Laporan Bulanan', nav_ifc_export:'Export',
                 nav_export:'Ekspor', nav_install:'Pasang Aplikasi', nav_setting:'Pengaturan', nav_config:'Konfigurasi',
@@ -5194,7 +5215,7 @@
                 kas_lbl_amount:'Jumlah', kas_lbl_ket:'Keterangan', kas_ph_ket:'Contoh: giling daging', kas_btn_cancel_edit:'Batal ubah',
                 kas_open_title:'Belum selesai', kas_open_hint:'Pinjaman yang masih harus dikembalikan, posisi saat ini.', kas_open_note:'Pinjaman dari IFC dan pengembaliannya otomatis tercatat juga di buku kas IFC.',
                 kas_th_date:'Tanggal', kas_th_ket:'Keterangan', kas_th_jenis:'Jenis', kas_th_in:'Masuk', kas_th_out:'Keluar', kas_th_sisa:'Sisa', kas_th_aksi:'Aksi',
-                fab_kamera:'Foto', fab_file:'Pilih file', profil_usaha:'Usaha', profil_bkcm_sub:'Warung bakso', profil_ifc_sub:'Buku kas IFC', profil_menu:'Menu', notif_update_sub:'Tekan Update untuk memakai versi terbaru aplikasi.', notif_backup_title:'Pengingat backup', foto_btn:'Ambil foto', foto_file_btn:'Pilih file foto', foto_hint:'Foto seluruh lembar catatan harian, termasuk catatan di pinggir.', foto_title:'Hasil baca foto', foto_close:'Tutup', foto_note:'Belum tersimpan. Periksa setiap kolom bertanda, lalu tekan Simpan Data.', foto_reading:'Membaca foto...', foto_done:'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.', foto_offline:'Butuh koneksi internet untuk membaca foto. Isi manual dulu.', foto_unreachable:'Fungsi server "baca-catatan" belum terpasang atau tidak bisa dijangkau.', foto_move_date:'Pindah ke {d}', foto_reapply:'Isi lagi dari foto', foto_bad_file:'Berkas bukan gambar yang bisa dibaca.', foto_lvl_ok:'Cocok', foto_lvl_info:'Info', foto_lvl_peringatan:'Periksa', foto_lvl_error:'Salah', foto_cek_TGL_KOSONG:'Tanggal di kertas tidak terbaca. Pastikan tanggal formulir sudah benar.', foto_cek_TGL_BEDA:'Tanggal di kertas {tgl}, berbeda dengan tanggal formulir {form}.', foto_cek_HARI_BEDA:'Nama hari di kertas "{hari}" tidak cocok dengan tanggal {tgl} (seharusnya {benar}).', foto_cek_RINCIAN_BEDA:'Jumlah rincian penjualan {a} tidak sama dengan Total Penjualan {b}.', foto_cek_PENGELUARAN_BEDA:'Jumlah baris pengeluaran {a} tidak sama dengan Total Pengeluaran di kertas {b}.', foto_cek_PPN_TERTUKAR:'Total penjualan mungkin tertukar dengan angka PPN ({a}).', foto_cek_PPN_BEDA:'PPN di kertas {a}, seharusnya {b} ({r}% dari Total Penjualan {c}).', foto_cek_SETOR_BEDA:'Disetorkan {a} tidak sama dengan Saldo Akhir + PPN ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) lebih besar dari Total Penjualan ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'Total pembayaran di kertas {a}, sedangkan QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'Total ojek online di kertas {a}, sedangkan GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'Catatan GoJek/Grab biasanya ada di lembar hari Minggu, tapi lembar ini hari {hari}.', foto_cek_PENJUALAN_KECIL:'Total Penjualan {a} jauh di bawah biasanya bulan ini (median {b}). Periksa lagi angkanya.', foto_cek_ADA_DATA:'Tanggal ini sudah punya data. Menyimpan akan menimpanya.', foto_cek_RAGU:'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.', foto_cek_SEMUA_COCOK:'Semua angka saling cocok.', foto_cek_TOTAL_DARI_RINCIAN:'Total penjualan kosong, dipakai jumlah rincian.', foto_cek_TUNAI_DARI_SALDO:'Saldo Akhir kosong, dipakai Saldo.', foto_cek_RAGU_TANGGAL:'Tanggal atau nama hari di kertas kurang jelas.'
+                fab_kamera:'Foto', fab_file:'Pilih file', profil_usaha:'Usaha', profil_bkcm_sub:'Warung bakso', profil_ifc_sub:'Buku kas IFC', profil_menu:'Menu', profil_foto_kamera:'Ambil foto', profil_foto_galeri:'Pilih dari galeri', profil_foto_hapus:'Hapus foto', notif_update_sub:'Tekan Update untuk memakai versi terbaru aplikasi.', notif_backup_title:'Pengingat backup', foto_btn:'Ambil foto', foto_file_btn:'Pilih file foto', foto_hint:'Foto seluruh lembar catatan harian, termasuk catatan di pinggir.', foto_title:'Hasil baca foto', foto_close:'Tutup', foto_note:'Belum tersimpan. Periksa setiap kolom bertanda, lalu tekan Simpan Data.', foto_reading:'Membaca foto...', foto_done:'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.', foto_offline:'Butuh koneksi internet untuk membaca foto. Isi manual dulu.', foto_unreachable:'Fungsi server "baca-catatan" belum terpasang atau tidak bisa dijangkau.', foto_move_date:'Pindah ke {d}', foto_reapply:'Isi lagi dari foto', foto_bad_file:'Berkas bukan gambar yang bisa dibaca.', foto_lvl_ok:'Cocok', foto_lvl_info:'Info', foto_lvl_peringatan:'Periksa', foto_lvl_error:'Salah', foto_cek_TGL_KOSONG:'Tanggal di kertas tidak terbaca. Pastikan tanggal formulir sudah benar.', foto_cek_TGL_BEDA:'Tanggal di kertas {tgl}, berbeda dengan tanggal formulir {form}.', foto_cek_HARI_BEDA:'Nama hari di kertas "{hari}" tidak cocok dengan tanggal {tgl} (seharusnya {benar}).', foto_cek_RINCIAN_BEDA:'Jumlah rincian penjualan {a} tidak sama dengan Total Penjualan {b}.', foto_cek_PENGELUARAN_BEDA:'Jumlah baris pengeluaran {a} tidak sama dengan Total Pengeluaran di kertas {b}.', foto_cek_PPN_TERTUKAR:'Total penjualan mungkin tertukar dengan angka PPN ({a}).', foto_cek_PPN_BEDA:'PPN di kertas {a}, seharusnya {b} ({r}% dari Total Penjualan {c}).', foto_cek_SETOR_BEDA:'Disetorkan {a} tidak sama dengan Saldo Akhir + PPN ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) lebih besar dari Total Penjualan ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'Total pembayaran di kertas {a}, sedangkan QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'Total ojek online di kertas {a}, sedangkan GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'Catatan GoJek/Grab biasanya ada di lembar hari Minggu, tapi lembar ini hari {hari}.', foto_cek_PENJUALAN_KECIL:'Total Penjualan {a} jauh di bawah biasanya bulan ini (median {b}). Periksa lagi angkanya.', foto_cek_ADA_DATA:'Tanggal ini sudah punya data. Menyimpan akan menimpanya.', foto_cek_RAGU:'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.', foto_cek_SEMUA_COCOK:'Semua angka saling cocok.', foto_cek_TOTAL_DARI_RINCIAN:'Total penjualan kosong, dipakai jumlah rincian.', foto_cek_TUNAI_DARI_SALDO:'Saldo Akhir kosong, dipakai Saldo.', foto_cek_RAGU_TANGGAL:'Tanggal atau nama hari di kertas kurang jelas.'
             }
         };
 
@@ -9095,7 +9116,7 @@
         }
         function fdRenderAvatar() {
             var m = window.FD_MEMBER;
-            ['profileAv', 'fdAvatarPreview', 'fdProfilAv'].forEach(function (id) { var av = document.getElementById(id); if (av) fdPaintAvatar(av, m); });
+            ['profileAv', 'fdProfilAv'].forEach(function (id) { var av = document.getElementById(id); if (av) fdPaintAvatar(av, m); });
             var del = document.getElementById('fdAvatarDelBtn');
             if (del) del.hidden = !(m && m.foto);
         }
@@ -9109,7 +9130,7 @@
             d.classList.toggle('is-error', !!isErr);
         }
         function fdAvatarBusy(on) {
-            ['fdAvatarPickBtn', 'fdAvatarDelBtn'].forEach(function (id) { var b = document.getElementById(id); if (b) b.disabled = on; });
+            ['fdAvatarPickBtn', 'fdAvatarCamBtn', 'fdAvatarDelBtn', 'fdProfilAvBtn'].forEach(function (id) { var b = document.getElementById(id); if (b) b.disabled = on; });
         }
         function fdAvatarErr(e) {
             var m = String((e && (e.message || e.error)) || e || '').toLowerCase();
@@ -10223,6 +10244,7 @@
         window.fdBukaProfil = function () {
             if (typeof fdNotifToggle === 'function') fdNotifToggle(false);
             fdFabToggle(false);
+            if (window.fdAvPopToggle) fdAvPopToggle(false);
             fdRenderProfil();
             showView('profil', null);
         };
@@ -10236,6 +10258,34 @@
             if (tujuan === 'export' && typeof activeBusiness !== 'undefined' && activeBusiness === 'ifc') v = 'ifc-export';
             showView(v, document.querySelector('.sidebar-item[data-view="' + v + '"]'));
         };
+        // Foto profil di halaman Profil: pop-up Ambil foto / Pilih dari galeri / Hapus foto
+        var avPop = document.getElementById('fdAvPop'), avBtn = document.getElementById('fdProfilAvBtn');
+        window.fdAvPopToggle = function (open) {
+            if (!avPop || !avBtn) return;
+            var buka = typeof open === 'boolean' ? open : avPop.hidden;
+            avPop.hidden = !buka;
+            avBtn.setAttribute('aria-expanded', String(buka));
+            if (buka) { var f = Array.prototype.find.call(avPop.querySelectorAll('.fd-av-opt'), function (b) { return b.offsetParent !== null; }); if (f) f.focus(); }
+        };
+        window.fdAvPilih = function (mode) {
+            fdAvPopToggle(false);
+            if (mode === 'hapus') { if (typeof fdAvatarRemove === 'function') fdAvatarRemove(); return; }
+            var inp = document.getElementById(mode === 'kamera' ? 'fdAvatarCam' : 'fdAvatarFile');
+            if (inp) inp.click();
+        };
+        document.addEventListener('click', function (e) {
+            if (avPop && !avPop.hidden && !avPop.contains(e.target) && avBtn && !avBtn.contains(e.target)) fdAvPopToggle(false);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && avPop && !avPop.hidden) { fdAvPopToggle(false); avBtn.focus(); }
+        });
+        // Pesan sukses hilang sendiri setelah beberapa detik (pesan error tetap tampil)
+        var avMsg = document.getElementById('fdAvatarDesc'), avMsgT = null;
+        if (avMsg && window.MutationObserver) new MutationObserver(function () {
+            clearTimeout(avMsgT);
+            if (avMsg.textContent && !avMsg.classList.contains('is-error') && !/…$/.test(avMsg.textContent)) avMsgT = setTimeout(function () { avMsg.textContent = ''; }, 4000);
+        }).observe(avMsg, { childList: true, characterData: true, subtree: true });
+
         var pb = document.getElementById('fdProfilBtn');
         if (pb) pb.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fdBukaProfil(); } });
     })();
