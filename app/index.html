@@ -3317,6 +3317,59 @@
             html.fd-viewer body { padding-top: 92px; }
         }
 
+        /* ============================================================
+           ===== v7.1h: ISI DARI FOTO (khusus admin) =====
+           ============================================================ */
+        .fd-foto-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 10px 0 14px; }
+        .fd-foto-btn { min-height: 44px; }
+        .fd-foto-hint { font-size: 12.5px; opacity: .75; }
+        .fd-foto-panel { border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 16px; background: #f7f9fa; color: var(--ink); }
+        body.dark .fd-foto-panel { background: linear-gradient(rgba(255,255,255,.04), rgba(255,255,255,.04)), var(--surface); border-color: var(--line); }
+        .fd-foto-panel[hidden] { display: none; }
+        .fd-foto-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+        .fd-foto-panel-head strong { font-family: var(--font-display); font-size: 15px; }
+        .fd-foto-close { min-height: 44px; }
+        .fd-foto-body { display: grid; grid-template-columns: minmax(120px, 200px) 1fr; gap: 14px; align-items: start; }
+        .fd-foto-thumb { width: 100%; max-height: 320px; object-fit: contain; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); cursor: zoom-in; }
+        .fd-foto-thumb:not([src]) { display: none; }
+        .fd-foto-body:has(.fd-foto-thumb:not([src])) { grid-template-columns: 1fr; }
+        .fd-foto-thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .fd-foto-info { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+        .fd-foto-status { font-size: 14px; font-weight: 600; }
+        .fd-foto-status:empty { display: none; }
+        .fd-foto-status.is-busy { color: var(--ink-2); }
+        .fd-foto-status.is-done { color: var(--up); }
+        .fd-foto-status.is-error { color: var(--down); }
+        .fd-foto-cek { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+        .fd-foto-cek:empty { display: none; }
+        .fd-foto-cek li { display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; line-height: 1.45; }
+        .fd-foto-cek-tag { flex: none; min-width: 58px; text-align: center; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+        .fd-foto-cek li.ok .fd-foto-cek-tag { background: #DCFCE7; color: #166534; }
+        .fd-foto-cek li.info .fd-foto-cek-tag { background: #E0F2FE; color: #075985; }
+        .fd-foto-cek li.peringatan .fd-foto-cek-tag { background: #FEF3C7; color: #92400E; }
+        .fd-foto-cek li.error .fd-foto-cek-tag { background: #FEE2E2; color: #B91C1C; }
+        body.dark .fd-foto-cek li.ok .fd-foto-cek-tag { background: rgba(74,222,128,.15); color: #86EFAC; }
+        body.dark .fd-foto-cek li.info .fd-foto-cek-tag { background: rgba(56,189,248,.15); color: #7DD3FC; }
+        body.dark .fd-foto-cek li.peringatan .fd-foto-cek-tag { background: rgba(251,191,36,.15); color: #FCD34D; }
+        body.dark .fd-foto-cek li.error .fd-foto-cek-tag { background: rgba(248,113,113,.15); color: #FCA5A5; }
+        #fdFotoPindahBtn { min-height: 44px; align-self: flex-start; }
+        #fdFotoPindahBtn[hidden] { display: none; }
+        .fd-foto-note { margin: 0; font-size: 12.5px; color: var(--ink-3); }
+        /* Penanda kolom hasil foto: biru-ungu = diisi AI, merah = tulisannya meragukan */
+        .form-group input.fd-ai-filled, body.dark .form-group input.fd-ai-filled,
+        .form-group textarea.fd-ai-filled, body.dark .form-group textarea.fd-ai-filled {
+            border: 2px solid var(--accent) !important; background: var(--accent-soft) !important;
+        }
+        .form-group input.fd-ai-doubt, body.dark .form-group input.fd-ai-doubt {
+            border: 2px solid var(--down) !important; background: rgba(220,38,38,.07) !important;
+        }
+        body.dark .form-group input.fd-ai-doubt { background: rgba(248,113,113,.10) !important; }
+        @media (max-width: 640px) {
+            .fd-foto-body { grid-template-columns: 1fr; }
+            .fd-foto-thumb { max-height: 220px; }
+            .fd-foto-btn { flex: 1 1 100%; }
+        }
+
         /* ----- Menu bawah (HP & tablet) ----- */
         .fd-bnav { display: none; }
         @media (max-width: 1023px) {
@@ -3566,6 +3619,31 @@
                 <option value="2030">2030</option>
                 <option value="2035">2035</option>
             </select>
+        </div>
+
+        <!-- v7.1.0: ISI DARI FOTO (khusus admin) -->
+        <div class="fd-foto-bar fd-admin-only">
+            <button type="button" class="btn btn-secondary fd-foto-btn" id="fdFotoBtn" onclick="fdFotoPilih()">
+                <svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <span data-i18n="foto_btn">Isi dari foto</span>
+            </button>
+            <span class="fd-foto-hint" data-i18n="foto_hint">Foto seluruh lembar catatan harian, termasuk catatan di pinggir.</span>
+            <input type="file" id="fdFotoInput" accept="image/*" capture="environment" hidden>
+        </div>
+        <div class="fd-foto-panel fd-admin-only" id="fdFotoPanel" hidden>
+            <div class="fd-foto-panel-head">
+                <strong data-i18n="foto_title">Hasil baca foto</strong>
+                <button type="button" class="btn btn-secondary fd-foto-close" onclick="fdFotoTutup()" data-i18n="foto_close">Tutup</button>
+            </div>
+            <div class="fd-foto-body">
+                <img id="fdFotoThumb" alt="Foto lembar catatan" class="fd-foto-thumb" tabindex="0" role="button">
+                <div class="fd-foto-info">
+                    <div id="fdFotoStatus" class="fd-foto-status" role="status" aria-live="polite"></div>
+                    <ul id="fdFotoCek" class="fd-foto-cek"></ul>
+                    <button type="button" class="btn btn-primary" id="fdFotoPindahBtn" onclick="fdFotoPindahTanggal()" hidden></button>
+                    <p class="fd-foto-note" data-i18n="foto_note">Belum tersimpan. Periksa setiap kolom bertanda, lalu tekan Simpan Data.</p>
+                </div>
+            </div>
         </div>
 
         <!-- Form Section -->
@@ -4789,7 +4867,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.1.0-uji.7';
+        const APP_VERSION = 'v7.1.0-uji.8';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -4895,7 +4973,8 @@
                 kas_akun_ifc:'to IFC', kas_akun_galon:'to Galon', kas_akun_warung:'of the shop',
                 kas_ok_saved:'Transaction saved.', kas_ok_saved_ifc:'Transaction saved and recorded in the IFC cash book.', kas_ok_updated:'Changes saved.', kas_ok_deleted:'Transaction deleted.',
                 kas_confirm_delete:'Delete "{k}" for {v}?', kas_confirm_delete_ifc:'Its entry in the IFC cash book will be deleted too.', kas_edit_note:'Editing the transaction on {d}.',
-                kas_err_start:'Fill in the start date.', kas_confirm_start:'There are {n} transactions before the new start date. They will no longer be counted.\n\nContinue?', kas_ok_cfg:'Cash Deposit starting setup saved.'
+                kas_err_start:'Fill in the start date.', kas_confirm_start:'There are {n} transactions before the new start date. They will no longer be counted.\n\nContinue?', kas_ok_cfg:'Cash Deposit starting setup saved.',
+                foto_btn:'Fill from photo', foto_hint:'Photograph the whole daily sheet, including notes in the margin.', foto_title:'Photo reading result', foto_close:'Close', foto_note:'Not saved yet. Check every marked field, then press Save Data.', foto_reading:'Reading photo...', foto_done:'The form has been filled from the photo. Check it before saving.', foto_offline:'An internet connection is required to read the photo. Fill it in manually.', foto_unreachable:'The server function "baca-catatan" is not installed or cannot be reached.', foto_move_date:'Go to {d}', foto_reapply:'Fill in again from photo', foto_bad_file:'The file is not a readable image.', foto_lvl_ok:'Match', foto_lvl_info:'Info', foto_lvl_peringatan:'Check', foto_lvl_error:'Wrong', foto_cek_TGL_KOSONG:'The date on the sheet could not be read. Make sure the form date is correct.', foto_cek_TGL_BEDA:'The sheet date is {tgl}, different from the form date {form}.', foto_cek_HARI_BEDA:'The day name on the sheet "{hari}" does not match the date {tgl} (should be {benar}).', foto_cek_RINCIAN_BEDA:'The sum of the sales details {a} is not equal to Total Sales {b}.', foto_cek_PENGELUARAN_BEDA:'The sum of the expense rows {a} is not equal to Total Expenses on the sheet {b}.', foto_cek_PPN_TERTUKAR:'Total sales may have been swapped with the VAT figure ({a}).', foto_cek_PPN_BEDA:'VAT on the sheet is {a}, it should be {b} ({r}% of Total Sales {c}).', foto_cek_SETOR_BEDA:'Deposited {a} is not equal to Final Balance + VAT ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) is larger than Total Sales ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'The payment total on the sheet is {a}, while QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'The online ride total on the sheet is {a}, while GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'GoJek/Grab notes are usually on the Sunday sheet, but this sheet is {hari}.', foto_cek_PENJUALAN_KECIL:'Total Sales {a} is far below usual this month (median {b}). Check the figure again.', foto_cek_ADA_DATA:'This date already has data. Saving will overwrite it.', foto_cek_RAGU:'Unclear handwriting in: {kolom}. Check the fields marked in red.', foto_cek_SEMUA_COCOK:'All figures match each other.', foto_cek_TOTAL_DARI_RINCIAN:'Total sales was empty, the sum of the details was used.', foto_cek_TUNAI_DARI_SALDO:'Final Balance was empty, Balance was used.', foto_cek_RAGU_TANGGAL:'The date or day name on the sheet is unclear.'
             },            id: {
                 menu_title:'Menu', nav_input:'Input Data', nav_kas:'Kas Setoran', nav_logout:'Keluar', setting_account_title:'Akun', nav_riwayat:'Riwayat', hist_title:'Riwayat perubahan', hist_hint:'Setiap tambah, ubah, dan hapus dicatat otomatis oleh server, dan catatannya tidak bisa diubah atau dihapus.', hist_all_types:'Semua jenis', hist_t_bkcm:'Input BKCM', hist_t_ifc:'Input IFC', hist_t_kas:'Kas Setoran', hist_t_cfg:'Pengaturan', hist_t_akun:'Akun pemantau', hist_all_people:'Semua orang', hist_more:'Muat lebih banyak', fd_viewer_pill:'Mode lihat saja', setting_pm_title:'Akun pemantau', setting_pm_desc:'Bos dan karyawan masuk dengan nama pengguna. Mereka bisa melihat semua menu dan mengunduh laporan, tapi tidak bisa mengubah data.', fd_pm_manage:'Kelola', fd_pm_add_title:'Tambah pemantau', fd_pm_nama:'Nama', fd_pm_nama_ph:'Contoh: Pak Joko', fd_pm_user:'Nama pengguna', fd_pm_pass:'Password (minimal 8 karakter)', fd_pm_add_btn:'Buat akun pemantau', fd_pm_hint:'Berikan nama pengguna dan password ini ke orangnya. Mereka masuk di halaman masuk seperti biasa, tanpa email.', fd_role_admin:'Admin', fd_role_pemantau:'Pemantau', fd_logout_confirm:'Keluar dari akun di HP ini? Semua data sudah aman di server.', fd_logout_pending:'Masih ada {n} perubahan yang belum terkirim ke server. Sambungkan internet dan tunggu sampai tertulis "Tersinkron", baru keluar.', setting_sync_title:'Data server', fd_reload_btn:'Muat ulang data', nav_dashboard:'Dasbor', nav_pajak:'Laporan Pajak', nav_ifc_input:'Input Harian', nav_ifc_laporan:'Laporan Bulanan', nav_ifc_export:'Export',
                 nav_export:'Ekspor', nav_install:'Pasang Aplikasi', nav_setting:'Pengaturan', nav_config:'Konfigurasi',
@@ -4971,7 +5050,8 @@
                 kas_lbl_kembali:'Pinjaman yang dikembalikan', kas_opt_warung:'Warung mengembalikan pinjaman', kas_opt_ifc:'Kembalikan ke IFC', kas_opt_galon:'Kembalikan ke Galon',
                 kas_lbl_amount:'Jumlah', kas_lbl_ket:'Keterangan', kas_ph_ket:'Contoh: giling daging', kas_btn_cancel_edit:'Batal ubah',
                 kas_open_title:'Belum selesai', kas_open_hint:'Pinjaman yang masih harus dikembalikan, posisi saat ini.', kas_open_note:'Pinjaman dari IFC dan pengembaliannya otomatis tercatat juga di buku kas IFC.',
-                kas_th_date:'Tanggal', kas_th_ket:'Keterangan', kas_th_jenis:'Jenis', kas_th_in:'Masuk', kas_th_out:'Keluar', kas_th_sisa:'Sisa', kas_th_aksi:'Aksi'
+                kas_th_date:'Tanggal', kas_th_ket:'Keterangan', kas_th_jenis:'Jenis', kas_th_in:'Masuk', kas_th_out:'Keluar', kas_th_sisa:'Sisa', kas_th_aksi:'Aksi',
+                foto_btn:'Isi dari foto', foto_hint:'Foto seluruh lembar catatan harian, termasuk catatan di pinggir.', foto_title:'Hasil baca foto', foto_close:'Tutup', foto_note:'Belum tersimpan. Periksa setiap kolom bertanda, lalu tekan Simpan Data.', foto_reading:'Membaca foto...', foto_done:'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.', foto_offline:'Butuh koneksi internet untuk membaca foto. Isi manual dulu.', foto_unreachable:'Fungsi server "baca-catatan" belum terpasang atau tidak bisa dijangkau.', foto_move_date:'Pindah ke {d}', foto_reapply:'Isi lagi dari foto', foto_bad_file:'Berkas bukan gambar yang bisa dibaca.', foto_lvl_ok:'Cocok', foto_lvl_info:'Info', foto_lvl_peringatan:'Periksa', foto_lvl_error:'Salah', foto_cek_TGL_KOSONG:'Tanggal di kertas tidak terbaca. Pastikan tanggal formulir sudah benar.', foto_cek_TGL_BEDA:'Tanggal di kertas {tgl}, berbeda dengan tanggal formulir {form}.', foto_cek_HARI_BEDA:'Nama hari di kertas "{hari}" tidak cocok dengan tanggal {tgl} (seharusnya {benar}).', foto_cek_RINCIAN_BEDA:'Jumlah rincian penjualan {a} tidak sama dengan Total Penjualan {b}.', foto_cek_PENGELUARAN_BEDA:'Jumlah baris pengeluaran {a} tidak sama dengan Total Pengeluaran di kertas {b}.', foto_cek_PPN_TERTUKAR:'Total penjualan mungkin tertukar dengan angka PPN ({a}).', foto_cek_PPN_BEDA:'PPN di kertas {a}, seharusnya {b} ({r}% dari Total Penjualan {c}).', foto_cek_SETOR_BEDA:'Disetorkan {a} tidak sama dengan Saldo Akhir + PPN ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) lebih besar dari Total Penjualan ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'Total pembayaran di kertas {a}, sedangkan QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'Total ojek online di kertas {a}, sedangkan GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'Catatan GoJek/Grab biasanya ada di lembar hari Minggu, tapi lembar ini hari {hari}.', foto_cek_PENJUALAN_KECIL:'Total Penjualan {a} jauh di bawah biasanya bulan ini (median {b}). Periksa lagi angkanya.', foto_cek_ADA_DATA:'Tanggal ini sudah punya data. Menyimpan akan menimpanya.', foto_cek_RAGU:'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.', foto_cek_SEMUA_COCOK:'Semua angka saling cocok.', foto_cek_TOTAL_DARI_RINCIAN:'Total penjualan kosong, dipakai jumlah rincian.', foto_cek_TUNAI_DARI_SALDO:'Saldo Akhir kosong, dipakai Saldo.', foto_cek_RAGU_TANGGAL:'Tanggal atau nama hari di kertas kurang jelas.'
             }
         };
 
@@ -9439,6 +9519,479 @@
         });
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { fdNotifToggle(false); bell.focus(); } });
         render();
+    })();
+    </script>
+    <script>
+    /* FD-FOTO-PURE-START */
+    // v7.1: fungsi murni fitur "Isi dari foto". Tanpa DOM, appData, atau configSettings:
+    // semua masukan lewat parameter, supaya bisa diuji di luar browser (tests/foto.test.mjs).
+    var FD_FOTO_HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    var FD_FOTO_BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    var FD_FOTO_LABEL = {
+        totalPenjualan: 'Total Penjualan', tunai: 'Saldo Akhir/Tunai', qris: 'QRIS', edc: 'EDC', transfer: 'Transfer',
+        gojek: 'GoJek', grab: 'Grab', belanjaPagi: 'Belanja Pagi', belanjaSore: 'Belanja Sore', daging: 'Daging', dll: 'Dan Lain-Lain'
+    };
+    var FD_FOTO_RAGU_KOLOM = {
+        total_penjualan: 'totalPenjualan', saldo_akhir: 'tunai', saldo: 'tunai', qris: 'qris', edc: 'edc', transfer: 'transfer',
+        belanja_pagi: 'belanjaPagi', belanja_sore: 'belanjaSore', daging: 'daging', lainnya: 'dll', gojek: 'gojek', grab: 'grab'
+    };
+
+    // Angka bulat dari hasil AI; kosong / bukan angka -> null
+    function fdFotoAngka(v) {
+        if (v === null || v === undefined || v === '') return null;
+        var n = typeof v === 'number' ? v : Number(String(v).replace(/[^0-9-]/g, ''));
+        return isFinite(n) ? Math.round(n) : null;
+    }
+    // 1234000 -> "Rp1.234.000", -118700 -> "-Rp118.700"
+    function fdFotoRp(n) {
+        n = Math.round(Number(n) || 0);
+        return (n < 0 ? '-' : '') + 'Rp' + String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+    // "2026-04-19" -> { y, m, d } (tanggal yang benar-benar ada), selain itu null
+    function fdFotoTanggal(s) {
+        var r = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(String(s == null ? '' : s).trim());
+        if (!r) return null;
+        var y = +r[1], m = +r[2], d = +r[3];
+        var dt = new Date(Date.UTC(y, m - 1, d));
+        if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return null;
+        return { y: y, m: m, d: d };
+    }
+    function fdFotoHariKe(t) { return new Date(Date.UTC(t.y, t.m - 1, t.d)).getUTCDay(); }
+    function fdFotoTglTeks(t) { return t.d + ' ' + FD_FOTO_BULAN[t.m - 1] + ' ' + t.y; }
+    function fdFotoJenis(row) {
+        var j = row && row.jenis;
+        if (j === 'belanja_pagi' || j === 'belanja_sore' || j === 'daging' || j === 'lainnya') return j;
+        var nm = String((row && row.nama) || '').toLowerCase();
+        if (nm.indexOf('daging') !== -1) return 'daging';
+        if (nm.indexOf('pagi') !== -1) return 'belanja_pagi';
+        if (nm.indexOf('sore') !== -1) return 'belanja_sore';
+        return 'lainnya';
+    }
+    // ["A"] -> "A"; ["A","B"] -> "A & B"; ["A","B","C"] -> "A, B & C"
+    function fdFotoGabungNama(list) {
+        if (!list.length) return '';
+        if (list.length === 1) return list[0];
+        return list.slice(0, -1).join(', ') + ' & ' + list[list.length - 1];
+    }
+    function fdFotoRincian(h) {
+        var p = (h && h.penjualan) || {}, ada = 0, jumlah = 0;
+        ['bakso', 'minuman', 'ice_cream', 'lain_lain'].forEach(function (k) {
+            var v = fdFotoAngka(p[k]);
+            if (v !== null) { ada++; jumlah += v; }
+        });
+        return { ada: ada, jumlah: jumlah };
+    }
+    function fdFotoBaris(h) { return Array.isArray(h && h.pengeluaran) ? h.pengeluaran : []; }
+
+    // Hasil baca AI -> nilai kolom formulir. Kunci "kolom" = ID input; hanya kolom yang diisi dari kertas.
+    function fdFotoPetakan(hasil) {
+        var h = hasil || {}, kolom = {}, ragu = [], info = [];
+        function tambahRagu(id) { if (ragu.indexOf(id) === -1) ragu.push(id); }
+
+        var tp = fdFotoAngka(h.total_penjualan), rin = fdFotoRincian(h);
+        if (tp !== null) kolom.totalPenjualan = tp;
+        else if (rin.ada > 0) {
+            kolom.totalPenjualan = rin.jumlah;
+            tambahRagu('totalPenjualan');
+            info.push({ kode: 'TOTAL_DARI_RINCIAN', pesan: 'Total penjualan kosong, dipakai jumlah rincian.' });
+        }
+
+        var sa = fdFotoAngka(h.saldo_akhir), sd = fdFotoAngka(h.saldo);
+        if (sa !== null) kolom.tunai = sa;
+        else if (sd !== null) {
+            kolom.tunai = sd;
+            tambahRagu('tunai');
+            info.push({ kode: 'TUNAI_DARI_SALDO', pesan: 'Saldo Akhir kosong, dipakai Saldo.' });
+        }
+
+        var bayar = h.pembayaran || {};
+        kolom.qris = fdFotoAngka(bayar.qris) || 0;
+        kolom.edc = fdFotoAngka(bayar.edc) || 0;
+        kolom.transfer = fdFotoAngka(bayar.transfer) || 0;
+
+        var sum = { belanja_pagi: 0, belanja_sore: 0, daging: 0, lainnya: 0 }, nama = [];
+        fdFotoBaris(h).forEach(function (row) {
+            var j = fdFotoJenis(row);
+            sum[j] += fdFotoAngka(row && row.jumlah) || 0;
+            if (j === 'lainnya') {
+                var n = String((row && row.nama) || '').trim().replace(/\s+/g, ' ').toUpperCase();
+                if (n && nama.indexOf(n) === -1) nama.push(n);
+            }
+        });
+        kolom.belanjaPagi = sum.belanja_pagi;
+        kolom.belanjaSore = sum.belanja_sore;
+        kolom.daging = sum.daging;
+        kolom.dll = sum.lainnya;
+        kolom.keterangan = fdFotoGabungNama(nama);
+
+        if (h.ojol && typeof h.ojol === 'object') {
+            var gj = fdFotoAngka(h.ojol.gojek), gb = fdFotoAngka(h.ojol.grab);
+            if (gj !== null) kolom.gojek = gj;
+            if (gb !== null) kolom.grab = gb;
+        }
+
+        var tglRagu = false;
+        (Array.isArray(h.keraguan) ? h.keraguan : []).forEach(function (k) {
+            var c = k && k.kolom;
+            if (c === 'tanggal' || c === 'nama_hari') { tglRagu = true; return; }
+            if (FD_FOTO_RAGU_KOLOM[c]) tambahRagu(FD_FOTO_RAGU_KOLOM[c]);
+        });
+        if (tglRagu) info.push({ kode: 'RAGU_TANGGAL', pesan: 'Tanggal atau nama hari di kertas kurang jelas.' });
+
+        return { kolom: kolom, ragu: ragu, info: info };
+    }
+
+    // Pemeriksaan silang. Tidak memblokir penyimpanan; admin yang memutuskan.
+    // konteks: { ppnRate, tanggalForm: {y,m,d}, adaDataTanggalIni, medianPenjualanBulan }
+    function fdFotoCek(hasil, nilai, konteks) {
+        var h = hasil || {}, kol = (nilai && nilai.kolom) || {}, ctx = konteks || {}, out = [];
+        function isi(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, function (_m, k) { return vars[k] != null ? vars[k] : ''; }); }
+        function tambah(tingkat, kode, tpl, vars) { vars = vars || {}; out.push({ tingkat: tingkat, kode: kode, pesan: isi(tpl, vars), vars: vars }); }
+
+        // Tanggal & hari
+        var tgl = fdFotoTanggal(h.tanggal), f = ctx.tanggalForm;
+        if (!tgl) tambah('peringatan', 'TGL_KOSONG', 'Tanggal di kertas tidak terbaca. Pastikan tanggal formulir sudah benar.');
+        else {
+            if (f && (f.y !== tgl.y || f.m !== tgl.m || f.d !== tgl.d)) {
+                tambah('peringatan', 'TGL_BEDA', 'Tanggal di kertas {tgl}, berbeda dengan tanggal formulir {form}.',
+                    { tgl: fdFotoTglTeks(tgl), form: fdFotoTglTeks(f) });
+            }
+            var hari = String(h.nama_hari == null ? '' : h.nama_hari).trim();
+            var benar = FD_FOTO_HARI[fdFotoHariKe(tgl)];
+            if (hari && hari.toLowerCase().replace(/[^a-z]/g, '') !== benar.toLowerCase()) {
+                tambah('peringatan', 'HARI_BEDA', 'Nama hari di kertas "{hari}" tidak cocok dengan tanggal {tgl} (seharusnya {benar}).',
+                    { hari: hari, tgl: fdFotoTglTeks(tgl), benar: benar });
+            }
+        }
+
+        // Penjualan & pengeluaran
+        var tpTulis = fdFotoAngka(h.total_penjualan), rin = fdFotoRincian(h);
+        if (rin.ada > 0 && tpTulis !== null && rin.jumlah !== tpTulis) {
+            tambah('peringatan', 'RINCIAN_BEDA', 'Jumlah rincian penjualan {a} tidak sama dengan Total Penjualan {b}.',
+                { a: fdFotoRp(rin.jumlah), b: fdFotoRp(tpTulis) });
+        }
+        var tpg = fdFotoAngka(h.total_pengeluaran);
+        if (tpg !== null) {
+            var jb = 0;
+            fdFotoBaris(h).forEach(function (row) { jb += fdFotoAngka(row && row.jumlah) || 0; });
+            if (jb !== tpg) {
+                tambah('peringatan', 'PENGELUARAN_BEDA', 'Jumlah baris pengeluaran {a} tidak sama dengan Total Pengeluaran di kertas {b}.',
+                    { a: fdFotoRp(jb), b: fdFotoRp(tpg) });
+            }
+        }
+
+        // PPN & setoran
+        var tp = typeof kol.totalPenjualan === 'number' ? kol.totalPenjualan : null;
+        var ppn = fdFotoAngka(h.ppn), rate = Number(ctx.ppnRate);
+        if (!isFinite(rate)) rate = 10;
+        if (ppn !== null && tp !== null) {
+            if (Math.abs(tp - ppn) <= 1) {
+                tambah('error', 'PPN_TERTUKAR', 'Total penjualan mungkin tertukar dengan angka PPN ({a}).', { a: fdFotoRp(ppn) });
+            } else {
+                var harus = Math.round(tp * rate / 100);
+                if (Math.abs(ppn - harus) > 1) {
+                    tambah('error', 'PPN_BEDA', 'PPN di kertas {a}, seharusnya {b} ({r}% dari Total Penjualan {c}).',
+                        { a: fdFotoRp(ppn), b: fdFotoRp(harus), r: String(rate), c: fdFotoRp(tp) });
+                }
+            }
+        }
+        var setor = fdFotoAngka(h.disetorkan), sa = fdFotoAngka(h.saldo_akhir);
+        if (setor !== null && sa !== null && ppn !== null && setor !== sa + ppn) {
+            tambah('peringatan', 'SETOR_BEDA', 'Disetorkan {a} tidak sama dengan Saldo Akhir + PPN ({b}).',
+                { a: fdFotoRp(setor), b: fdFotoRp(sa + ppn) });
+        }
+
+        // Pembayaran non-tunai (GoJek/Grab tidak ikut: dicatat terpisah)
+        var nonTunai = (kol.qris || 0) + (kol.edc || 0) + (kol.transfer || 0);
+        if (tp !== null && nonTunai > tp) {
+            tambah('error', 'NONTUNAI_LEBIH', 'QRIS + EDC + Transfer ({a}) lebih besar dari Total Penjualan ({b}).',
+                { a: fdFotoRp(nonTunai), b: fdFotoRp(tp) });
+        }
+        var bt = fdFotoAngka(h.pembayaran && h.pembayaran.total);
+        if (bt !== null && bt !== nonTunai) {
+            tambah('peringatan', 'BAYAR_TOTAL_BEDA', 'Total pembayaran di kertas {a}, sedangkan QRIS + EDC + Transfer = {b}.',
+                { a: fdFotoRp(bt), b: fdFotoRp(nonTunai) });
+        }
+
+        // Ojek online
+        var oj = (h.ojol && typeof h.ojol === 'object') ? h.ojol : null;
+        if (oj) {
+            var gj = fdFotoAngka(oj.gojek), gb = fdFotoAngka(oj.grab), ot = fdFotoAngka(oj.total);
+            if (ot !== null && (gj !== null || gb !== null) && ot !== (gj || 0) + (gb || 0)) {
+                tambah('peringatan', 'OJOL_TOTAL_BEDA', 'Total ojek online di kertas {a}, sedangkan GoJek + Grab = {b}.',
+                    { a: fdFotoRp(ot), b: fdFotoRp((gj || 0) + (gb || 0)) });
+            }
+            if (tgl && (gj !== null || gb !== null || ot !== null) && fdFotoHariKe(tgl) !== 0) {
+                tambah('info', 'OJOL_BUKAN_MINGGU', 'Catatan GoJek/Grab biasanya ada di lembar hari Minggu, tapi lembar ini hari {hari}.',
+                    { hari: FD_FOTO_HARI[fdFotoHariKe(tgl)] });
+            }
+        }
+
+        // Dibanding kebiasaan bulan ini
+        var med = ctx.medianPenjualanBulan;
+        if (typeof med === 'number' && med > 0 && tp !== null && tp < 0.3 * med) {
+            tambah('peringatan', 'PENJUALAN_KECIL', 'Total Penjualan {a} jauh di bawah biasanya bulan ini (median {b}). Periksa lagi angkanya.',
+                { a: fdFotoRp(tp), b: fdFotoRp(med) });
+        }
+        if (ctx.adaDataTanggalIni) tambah('info', 'ADA_DATA', 'Tanggal ini sudah punya data. Menyimpan akan menimpanya.');
+
+        var ragu = (nilai && nilai.ragu) || [];
+        if (ragu.length) {
+            tambah('peringatan', 'RAGU', 'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.',
+                { kolom: ragu.map(function (id) { return FD_FOTO_LABEL[id] || id; }).join(', ') });
+        }
+        ((nilai && nilai.info) || []).forEach(function (i) { tambah('info', i.kode, i.pesan); });
+
+        var masalah = out.some(function (c) { return c.tingkat === 'peringatan' || c.tingkat === 'error'; });
+        if (!masalah) tambah('ok', 'SEMUA_COCOK', 'Semua angka saling cocok.');
+        return out;
+    }
+    /* FD-FOTO-PURE-END */
+
+    // ===== v7.1: ISI DARI FOTO — tampilan & alur (khusus admin) =====
+    // Hanya MENGISI kolom formulir; tidak pernah memanggil saveData() atau menulis ke appData/localStorage.
+    // Foto tidak disimpan di mana pun: hanya dikirim ke fungsi server baca-catatan, pratinjau dicabut saat panel ditutup.
+    var FD_FOTO_KOLOM = ['totalPenjualan', 'tunai', 'qris', 'edc', 'transfer', 'gojek', 'grab', 'belanjaPagi', 'belanjaSore', 'daging', 'dll', 'keterangan'];
+    var fdFoto = { hasil: null, nilai: null, objectUrl: null, sibuk: false, pindah: false, tanggalDiisi: null };
+
+    function fdFotoEl(id) { return document.getElementById(id); }
+    function fdFotoAdmin() { return !!(window.FD_MEMBER && window.FD_MEMBER.peran === 'admin'); }
+    function fdFotoTanggalForm() {
+        return { y: +fdFotoEl('yearSelect').value, m: +fdFotoEl('monthSelect').value, d: +fdFotoEl('daySelect').value };
+    }
+    function fdFotoTglKey(t) { return t ? t.y + '-' + t.m + '-' + t.d : ''; }
+
+    function fdFotoKonteks() {
+        var f = fdFotoTanggalForm();
+        var list = (typeof appData !== 'undefined' && appData && appData[f.y + '-' + f.m]) || [];
+        var ada = list.some(function (e) { return e && e.day === f.d && !e.isLibur; });
+        var jual = list.filter(function (e) { return e && !e.isLibur && Number(e.totalPenjualan) > 0; })
+            .map(function (e) { return Number(e.totalPenjualan); }).sort(function (a, b) { return a - b; });
+        var median = null;
+        if (jual.length >= 5) {
+            var mid = Math.floor(jual.length / 2);
+            median = jual.length % 2 ? jual[mid] : Math.round((jual[mid - 1] + jual[mid]) / 2);
+        }
+        var rate = (typeof configSettings !== 'undefined' && configSettings && configSettings.ppnRate != null) ? Number(configSettings.ppnRate) : 10;
+        return { ppnRate: isFinite(rate) ? rate : 10, tanggalForm: f, adaDataTanggalIni: ada, medianPenjualanBulan: median };
+    }
+
+    function fdFotoStatus(text, jenis) {
+        var s = fdFotoEl('fdFotoStatus');
+        if (!s) return;
+        s.textContent = text || '';
+        s.className = 'fd-foto-status' + (jenis ? ' is-' + jenis : '');
+    }
+    function fdFotoBukaPanel() { var p = fdFotoEl('fdFotoPanel'); if (p) p.hidden = false; }
+    function fdFotoSibuk(on) {
+        fdFoto.sibuk = on;
+        var b = fdFotoEl('fdFotoBtn'); if (b) b.disabled = on;
+        var pb = fdFotoEl('fdFotoPindahBtn'); if (pb) pb.disabled = on;
+    }
+
+    function fdFotoPilih() {
+        if (!fdFotoAdmin()) return;
+        if (fdFoto.sibuk) return;
+        if (!navigator.onLine) {
+            fdFotoBukaPanel();
+            fdFotoEl('fdFotoCek').textContent = '';
+            fdFotoEl('fdFotoPindahBtn').hidden = true;
+            fdFotoStatus(fdTr('foto_offline', 'Butuh koneksi internet untuk membaca foto. Isi manual dulu.'), 'error');
+            return;
+        }
+        fdFotoEl('fdFotoInput').click();
+    }
+
+    // Kecilkan foto di perangkat: sisi terpanjang <= 1600 px, JPEG 0.82 (0.7 bila masih > 2 MB)
+    function fdFotoMuat(file) {
+        if (typeof createImageBitmap === 'function') {
+            return createImageBitmap(file, { imageOrientation: 'from-image' }).catch(function () { return fdFotoMuatImg(file); });
+        }
+        return fdFotoMuatImg(file);
+    }
+    function fdFotoMuatImg(file) {
+        return new Promise(function (resolve, reject) {
+            var u = URL.createObjectURL(file), img = new Image();
+            img.onload = function () { URL.revokeObjectURL(u); resolve(img); };
+            img.onerror = function () { URL.revokeObjectURL(u); reject(new Error(fdTr('foto_bad_file', 'Berkas bukan gambar yang bisa dibaca.'))); };
+            img.src = u;
+        });
+    }
+    function fdFotoBlob(canvas, q) { return new Promise(function (r) { canvas.toBlob(r, 'image/jpeg', q); }); }
+    function fdFotoBase64(blob) {
+        return new Promise(function (resolve, reject) {
+            var fr = new FileReader();
+            fr.onload = function () { var s = String(fr.result || ''); resolve(s.slice(s.indexOf(',') + 1)); };
+            fr.onerror = function () { reject(fr.error || new Error('baca berkas')); };
+            fr.readAsDataURL(blob);
+        });
+    }
+    async function fdFotoKecilkan(file) {
+        var src = await fdFotoMuat(file);
+        var w = src.width || src.naturalWidth, h = src.height || src.naturalHeight;
+        var skala = Math.min(1, 1600 / Math.max(w, h));
+        var c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(w * skala)); c.height = Math.max(1, Math.round(h * skala));
+        var ctx = c.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(src, 0, 0, c.width, c.height);
+        if (src.close) src.close();
+        var blob = await fdFotoBlob(c, 0.82);
+        if (blob && blob.size > 2 * 1024 * 1024) blob = await fdFotoBlob(c, 0.7);
+        if (!blob) throw new Error(fdTr('foto_bad_file', 'Berkas bukan gambar yang bisa dibaca.'));
+        return { base64: await fdFotoBase64(blob), mediaType: 'image/jpeg', objectUrl: URL.createObjectURL(blob) };
+    }
+
+    async function fdFotoPanggil(gambar) {
+        var sb = await FD.ready;
+        var res = await sb.functions.invoke('baca-catatan', {
+            body: { instansi_id: window.FD_MEMBER.instansi_id, gambar_base64: gambar.base64, media_type: gambar.mediaType }
+        });
+        if (res.error) {
+            var msg = res.error.message || String(res.error);
+            try { var ctx = res.error.context; if (ctx && typeof ctx.json === 'function') { var j = await ctx.json(); if (j && j.error) msg = j.error; } } catch (e) {}
+            if (/failed to send|failed to fetch|not found|404/i.test(msg)) msg = fdTr('foto_unreachable', 'Fungsi server "baca-catatan" belum terpasang atau tidak bisa dijangkau.');
+            throw new Error(msg);
+        }
+        var d = res.data || {};
+        if (!d.ok || !d.hasil || typeof d.hasil !== 'object') throw new Error(fdTr('foto_unreachable', 'Fungsi server "baca-catatan" belum terpasang atau tidak bisa dijangkau.'));
+        return d.hasil;
+    }
+
+    function fdFotoBersihkanTanda() {
+        FD_FOTO_KOLOM.forEach(function (id) { var el = fdFotoEl(id); if (el) el.classList.remove('fd-ai-filled', 'fd-ai-doubt'); });
+    }
+    function fdFotoHapusTandaSatu() { this.classList.remove('fd-ai-filled', 'fd-ai-doubt'); }
+
+    function fdFotoTerapkan(nilai) {
+        if (!nilai) return;
+        fdFotoBersihkanTanda();
+        Object.keys(nilai.kolom).forEach(function (id) {
+            if (FD_FOTO_KOLOM.indexOf(id) === -1) return;   // pesanan & kolom lain tidak pernah diisi
+            var el = fdFotoEl(id);
+            if (!el) return;
+            var v = nilai.kolom[id];
+            el.value = (id === 'keterangan') ? String(v || '') : formatNum(v);
+            el.classList.add('fd-ai-filled');
+            el.removeEventListener('input', fdFotoHapusTandaSatu);
+            el.addEventListener('input', fdFotoHapusTandaSatu);
+        });
+        (nilai.ragu || []).forEach(function (id) { var el = fdFotoEl(id); if (el) el.classList.add('fd-ai-doubt'); });
+        fdFoto.tanggalDiisi = fdFotoTglKey(fdFotoTanggalForm());
+        updateCalculations();
+    }
+
+    function fdFotoTampilCek(cek) {
+        var ul = fdFotoEl('fdFotoCek');
+        ul.textContent = '';
+        cek.forEach(function (c) {
+            var li = document.createElement('li');
+            li.className = c.tingkat;
+            var tag = document.createElement('span');
+            tag.className = 'fd-foto-cek-tag';
+            tag.textContent = fdTr('foto_lvl_' + c.tingkat, { ok: 'Cocok', info: 'Info', peringatan: 'Periksa', error: 'Salah' }[c.tingkat] || c.tingkat);
+            var txt = document.createElement('span');
+            txt.textContent = fdTr('foto_cek_' + c.kode, c.pesan, c.vars);
+            li.appendChild(tag); li.appendChild(txt);
+            ul.appendChild(li);
+        });
+    }
+
+    function fdFotoPerbarui() {
+        if (!fdFoto.hasil || !fdFoto.nilai) return;
+        fdFotoTampilCek(fdFotoCek(fdFoto.hasil, fdFoto.nilai, fdFotoKonteks()));
+        var btn = fdFotoEl('fdFotoPindahBtn'), tgl = fdFotoTanggal(fdFoto.hasil.tanggal), f = fdFotoTanggalForm();
+        if (tgl && fdFotoTglKey(tgl) !== fdFotoTglKey(f)) {
+            btn.textContent = fdTr('foto_move_date', 'Pindah ke {d}', { d: tgl.d + ' ' + dispMonth(tgl.m - 1) + ' ' + tgl.y });
+            btn.dataset.aksi = 'pindah';
+            btn.hidden = false;
+        } else if (fdFoto.tanggalDiisi !== fdFotoTglKey(f)) {
+            // Tanggal formulir diganti setelah diisi: formulir memuat ulang data tanggal itu
+            btn.textContent = fdTr('foto_reapply', 'Isi lagi dari foto');
+            btn.dataset.aksi = 'isi';
+            btn.hidden = false;
+        } else {
+            btn.hidden = true;
+        }
+    }
+
+    async function fdFotoProses(file) {
+        if (!file || !fdFotoAdmin() || fdFoto.sibuk) return;
+        fdFotoSibuk(true);
+        fdFotoBukaPanel();
+        fdFotoEl('fdFotoCek').textContent = '';
+        fdFotoEl('fdFotoPindahBtn').hidden = true;
+        fdFotoStatus(fdTr('foto_reading', 'Membaca foto...'), 'busy');
+        try {
+            var gambar = await fdFotoKecilkan(file);
+            if (fdFoto.objectUrl) URL.revokeObjectURL(fdFoto.objectUrl);
+            fdFoto.objectUrl = gambar.objectUrl;
+            fdFotoEl('fdFotoThumb').src = gambar.objectUrl;
+            if (!navigator.onLine) throw new Error(fdTr('foto_offline', 'Butuh koneksi internet untuk membaca foto. Isi manual dulu.'));
+            var hasil = await fdFotoPanggil(gambar);
+            gambar.base64 = '';
+            fdFoto.hasil = hasil;
+            fdFoto.nilai = fdFotoPetakan(hasil);
+            fdFotoTerapkan(fdFoto.nilai);
+            fdFotoPerbarui();
+            fdFotoStatus(fdTr('foto_done', 'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.'), 'done');
+        } catch (e) {
+            fdFotoStatus((e && e.message) || String(e), 'error');
+        } finally {
+            fdFotoSibuk(false);
+        }
+    }
+
+    function fdFotoPindahTanggal() {
+        if (!fdFoto.hasil || !fdFoto.nilai || fdFoto.sibuk) return;
+        var btn = fdFotoEl('fdFotoPindahBtn');
+        if (btn.dataset.aksi === 'pindah') {
+            var t = fdFotoTanggal(fdFoto.hasil.tanggal);
+            if (!t) return;
+            fdFoto.pindah = true;
+            try { calViewMonth = t.m; calViewYear = t.y; calSelectDay(t.d); }
+            finally { fdFoto.pindah = false; }
+        }
+        // Pindah tanggal memuat ulang formulir: isi ulang dari foto, lalu periksa dengan konteks baru
+        fdFotoTerapkan(fdFoto.nilai);
+        fdFotoPerbarui();
+    }
+
+    function fdFotoTutup() {
+        var p = fdFotoEl('fdFotoPanel');
+        if (p) p.hidden = true;
+        if (fdFoto.objectUrl) URL.revokeObjectURL(fdFoto.objectUrl);
+        var img = fdFotoEl('fdFotoThumb');
+        if (img) img.removeAttribute('src');
+        fdFotoBersihkanTanda();
+        fdFotoEl('fdFotoCek').textContent = '';
+        fdFotoEl('fdFotoPindahBtn').hidden = true;
+        fdFotoStatus('');
+        fdFoto.hasil = null; fdFoto.nilai = null; fdFoto.objectUrl = null; fdFoto.tanggalDiisi = null;
+    }
+
+    function fdFotoBukaGambar() { if (fdFoto.objectUrl) window.open(fdFoto.objectUrl, '_blank', 'noopener'); }
+
+    (function () {
+        var inp = fdFotoEl('fdFotoInput');
+        if (!inp) return;
+        inp.addEventListener('change', function () {
+            var f = inp.files && inp.files[0];
+            inp.value = '';                       // supaya foto yang sama bisa dipilih ulang
+            if (f) fdFotoProses(f);
+        });
+        var img = fdFotoEl('fdFotoThumb');
+        img.addEventListener('click', fdFotoBukaGambar);
+        img.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fdFotoBukaGambar(); } });
+        // Tanggal formulir diganti admin: penanda dihapus (nilai di formulir sudah dimuat ulang), cek & tombol diperbarui
+        var tampil = fdFotoEl('dateDisplay');
+        if (tampil && 'MutationObserver' in window) {
+            new MutationObserver(function () {
+                if (fdFoto.pindah || !fdFoto.nilai) return;
+                if (fdFoto.tanggalDiisi !== fdFotoTglKey(fdFotoTanggalForm())) fdFotoBersihkanTanda();
+                fdFotoPerbarui();
+            }).observe(tampil, { childList: true, characterData: true, subtree: true });
+        }
     })();
     </script>
 </body>
