@@ -6,7 +6,7 @@
    PERNAH disimpan, supaya data selalu terbaru dan data satu akun tidak
    pernah tampil ke akun lain di HP yang sama. */
 
-const CACHE_NAME = 'findaily-uji-v7-1-0-a8';
+const CACHE_NAME = 'findaily-uji-v7-1-0-a9';
 
 // File inti aplikasi (same-origin), relatif terhadap /app/
 const APP_SHELL = [
