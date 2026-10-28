@@ -3493,6 +3493,29 @@
         .fd-profil-keluar:hover { background: rgba(220,38,38,.06); }
         .fd-profil-versi { margin: 0; text-align: center; font-size: 12px; color: var(--ink-3); }
         html.fd-viewer .fd-profil-item.fd-admin-only { display: none; }
+        body.ifc-mode .fd-profil-item.fd-profil-bkcm { display: none; }
+
+        /* v7.2: Profil & halaman yang dibuka dari Profil — tombol kembali (<) ganti tombol cari, menu bawah disembunyikan */
+        .fd-back-btn { display: none; }
+        body.fd-tumpuk .header-search-btn { display: none !important; }
+        body.fd-tumpuk .fd-back-btn {
+            display: grid; place-items: center; flex: 0 0 40px; width: 40px; height: 40px; padding: 0; border-radius: 12px; cursor: pointer;
+            border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); -webkit-tap-highlight-color: transparent;
+        }
+        body.fd-tumpuk .fd-back-btn:hover { border-color: var(--field); }
+        body.fd-tumpuk .fd-back-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        body.fd-tumpuk .fd-back-btn .hdr-ic { width: 22px; height: 22px; }
+        @media (max-width: 1023px) {
+            body.fd-tumpuk #fdBottomNav { display: none !important; }
+            body.fd-tumpuk { padding-bottom: calc(env(safe-area-inset-bottom) + 24px); }
+        }
+        /* Halaman Export dibagi tiga lewat menu Profil: Konfigurasi / Export / Backup */
+        #view-export[data-fd-bagian="konfigurasi"] > :not(#configSection),
+        #view-export[data-fd-bagian="export"] > #configSection,
+        #view-export[data-fd-bagian="export"] > #fdBackupSection,
+        #view-export[data-fd-bagian="export"] > #fdDriveSection,
+        #view-export[data-fd-bagian="backup"] > :not(#fdBackupSection):not(#fdDriveSection) { display: none !important; }
+        #view-export[data-fd-bagian="backup"] > #fdBackupSection { margin-top: 0 !important; }
 
         /* ----- Menu bawah (HP & tablet) ----- */
         .fd-bnav { display: none; }
@@ -3590,6 +3613,7 @@
         <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menu"><svg class="hdr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div class="brand-mini"><div class="brand-logo" id="brandLogo">BK</div><span class="brand-name" id="brandName">BKCM</span></div>
         <button class="header-search-btn" id="headerSearchBtn" onclick="openSearch()" aria-label="Cari" title="Cari data"><svg class="hdr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="hsb-text">Cari tanggal, nominal, atau keterangan…</span></button>
+        <button type="button" class="fd-back-btn" id="fdBackBtn" onclick="fdKembali()" aria-label="Kembali" title="Kembali"><svg class="hdr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
         <span class="topbar-spacer"></span>
         <span class="fd-viewer-pill" data-i18n="fd_viewer_pill">Mode lihat saja</span>
         <span class="topbar-live" id="fdSyncPill" data-state="busy" role="status" aria-live="polite"><i></i><span id="fdSyncText">Memuat data...</span></span>
@@ -4339,7 +4363,7 @@
         <!-- ===== VIEW: EXPORT ===== -->
         <div class="view-panel" id="view-export">
         <!-- Konfigurasi (digabung ke Export, di atas pilihan export) -->
-        <div class="data-section">
+        <div class="data-section" id="configSection">
             <h2 class="sec-title"><svg class="sec-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span data-i18n="cfg_title">KONFIGURASI SISTEM</span></h2>
             <p style="font-size:13px; color:#888; margin:-6px 0 16px;" data-i18n="cfg_hint">Isi data ini dulu sebelum export PDF (PPN & Royalti).</p>
             <div class="config-grid">
@@ -4419,7 +4443,7 @@
         <div id="emptyExport" class="view-empty" style="display:none;">
             <div class="view-empty-icon"><svg class="empty-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
             <div style="font-size: 17px; margin-bottom: 6px; font-weight: 600;" data-i18n="empty_export_1">Belum ada laporan untuk di-export</div>
-            <div style="font-size: 13px; color: #bbb;" data-i18n="empty_export_2">Input data dulu di menu Input Data — atau restore dari backup di bawah</div>
+            <div style="font-size: 13px; color: #bbb;" data-i18n="empty_export_2">Input data dulu di menu Input Data — atau pulihkan lewat menu Backup di Profil</div>
         </div>
 
         <!-- Backup & Restore (SELALU tampil) -->
@@ -4512,7 +4536,9 @@
                 <section class="fd-profil-group">
                     <h3 class="fd-profil-label" data-i18n="profil_menu">Menu</h3>
                     <div class="fd-profil-list">
+                        <button type="button" class="fd-profil-item fd-admin-only fd-profil-bkcm" onclick="fdProfilKe('konfigurasi')"><span class="fd-profil-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span><span class="fd-profil-txt" data-i18n="nav_config">Konfigurasi</span><span class="fd-profil-chev" aria-hidden="true">›</span></button>
                         <button type="button" class="fd-profil-item" onclick="fdProfilKe('export')"><span class="fd-profil-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span><span class="fd-profil-txt" data-i18n="nav_export">Export</span><span class="fd-profil-chev" aria-hidden="true">›</span></button>
+                        <button type="button" class="fd-profil-item fd-admin-only" onclick="fdProfilKe('backup')"><span class="fd-profil-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="12 17 12 11"/><polyline points="9.5 13.5 12 11 14.5 13.5"/></svg></span><span class="fd-profil-txt" data-i18n="profil_backup">Backup</span><span class="fd-profil-chev" aria-hidden="true">›</span></button>
                         <button type="button" class="fd-profil-item fd-admin-only" onclick="fdProfilKe('riwayat')"><span class="fd-profil-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span><span class="fd-profil-txt" data-i18n="nav_riwayat">Riwayat</span><span class="fd-profil-chev" aria-hidden="true">›</span></button>
                         <button type="button" class="fd-profil-item" onclick="fdProfilKe('setting')"><span class="fd-profil-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="fd-profil-txt" data-i18n="nav_setting">Setting</span><span class="fd-profil-chev" aria-hidden="true">›</span></button>
                     </div>
@@ -4705,10 +4731,10 @@
             </div>
             <div class="data-section">
                 <h2 class="sec-title"><svg class="sec-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Export Laporan IFC</span></h2>
-                <p style="font-size:13px; color:var(--ink-2); margin:-6px 0 16px;">Laporan bulan terpilih, siap dikirim ke owner.</p>
+                <p style="font-size:13px; color:var(--ink-2); margin:-6px 0 16px;">PDF: laporan bulan terpilih, siap dikirim ke owner. Excel: semua bulan dan tahun dalam 1 file.</p>
                 <div class="export-options">
                     <button class="export-btn" onclick="ifcExportPDF()"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Download PDF</span><div class="export-desc">Format laporan kas IFC</div></button>
-                    <button class="export-btn" onclick="ifcExportExcel()"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg><span>Download Excel</span><div class="export-desc">Spreadsheet .xlsx</div></button>
+                    <button class="export-btn" onclick="ifcExportExcel()"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg><span>Download Excel</span><div class="export-desc">Excel (.xlsx) — 1 file, semua bulan jadi sheet</div></button>
                 </div>
             </div>
         </div>
@@ -5031,7 +5057,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.1.0-uji.13';
+        const APP_VERSION = 'v7.1.0-uji.14';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -5065,7 +5091,7 @@
                 empty_input_1:'No data for this month yet', empty_input_2:'Fill the form above to start recording',
                 empty_dash_1:'Dashboard is empty', empty_hint:'Enter data first in the Data Entry menu',
                 empty_pajak_1:'No tax data yet', empty_export_1:'No report to export yet',
-                empty_export_2:'Enter data first — or restore from backup below',
+                empty_export_2:'Enter data first — or restore it from the Backup menu in Profile',
                 dash_title:'FINANCIAL DASHBOARD', kpi_revenue:'Total Revenue', kpi_expense:'Total Expense',
                 kpi_profit:'Net Profit', kpi_margin:'Profit Margin', toggle_harian:'Daily', toggle_bulanan:'Monthly',
                 ppn_title:'DAILY VAT REPORT', ppn_th_date:'Date', ppn_th_income:'Income (Rp)', ppn_th_ppn:'VAT (Rp)',
@@ -5138,7 +5164,7 @@
                 kas_ok_saved:'Transaction saved.', kas_ok_saved_ifc:'Transaction saved and recorded in the IFC cash book.', kas_ok_updated:'Changes saved.', kas_ok_deleted:'Transaction deleted.',
                 kas_confirm_delete:'Delete "{k}" for {v}?', kas_confirm_delete_ifc:'Its entry in the IFC cash book will be deleted too.', kas_edit_note:'Editing the transaction on {d}.',
                 kas_err_start:'Fill in the start date.', kas_confirm_start:'There are {n} transactions before the new start date. They will no longer be counted.\n\nContinue?', kas_ok_cfg:'Cash Deposit starting setup saved.',
-                fab_kamera:'Photo', fab_file:'Choose file', profil_usaha:'Business', profil_bkcm_sub:'Meatball stall', profil_ifc_sub:'IFC cash book', profil_menu:'Menu', profil_foto_kamera:'Take photo', profil_foto_galeri:'Choose from gallery', profil_foto_hapus:'Remove photo', notif_update_sub:'Press Update to use the latest version of the app.', notif_backup_title:'Backup reminder', foto_btn:'Take photo', foto_file_btn:'Choose photo file', foto_hint:'Photograph the whole daily sheet, including notes in the margin.', foto_title:'Photo reading result', foto_close:'Close', foto_note:'Not saved yet. Check every marked field, then press Save Data.', foto_reading:'Reading photo...', foto_done:'The form has been filled from the photo. Check it before saving.', foto_offline:'An internet connection is required to read the photo. Fill it in manually.', foto_unreachable:'The server function "baca-catatan" is not installed or cannot be reached.', foto_move_date:'Go to {d}', foto_reapply:'Fill in again from photo', foto_bad_file:'The file is not a readable image.', foto_lvl_ok:'Match', foto_lvl_info:'Info', foto_lvl_peringatan:'Check', foto_lvl_error:'Wrong', foto_cek_TGL_KOSONG:'The date on the sheet could not be read. Make sure the form date is correct.', foto_cek_TGL_BEDA:'The sheet date is {tgl}, different from the form date {form}.', foto_cek_HARI_BEDA:'The day name on the sheet "{hari}" does not match the date {tgl} (should be {benar}).', foto_cek_RINCIAN_BEDA:'The sum of the sales details {a} is not equal to Total Sales {b}.', foto_cek_PENGELUARAN_BEDA:'The sum of the expense rows {a} is not equal to Total Expenses on the sheet {b}.', foto_cek_PPN_TERTUKAR:'Total sales may have been swapped with the VAT figure ({a}).', foto_cek_PPN_BEDA:'VAT on the sheet is {a}, it should be {b} ({r}% of Total Sales {c}).', foto_cek_SETOR_BEDA:'Deposited {a} is not equal to Final Balance + VAT ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) is larger than Total Sales ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'The payment total on the sheet is {a}, while QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'The online ride total on the sheet is {a}, while GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'GoJek/Grab notes are usually on the Sunday sheet, but this sheet is {hari}.', foto_cek_PENJUALAN_KECIL:'Total Sales {a} is far below usual this month (median {b}). Check the figure again.', foto_cek_ADA_DATA:'This date already has data. Saving will overwrite it.', foto_cek_RAGU:'Unclear handwriting in: {kolom}. Check the fields marked in red.', foto_cek_SEMUA_COCOK:'All figures match each other.', foto_cek_TOTAL_DARI_RINCIAN:'Total sales was empty, the sum of the details was used.', foto_cek_TUNAI_DARI_SALDO:'Final Balance was empty, Balance was used.', foto_cek_RAGU_TANGGAL:'The date or day name on the sheet is unclear.'
+                fab_kamera:'Photo', fab_file:'Choose file', profil_usaha:'Business', profil_bkcm_sub:'Meatball stall', profil_ifc_sub:'IFC cash book', profil_menu:'Menu', profil_backup:'Backup', profil_foto_kamera:'Take photo', profil_foto_galeri:'Choose from gallery', profil_foto_hapus:'Remove photo', notif_update_sub:'Press Update to use the latest version of the app.', notif_backup_title:'Backup reminder', foto_btn:'Take photo', foto_file_btn:'Choose photo file', foto_hint:'Photograph the whole daily sheet, including notes in the margin.', foto_title:'Photo reading result', foto_close:'Close', foto_note:'Not saved yet. Check every marked field, then press Save Data.', foto_reading:'Reading photo...', foto_done:'The form has been filled from the photo. Check it before saving.', foto_offline:'An internet connection is required to read the photo. Fill it in manually.', foto_unreachable:'The server function "baca-catatan" is not installed or cannot be reached.', foto_move_date:'Go to {d}', foto_reapply:'Fill in again from photo', foto_bad_file:'The file is not a readable image.', foto_lvl_ok:'Match', foto_lvl_info:'Info', foto_lvl_peringatan:'Check', foto_lvl_error:'Wrong', foto_cek_TGL_KOSONG:'The date on the sheet could not be read. Make sure the form date is correct.', foto_cek_TGL_BEDA:'The sheet date is {tgl}, different from the form date {form}.', foto_cek_HARI_BEDA:'The day name on the sheet "{hari}" does not match the date {tgl} (should be {benar}).', foto_cek_RINCIAN_BEDA:'The sum of the sales details {a} is not equal to Total Sales {b}.', foto_cek_PENGELUARAN_BEDA:'The sum of the expense rows {a} is not equal to Total Expenses on the sheet {b}.', foto_cek_PPN_TERTUKAR:'Total sales may have been swapped with the VAT figure ({a}).', foto_cek_PPN_BEDA:'VAT on the sheet is {a}, it should be {b} ({r}% of Total Sales {c}).', foto_cek_SETOR_BEDA:'Deposited {a} is not equal to Final Balance + VAT ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) is larger than Total Sales ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'The payment total on the sheet is {a}, while QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'The online ride total on the sheet is {a}, while GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'GoJek/Grab notes are usually on the Sunday sheet, but this sheet is {hari}.', foto_cek_PENJUALAN_KECIL:'Total Sales {a} is far below usual this month (median {b}). Check the figure again.', foto_cek_ADA_DATA:'This date already has data. Saving will overwrite it.', foto_cek_RAGU:'Unclear handwriting in: {kolom}. Check the fields marked in red.', foto_cek_SEMUA_COCOK:'All figures match each other.', foto_cek_TOTAL_DARI_RINCIAN:'Total sales was empty, the sum of the details was used.', foto_cek_TUNAI_DARI_SALDO:'Final Balance was empty, Balance was used.', foto_cek_RAGU_TANGGAL:'The date or day name on the sheet is unclear.'
             },            id: {
                 menu_title:'Menu', nav_input:'Input Data', nav_kas:'Kas Setoran', nav_logout:'Keluar', setting_account_title:'Akun', nav_riwayat:'Riwayat', hist_title:'Riwayat perubahan', hist_hint:'Setiap tambah, ubah, dan hapus dicatat otomatis oleh server, dan catatannya tidak bisa diubah atau dihapus.', hist_all_types:'Semua jenis', hist_t_bkcm:'Input BKCM', hist_t_ifc:'Input IFC', hist_t_kas:'Kas Setoran', hist_t_cfg:'Pengaturan', hist_t_akun:'Akun pemantau', hist_all_people:'Semua orang', hist_more:'Muat lebih banyak', fd_viewer_pill:'Mode lihat saja', setting_pm_title:'Akun pemantau', setting_pm_desc:'Bos dan karyawan masuk dengan nama pengguna. Mereka bisa melihat semua menu dan mengunduh laporan, tapi tidak bisa mengubah data.', fd_pm_manage:'Kelola', fd_pm_add_title:'Tambah pemantau', fd_pm_nama:'Nama', fd_pm_nama_ph:'Contoh: Pak Joko', fd_pm_user:'Nama pengguna', fd_pm_pass:'Password (minimal 8 karakter)', fd_pm_add_btn:'Buat akun pemantau', fd_pm_hint:'Berikan nama pengguna dan password ini ke orangnya. Mereka masuk di halaman masuk seperti biasa, tanpa email.', fd_role_admin:'Admin', fd_role_pemantau:'Pemantau', fd_logout_confirm:'Keluar dari akun di HP ini? Semua data sudah aman di server.', fd_logout_pending:'Masih ada {n} perubahan yang belum terkirim ke server. Sambungkan internet dan tunggu sampai tertulis "Tersinkron", baru keluar.', setting_sync_title:'Data server', fd_reload_btn:'Muat ulang data', nav_dashboard:'Dasbor', nav_pajak:'Laporan Pajak', nav_ifc_input:'Input Harian', nav_ifc_laporan:'Laporan Bulanan', nav_ifc_export:'Export',
                 nav_export:'Ekspor', nav_install:'Pasang Aplikasi', nav_setting:'Pengaturan', nav_config:'Konfigurasi',
@@ -5159,7 +5185,7 @@
                 empty_input_1:'Belum ada data bulan ini', empty_input_2:'Isi formulir di atas untuk mulai mencatat',
                 empty_dash_1:'Dasbor masih kosong', empty_hint:'Input data dulu di menu Input Data',
                 empty_pajak_1:'Belum ada data pajak', empty_export_1:'Belum ada laporan untuk diekspor',
-                empty_export_2:'Input data dulu di menu Input Data — atau pulihkan dari cadangan di bawah',
+                empty_export_2:'Input data dulu di menu Input Data — atau pulihkan lewat menu Backup di Profil',
                 dash_title:'DASBOR KEUANGAN', kpi_revenue:'Total Pemasukan', kpi_expense:'Total Pengeluaran',
                 kpi_profit:'Laba Bersih', kpi_margin:'Margin Laba', toggle_harian:'Harian', toggle_bulanan:'Bulanan',
                 ppn_title:'LAPORAN PPN HARIAN', ppn_th_date:'Tanggal', ppn_th_income:'Pendapatan (Rp)', ppn_th_ppn:'PPN (Rp)',
@@ -5215,7 +5241,7 @@
                 kas_lbl_amount:'Jumlah', kas_lbl_ket:'Keterangan', kas_ph_ket:'Contoh: giling daging', kas_btn_cancel_edit:'Batal ubah',
                 kas_open_title:'Belum selesai', kas_open_hint:'Pinjaman yang masih harus dikembalikan, posisi saat ini.', kas_open_note:'Pinjaman dari IFC dan pengembaliannya otomatis tercatat juga di buku kas IFC.',
                 kas_th_date:'Tanggal', kas_th_ket:'Keterangan', kas_th_jenis:'Jenis', kas_th_in:'Masuk', kas_th_out:'Keluar', kas_th_sisa:'Sisa', kas_th_aksi:'Aksi',
-                fab_kamera:'Foto', fab_file:'Pilih file', profil_usaha:'Usaha', profil_bkcm_sub:'Warung bakso', profil_ifc_sub:'Buku kas IFC', profil_menu:'Menu', profil_foto_kamera:'Ambil foto', profil_foto_galeri:'Pilih dari galeri', profil_foto_hapus:'Hapus foto', notif_update_sub:'Tekan Update untuk memakai versi terbaru aplikasi.', notif_backup_title:'Pengingat backup', foto_btn:'Ambil foto', foto_file_btn:'Pilih file foto', foto_hint:'Foto seluruh lembar catatan harian, termasuk catatan di pinggir.', foto_title:'Hasil baca foto', foto_close:'Tutup', foto_note:'Belum tersimpan. Periksa setiap kolom bertanda, lalu tekan Simpan Data.', foto_reading:'Membaca foto...', foto_done:'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.', foto_offline:'Butuh koneksi internet untuk membaca foto. Isi manual dulu.', foto_unreachable:'Fungsi server "baca-catatan" belum terpasang atau tidak bisa dijangkau.', foto_move_date:'Pindah ke {d}', foto_reapply:'Isi lagi dari foto', foto_bad_file:'Berkas bukan gambar yang bisa dibaca.', foto_lvl_ok:'Cocok', foto_lvl_info:'Info', foto_lvl_peringatan:'Periksa', foto_lvl_error:'Salah', foto_cek_TGL_KOSONG:'Tanggal di kertas tidak terbaca. Pastikan tanggal formulir sudah benar.', foto_cek_TGL_BEDA:'Tanggal di kertas {tgl}, berbeda dengan tanggal formulir {form}.', foto_cek_HARI_BEDA:'Nama hari di kertas "{hari}" tidak cocok dengan tanggal {tgl} (seharusnya {benar}).', foto_cek_RINCIAN_BEDA:'Jumlah rincian penjualan {a} tidak sama dengan Total Penjualan {b}.', foto_cek_PENGELUARAN_BEDA:'Jumlah baris pengeluaran {a} tidak sama dengan Total Pengeluaran di kertas {b}.', foto_cek_PPN_TERTUKAR:'Total penjualan mungkin tertukar dengan angka PPN ({a}).', foto_cek_PPN_BEDA:'PPN di kertas {a}, seharusnya {b} ({r}% dari Total Penjualan {c}).', foto_cek_SETOR_BEDA:'Disetorkan {a} tidak sama dengan Saldo Akhir + PPN ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) lebih besar dari Total Penjualan ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'Total pembayaran di kertas {a}, sedangkan QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'Total ojek online di kertas {a}, sedangkan GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'Catatan GoJek/Grab biasanya ada di lembar hari Minggu, tapi lembar ini hari {hari}.', foto_cek_PENJUALAN_KECIL:'Total Penjualan {a} jauh di bawah biasanya bulan ini (median {b}). Periksa lagi angkanya.', foto_cek_ADA_DATA:'Tanggal ini sudah punya data. Menyimpan akan menimpanya.', foto_cek_RAGU:'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.', foto_cek_SEMUA_COCOK:'Semua angka saling cocok.', foto_cek_TOTAL_DARI_RINCIAN:'Total penjualan kosong, dipakai jumlah rincian.', foto_cek_TUNAI_DARI_SALDO:'Saldo Akhir kosong, dipakai Saldo.', foto_cek_RAGU_TANGGAL:'Tanggal atau nama hari di kertas kurang jelas.'
+                fab_kamera:'Foto', fab_file:'Pilih file', profil_usaha:'Usaha', profil_bkcm_sub:'Warung bakso', profil_ifc_sub:'Buku kas IFC', profil_menu:'Menu', profil_backup:'Backup', profil_foto_kamera:'Ambil foto', profil_foto_galeri:'Pilih dari galeri', profil_foto_hapus:'Hapus foto', notif_update_sub:'Tekan Update untuk memakai versi terbaru aplikasi.', notif_backup_title:'Pengingat backup', foto_btn:'Ambil foto', foto_file_btn:'Pilih file foto', foto_hint:'Foto seluruh lembar catatan harian, termasuk catatan di pinggir.', foto_title:'Hasil baca foto', foto_close:'Tutup', foto_note:'Belum tersimpan. Periksa setiap kolom bertanda, lalu tekan Simpan Data.', foto_reading:'Membaca foto...', foto_done:'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.', foto_offline:'Butuh koneksi internet untuk membaca foto. Isi manual dulu.', foto_unreachable:'Fungsi server "baca-catatan" belum terpasang atau tidak bisa dijangkau.', foto_move_date:'Pindah ke {d}', foto_reapply:'Isi lagi dari foto', foto_bad_file:'Berkas bukan gambar yang bisa dibaca.', foto_lvl_ok:'Cocok', foto_lvl_info:'Info', foto_lvl_peringatan:'Periksa', foto_lvl_error:'Salah', foto_cek_TGL_KOSONG:'Tanggal di kertas tidak terbaca. Pastikan tanggal formulir sudah benar.', foto_cek_TGL_BEDA:'Tanggal di kertas {tgl}, berbeda dengan tanggal formulir {form}.', foto_cek_HARI_BEDA:'Nama hari di kertas "{hari}" tidak cocok dengan tanggal {tgl} (seharusnya {benar}).', foto_cek_RINCIAN_BEDA:'Jumlah rincian penjualan {a} tidak sama dengan Total Penjualan {b}.', foto_cek_PENGELUARAN_BEDA:'Jumlah baris pengeluaran {a} tidak sama dengan Total Pengeluaran di kertas {b}.', foto_cek_PPN_TERTUKAR:'Total penjualan mungkin tertukar dengan angka PPN ({a}).', foto_cek_PPN_BEDA:'PPN di kertas {a}, seharusnya {b} ({r}% dari Total Penjualan {c}).', foto_cek_SETOR_BEDA:'Disetorkan {a} tidak sama dengan Saldo Akhir + PPN ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) lebih besar dari Total Penjualan ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'Total pembayaran di kertas {a}, sedangkan QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'Total ojek online di kertas {a}, sedangkan GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'Catatan GoJek/Grab biasanya ada di lembar hari Minggu, tapi lembar ini hari {hari}.', foto_cek_PENJUALAN_KECIL:'Total Penjualan {a} jauh di bawah biasanya bulan ini (median {b}). Periksa lagi angkanya.', foto_cek_ADA_DATA:'Tanggal ini sudah punya data. Menyimpan akan menimpanya.', foto_cek_RAGU:'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.', foto_cek_SEMUA_COCOK:'Semua angka saling cocok.', foto_cek_TOTAL_DARI_RINCIAN:'Total penjualan kosong, dipakai jumlah rincian.', foto_cek_TUNAI_DARI_SALDO:'Saldo Akhir kosong, dipakai Saldo.', foto_cek_RAGU_TANGGAL:'Tanggal atau nama hari di kertas kurang jelas.'
             }
         };
 
@@ -8388,48 +8414,157 @@
             } catch (e) { alert('Gagal membuat PDF: ' + e.message); }
         }
 
-        // ===== EXPORT EXCEL =====
+        // ===== EXPORT EXCEL (v7.2: sama seperti BKCM — 1 file, tiap bulan yang ada datanya jadi 1 sheet, semua tahun) =====
+        function ifcBulanBerdata() {
+            const set = {};
+            Object.keys(irfanData || {}).forEach(k => {
+                const md = irfanData[k];
+                if (md && md.entries && Object.keys(md.entries).length) set[k] = true;
+            });
+            kasActiveTx().forEach(t => {
+                if (t.type !== 'ifc_pinjam' && t.type !== 'ifc_kembali') return;
+                const [Y, M] = t.date.split('-').map(Number);
+                set[Y + '-' + M] = true;
+            });
+            if (irfanConfig && irfanConfig.firstMonth) set[irfanConfig.firstMonth] = true;
+            return Object.keys(set).filter(k => /^\d{4}-\d{1,2}$/.test(k)).sort((x, y) => ifcMonthNum(x) - ifcMonthNum(y));
+        }
+
         async function ifcExportExcel() {
-            const key = document.getElementById('ifcExpYear').value + '-' + (+document.getElementById('ifcExpMonth').value);
-            const R = ifcGetMonthRows(key);
-            const monthName = months[R.m - 1];
+            const keys = ifcBulanBerdata();
+            if (keys.length === 0) {
+                alert('Belum ada data IFC. Isi data dulu sebelum export.');
+                return;
+            }
+            showSuccessMessage('⏳ Menyiapkan file Excel...');
             try {
                 const wb = new ExcelJS.Workbook();
-                const ws = wb.addWorksheet('IFC ' + monthName);
-                const bord = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-                ws.mergeCells('A1:F1');
-                ws.getCell('A1').value = 'LAPORAN PEMASUKAN DAN PENGELUARAN UANG KAS IFC';
-                ws.getCell('A1').font = { bold: true, italic: true, size: 12 };
-                ws.getCell('A1').alignment = { horizontal: 'center' };
-                ws.mergeCells('A2:F2');
-                ws.getCell('A2').value = 'Bulan ' + monthName + ' ' + R.y;
-                ws.getCell('A2').alignment = { horizontal: 'center' };
-                ws.addRow([]);
-                const head = ws.addRow(['NO', 'TGL/BLN/TAHUN', 'KETERANGAN', 'PEMASUKAN', 'PENGELUARAN', 'SALDO']);
-                head.eachCell(cell => { cell.font = { bold: true }; cell.alignment = { horizontal: 'center' }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } }; cell.border = bord; });
-                R.rows.forEach(row => {
-                    const r = ws.addRow([row.no, row.dateStr, row.keterangan, row.pemasukan, row.pengeluaran, row.saldo]);
-                    r.getCell(1).alignment = { horizontal: 'center' };
-                    r.getCell(3).font = { color: { argb: 'FFCC0000' } };
-                    r.getCell(4).numFmt = '"Rp"#,##0;"Rp"-#,##0;"Rp-"';
-                    r.getCell(5).numFmt = '"Rp"#,##0;"Rp"-#,##0;"Rp-"';
-                    r.getCell(5).font = { color: { argb: 'FFCC0000' } };
-                    r.getCell(6).numFmt = '"Rp"#,##0;"Rp"-#,##0';
-                    r.eachCell(cell => cell.border = bord);
+                wb.creator = 'Financial Daily Report';
+                wb.created = new Date();
+                const columns = [
+                    { header: 'NO',            width: 6  },
+                    { header: 'TGL/BLN/TAHUN', width: 26 },
+                    { header: 'KETERANGAN',    width: 38 },
+                    { header: 'PEMASUKAN',     width: 17 },
+                    { header: 'PENGELUARAN',   width: 17 },
+                    { header: 'SALDO',         width: 18 }
+                ];
+                const N = columns.length;
+                const moneyFmt = '#,##0';
+                const thin = c => ({ style: 'thin', color: { argb: c } });
+                const hair = { style: 'hair', color: { argb: 'FFCCCCCC' } };
+
+                keys.forEach(key => {
+                    const R = ifcGetMonthRows(key);
+                    const monthName = months[R.m - 1];
+                    const ws = wb.addWorksheet(monthName + ' ' + R.y, { views: [{ state: 'frozen', ySplit: 4 }] });
+                    columns.forEach((c, i) => { ws.getColumn(i + 1).width = c.width; });
+
+                    // Baris 1: judul
+                    ws.mergeCells(1, 1, 1, N);
+                    const t = ws.getCell(1, 1);
+                    t.value = 'LAPORAN PEMASUKAN DAN PENGELUARAN UANG KAS IFC';
+                    t.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+                    t.alignment = { horizontal: 'center', vertical: 'middle' };
+                    t.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0D3D52' } };
+                    ws.getRow(1).height = 24;
+                    // Baris 2: bulan & tahun
+                    ws.mergeCells(2, 1, 2, N);
+                    const sub = ws.getCell(2, 1);
+                    sub.value = monthName.toUpperCase() + ' ' + R.y;
+                    sub.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF1A5F7A' } };
+                    sub.alignment = { horizontal: 'center', vertical: 'middle' };
+                    sub.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F4F8' } };
+                    ws.getRow(2).height = 18;
+                    ws.getRow(3).height = 6;
+                    // Baris 4: header kolom
+                    const hr = ws.getRow(4);
+                    columns.forEach((c, i) => {
+                        const cell = hr.getCell(i + 1);
+                        cell.value = c.header;
+                        cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1A5F7A' } };
+                        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                        cell.border = { top: thin('FF0D3D52'), left: thin('FF0D3D52'), bottom: thin('FF0D3D52'), right: thin('FF0D3D52') };
+                    });
+                    hr.height = 24;
+
+                    // Baris 5: saldo awal bulan
+                    const sa = ws.getRow(5);
+                    sa.getCell(3).value = 'SALDO AWAL';
+                    sa.getCell(6).value = R.saldoAwal;
+                    for (let i = 1; i <= N; i++) {
+                        const cell = sa.getCell(i);
+                        cell.font = { name: 'Arial', size: 10, bold: true, italic: true, color: { argb: 'FF1A5F7A' } };
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F4F8' } };
+                        cell.border = { top: hair, left: hair, bottom: hair, right: hair };
+                    }
+                    sa.getCell(6).numFmt = moneyFmt;
+                    sa.getCell(6).alignment = { horizontal: 'right' };
+
+                    // Data harian (semua tanggal, sama seperti PDF IFC)
+                    const first = 6;
+                    R.rows.forEach((row, idx) => {
+                        const r = ws.getRow(first + idx);
+                        const vals = [row.no, row.dateStr, row.keterangan, row.pemasukan || '', row.pengeluaran || '', row.saldo];
+                        vals.forEach((v, i) => {
+                            const cell = r.getCell(i + 1);
+                            cell.value = v;
+                            cell.border = { top: hair, left: hair, bottom: hair, right: hair };
+                            cell.font = { name: 'Arial', size: 10, color: { argb: (i === 2 || i === 4) ? 'FFCC0000' : 'FF000000' } };
+                            if (i === 0) cell.alignment = { horizontal: 'center' };
+                            else if (i >= 3) { cell.numFmt = moneyFmt; cell.alignment = { horizontal: 'right' }; }
+                            if (idx % 2 === 1) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F8FA' } };
+                        });
+                        r.height = 16;
+                    });
+
+                    // Baris TOTAL (rumus SUM; saldo = saldo baris terakhir)
+                    const last = first + R.rows.length - 1;
+                    const T = last + 1;
+                    const tr = ws.getRow(T);
+                    for (let i = 1; i <= N; i++) {
+                        const cell = tr.getCell(i);
+                        const col = cell.address.replace(/[0-9]/g, '');
+                        if (i === 1) { cell.value = 'TOTAL'; cell.alignment = { horizontal: 'center' }; }
+                        else if (i === 4 || i === 5) { cell.value = { formula: `SUM(${col}${first}:${col}${last})`, result: i === 4 ? R.totalPem : R.totalPeng }; cell.numFmt = moneyFmt; cell.alignment = { horizontal: 'right' }; }
+                        else if (i === 6) { cell.value = { formula: `${col}${last}`, result: R.saldoAkhir }; cell.numFmt = moneyFmt; cell.alignment = { horizontal: 'right' }; }
+                        cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF1A5F7A' } };
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD4E6EF' } };
+                        cell.border = { top: { style: 'double', color: { argb: 'FF1A5F7A' } }, bottom: { style: 'double', color: { argb: 'FF1A5F7A' } }, left: thin('FF1A5F7A'), right: thin('FF1A5F7A') };
+                    }
+                    tr.height = 20;
+
+                    // Ringkasan (seperti laporan IFC)
+                    const ring = [['Saldo Awal', R.saldoAwal], ['Total Pemasukan', R.totalPem], ['Total Pengeluaran', R.totalPeng], ['Saldo Akhir', R.saldoAkhir]];
+                    ring.forEach((it, k) => {
+                        const r = ws.getRow(T + 2 + k);
+                        const l = r.getCell(3), v = r.getCell(4);
+                        l.value = it[0];
+                        l.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF856404' } };
+                        v.value = it[1];
+                        v.numFmt = moneyFmt;
+                        v.alignment = { horizontal: 'right' };
+                        v.font = { name: 'Arial', size: 10, bold: k === 3, color: { argb: 'FF1A5F7A' } };
+                        v.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+                        v.border = { top: thin('FFD39E00'), left: thin('FFD39E00'), bottom: thin('FFD39E00'), right: thin('FFD39E00') };
+                    });
                 });
-                ws.addRow([]);
-                ws.addRow(['', '', 'Total Pemasukan', R.totalPem]).getCell(4).numFmt = '"Rp"#,##0';
-                ws.addRow(['', '', 'Total Pengeluaran', R.totalPeng]).getCell(4).numFmt = '"Rp"#,##0';
-                ws.addRow(['', '', 'Saldo Akhir', R.saldoAkhir]).getCell(4).numFmt = '"Rp"#,##0';
-                ws.columns = [{ width: 5 }, { width: 26 }, { width: 36 }, { width: 16 }, { width: 16 }, { width: 16 }];
+
                 const buffer = await wb.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                link.href = url; link.download = 'LAPORAN BULANAN IFC ' + monthName + ' ' + R.y + '.xlsx'; link.click();
+                const y0 = keys[0].split('-')[0], y1 = keys[keys.length - 1].split('-')[0];
+                link.href = url;
+                link.download = 'Rekap_Kas_IFC_' + (y0 === y1 ? y0 : y0 + '-' + y1) + '.xlsx';
+                link.click();
                 setTimeout(() => URL.revokeObjectURL(url), 1000);
-                showSuccessMessage('Excel IFC tersimpan.');
-            } catch (e) { alert('Gagal membuat Excel: ' + e.message); }
+                showSuccessMessage('✓ Berhasil! ' + keys.length + ' bulan IFC ter-export ke 1 file Excel.');
+            } catch (e) {
+                console.error(e);
+                alert('Gagal membuat file Excel: ' + e.message);
+            }
         }
 
         function showView(viewName, btnEl) {
@@ -10241,7 +10376,44 @@
             set('fdProfilVersi', (typeof APP_VERSION !== 'undefined') ? 'Findaily ' + APP_VERSION : '');
             if (typeof fdRenderAvatar === 'function') fdRenderAvatar();
         };
+        // Kembali (<): dari Profil ke halaman sebelum Profil dibuka; dari halaman turunan Profil ke Profil
+        var fdAsal = null, fdSub = null;
+        function fdViewAktif() { var p = document.querySelector('.view-panel.active'); return p ? p.id.replace(/^view-/, '') : null; }
+        function fdSidebarBtn(v) { return document.querySelector('.sidebar-item[data-view="' + v + '"]'); }
+        function fdSinkronTumpuk() {
+            var v = fdViewAktif();
+            if (fdSub && v !== fdSub) fdSub = null;
+            var ex = document.getElementById('view-export');
+            if (ex && !(fdSub === 'export' && v === 'export')) ex.removeAttribute('data-fd-bagian');
+            document.body.classList.toggle('fd-tumpuk', v === 'profil' || !!fdSub);
+        }
+        if (window.MutationObserver) {
+            var mo = new MutationObserver(fdSinkronTumpuk);
+            document.querySelectorAll('.view-panel').forEach(function (p) { mo.observe(p, { attributes: true, attributeFilter: ['class'] }); });
+        }
+        window.fdKembali = function () {
+            var v = fdViewAktif();
+            if (fdSub && v === fdSub) { fdBukaProfil(); return; }
+            var ifc = (typeof activeBusiness !== 'undefined' && activeBusiness === 'ifc');
+            var t = fdAsal;
+            var bkcmV = ['input', 'kas', 'dashboard', 'pajak', 'export'];
+            var cocok = t && (t === 'riwayat' || t === 'setting' || (ifc ? /^ifc-/.test(t) : bkcmV.indexOf(t) !== -1)) && document.getElementById('view-' + t);
+            if (!cocok) t = ifc ? 'ifc-input' : 'input';
+            showView(t, fdSidebarBtn(t));
+        };
+        // Export PDF tanpa konfigurasi: tampilkan bagian Konfigurasi (peringatan lama tetap muncul)
+        if (typeof window.showConfigWarning === 'function') {
+            var fdScw = window.showConfigWarning;
+            window.showConfigWarning = function () {
+                var ex = document.getElementById('view-export');
+                if (ex && ex.hasAttribute('data-fd-bagian')) ex.setAttribute('data-fd-bagian', 'konfigurasi');
+                return fdScw.apply(this, arguments);
+            };
+        }
         window.fdBukaProfil = function () {
+            var v = fdViewAktif();
+            if (v && v !== 'profil' && v !== fdSub) fdAsal = v;   // ingat halaman asal (bukan halaman turunan Profil)
+            fdSub = null;
             if (typeof fdNotifToggle === 'function') fdNotifToggle(false);
             fdFabToggle(false);
             if (window.fdAvPopToggle) fdAvPopToggle(false);
@@ -10254,9 +10426,15 @@
             fdBukaProfil();                 // tetap di halaman Profil
         };
         window.fdProfilKe = function (tujuan) {
-            var v = tujuan;
-            if (tujuan === 'export' && typeof activeBusiness !== 'undefined' && activeBusiness === 'ifc') v = 'ifc-export';
-            showView(v, document.querySelector('.sidebar-item[data-view="' + v + '"]'));
+            var v = tujuan, bagian = null;
+            var ifc = (typeof activeBusiness !== 'undefined' && activeBusiness === 'ifc');
+            if (tujuan === 'export' && ifc) v = 'ifc-export';
+            else if (tujuan === 'export' || tujuan === 'konfigurasi' || tujuan === 'backup') { v = 'export'; bagian = tujuan; }
+            fdSub = v;
+            var ex = document.getElementById('view-export');
+            if (ex) { if (bagian) ex.setAttribute('data-fd-bagian', bagian); else ex.removeAttribute('data-fd-bagian'); }
+            showView(v, fdSidebarBtn(v));
+            fdSinkronTumpuk();
         };
         // Foto profil di halaman Profil: pop-up Ambil foto / Pilih dari galeri / Hapus foto
         var avPop = document.getElementById('fdAvPop'), avBtn = document.getElementById('fdProfilAvBtn');
