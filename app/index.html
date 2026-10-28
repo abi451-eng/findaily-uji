@@ -3330,7 +3330,9 @@
         .fd-foto-body { display: grid; grid-template-columns: minmax(120px, 200px) 1fr; gap: 14px; align-items: start; }
         .fd-foto-thumb { width: 100%; max-height: 320px; object-fit: contain; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); cursor: zoom-in; }
         .fd-foto-thumb:not([src]) { display: none; }
-        .fd-foto-body:has(.fd-foto-thumb:not([src])) { grid-template-columns: 1fr; }
+        .fd-foto-body:has(#fdFotoThumb:not([src])) { grid-template-columns: 1fr; }
+        .fd-foto-thumbs { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+        .fd-foto-thumbs:has(#fdFotoThumb:not([src])) { display: none; }
         .fd-foto-thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         .fd-foto-info { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
         .fd-foto-status { font-size: 14px; font-weight: 600; }
@@ -3365,6 +3367,8 @@
         @media (max-width: 640px) {
             .fd-foto-body { grid-template-columns: 1fr; }
             .fd-foto-thumb { max-height: 220px; }
+            .fd-foto-thumbs { flex-direction: row; }
+            .fd-foto-thumbs .fd-foto-thumb { flex: 1 1 0; min-width: 0; }
             .fd-foto-btn { flex: 1 1 140px; }
         }
 
@@ -3780,9 +3784,9 @@
                 <svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
                 <span data-i18n="foto_file_btn">Pilih file foto</span>
             </button>
-            <span class="fd-foto-hint" data-i18n="foto_hint">Foto seluruh lembar catatan harian, termasuk catatan di pinggir.</span>
+            <span class="fd-foto-hint" data-i18n="foto_hint">Foto lembar catatan harian dan/atau nota daging. Lewat Pilih file bisa 2 foto sekaligus.</span>
             <input type="file" id="fdFotoInput" accept="image/*" capture="environment" hidden>
-            <input type="file" id="fdFotoFile" accept="image/*" hidden>
+            <input type="file" id="fdFotoFile" accept="image/*" multiple hidden>
         </div>
         <div class="fd-foto-panel fd-admin-only" id="fdFotoPanel" hidden>
             <div class="fd-foto-panel-head">
@@ -3790,7 +3794,10 @@
                 <button type="button" class="btn btn-secondary fd-foto-close" onclick="fdFotoTutup()" data-i18n="foto_close">Tutup</button>
             </div>
             <div class="fd-foto-body">
-                <img id="fdFotoThumb" alt="Foto lembar catatan" class="fd-foto-thumb" tabindex="0" role="button">
+                <div class="fd-foto-thumbs">
+                    <img id="fdFotoThumb" alt="Foto 1" class="fd-foto-thumb" tabindex="0" role="button">
+                    <img id="fdFotoThumb2" alt="Foto 2" class="fd-foto-thumb" tabindex="0" role="button">
+                </div>
                 <div class="fd-foto-info">
                     <div id="fdFotoStatus" class="fd-foto-status" role="status" aria-live="polite"></div>
                     <ul id="fdFotoCek" class="fd-foto-cek"></ul>
@@ -5057,7 +5064,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.1.0-uji.15';
+        const APP_VERSION = 'v7.1.0-uji.16';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -5164,7 +5171,7 @@
                 kas_ok_saved:'Transaction saved.', kas_ok_saved_ifc:'Transaction saved and recorded in the IFC cash book.', kas_ok_updated:'Changes saved.', kas_ok_deleted:'Transaction deleted.',
                 kas_confirm_delete:'Delete "{k}" for {v}?', kas_confirm_delete_ifc:'Its entry in the IFC cash book will be deleted too.', kas_edit_note:'Editing the transaction on {d}.',
                 kas_err_start:'Fill in the start date.', kas_confirm_start:'There are {n} transactions before the new start date. They will no longer be counted.\n\nContinue?', kas_ok_cfg:'Cash Deposit starting setup saved.',
-                fab_kamera:'Photo', fab_file:'Choose file', profil_usaha:'Business', profil_bkcm_sub:'Meatball stall', profil_ifc_sub:'IFC cash book', profil_menu:'Menu', profil_backup:'Backup', profil_foto_kamera:'Take photo', profil_foto_galeri:'Choose from gallery', profil_foto_hapus:'Remove photo', notif_update_sub:'Press Update to use the latest version of the app.', notif_backup_title:'Backup reminder', foto_btn:'Take photo', foto_file_btn:'Choose photo file', foto_hint:'Photograph the whole daily sheet, including notes in the margin.', foto_title:'Photo reading result', foto_close:'Close', foto_note:'Not saved yet. Check every marked field, then press Save Data.', foto_reading:'Reading photo...', foto_done:'The form has been filled from the photo. Check it before saving.', foto_offline:'An internet connection is required to read the photo. Fill it in manually.', foto_unreachable:'The server function "baca-catatan" is not installed or cannot be reached.', foto_move_date:'Go to {d}', foto_reapply:'Fill in again from photo', foto_bad_file:'The file is not a readable image.', foto_lvl_ok:'Match', foto_lvl_info:'Info', foto_lvl_peringatan:'Check', foto_lvl_error:'Wrong', foto_cek_TGL_KOSONG:'The date on the sheet could not be read. Make sure the form date is correct.', foto_cek_TGL_BEDA:'The sheet date is {tgl}, different from the form date {form}.', foto_cek_HARI_BEDA:'The day name on the sheet "{hari}" does not match the date {tgl} (should be {benar}).', foto_cek_RINCIAN_BEDA:'The sum of the sales details {a} is not equal to Total Sales {b}.', foto_cek_PENGELUARAN_BEDA:'The sum of the expense rows {a} is not equal to Total Expenses on the sheet {b}.', foto_cek_PPN_TERTUKAR:'Total sales may have been swapped with the VAT figure ({a}).', foto_cek_PPN_BEDA:'VAT on the sheet is {a}, it should be {b} ({r}% of Total Sales {c}).', foto_cek_SETOR_BEDA:'Deposited {a} is not equal to Final Balance + VAT ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) is larger than Total Sales ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'The payment total on the sheet is {a}, while QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'The online ride total on the sheet is {a}, while GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'GoJek/Grab notes are usually on the Sunday sheet, but this sheet is {hari}.', foto_cek_PENJUALAN_KECIL:'Total Sales {a} is far below usual this month (median {b}). Check the figure again.', foto_cek_ADA_DATA:'This date already has data. Saving will overwrite it.', foto_cek_RAGU:'Unclear handwriting in: {kolom}. Check the fields marked in red.', foto_cek_SEMUA_COCOK:'All figures match each other.', foto_cek_TOTAL_DARI_RINCIAN:'Total sales was empty, the sum of the details was used.', foto_cek_TUNAI_DARI_SALDO:'Final Balance was empty, Balance was used.', foto_cek_RAGU_TANGGAL:'The date or day name on the sheet is unclear.'
+                fab_kamera:'Photo', fab_file:'Choose file', profil_usaha:'Business', profil_bkcm_sub:'Meatball stall', profil_ifc_sub:'IFC cash book', profil_menu:'Menu', profil_backup:'Backup', profil_foto_kamera:'Take photo', profil_foto_galeri:'Choose from gallery', profil_foto_hapus:'Remove photo', notif_update_sub:'Press Update to use the latest version of the app.', notif_backup_title:'Backup reminder', foto_btn:'Take photo', foto_file_btn:'Choose photo file', foto_hint:'Photograph the daily sheet and/or the meat receipt. Choose file accepts 2 photos at once.', foto_title:'Photo reading result', foto_close:'Close', foto_note:'Not saved yet. Check every marked field, then press Save Data.', foto_reading:'Reading photo...', foto_done:'The form has been filled from the photo. Check it before saving.', foto_offline:'An internet connection is required to read the photo. Fill it in manually.', foto_unreachable:'The server function "baca-catatan" is not installed or cannot be reached.', foto_move_date:'Go to {d}', foto_reapply:'Fill in again from photo', foto_bad_file:'The file is not a readable image.', foto_lvl_ok:'Match', foto_lvl_info:'Info', foto_lvl_peringatan:'Check', foto_lvl_error:'Wrong', foto_cek_TGL_KOSONG:'The date on the sheet could not be read. Make sure the form date is correct.', foto_cek_TGL_BEDA:'The sheet date is {tgl}, different from the form date {form}.', foto_cek_HARI_BEDA:'The day name on the sheet "{hari}" does not match the date {tgl} (should be {benar}).', foto_cek_RINCIAN_BEDA:'The sum of the sales details {a} is not equal to Total Sales {b}.', foto_cek_PENGELUARAN_BEDA:'The sum of the expense rows {a} is not equal to Total Expenses on the sheet {b}.', foto_cek_PPN_TERTUKAR:'Total sales may have been swapped with the VAT figure ({a}).', foto_cek_PPN_BEDA:'VAT on the sheet is {a}, it should be {b} ({r}% of Total Sales {c}).', foto_cek_SETOR_BEDA:'Deposited {a} is not equal to Final Balance + VAT ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) is larger than Total Sales ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'The payment total on the sheet is {a}, while QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'The online ride total on the sheet is {a}, while GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'GoJek/Grab notes are usually on the Sunday sheet, but this sheet is {hari}.', foto_cek_PENJUALAN_KECIL:'Total Sales {a} is far below usual this month (median {b}). Check the figure again.', foto_cek_ADA_DATA:'This date already has data. Saving will overwrite it.', foto_cek_RAGU:'Unclear handwriting in: {kolom}. Check the fields marked in red.', foto_cek_SEMUA_COCOK:'All figures match each other.', foto_cek_TOTAL_DARI_RINCIAN:'Total sales was empty, the sum of the details was used.', foto_cek_TUNAI_DARI_SALDO:'Final Balance was empty, Balance was used.', foto_cek_RAGU_TANGGAL:'The date or day name on the sheet is unclear.', foto_kosong:'The photo has no readable daily sheet or meat receipt.', foto_nota_pindah:'Meat receipt for {d}. Press the change-date button to fill the Meat field.', foto_nota_done:'The Meat field has been filled from the receipt. Check it before saving.', foto_cek_NOTA_TGL_KOSONG:'The date on the meat receipt could not be read. Make sure the form date is correct.', foto_cek_NOTA_TGL_FORM:'Meat receipt dated {tgl}, the form is now {form}. Press the change-date button below.', foto_cek_NOTA_TOTAL_KOSONG:'The "Jumlah Rp." line on the meat receipt could not be read. Fill in the Meat field manually.', foto_cek_NOTA_DIPAKAI:'Only the Meat field is filled from the meat receipt ({a}).', foto_cek_NOTA_ADA_DATA:'This date already has data: it was loaded, and only the Meat field is replaced.', foto_cek_NOTA_DATA_BARU:'This date has no data yet. The other fields can be completed later.', foto_cek_NOTA_TGL_LAIN:'The meat receipt is dated {a}, different from the daily sheet {b}. The receipt amount is not used: photograph that receipt on its own for {a}.', foto_cek_DAGING_BEDA:'Meat on the daily sheet is {a}, on the meat receipt {b}. The receipt amount is used.', foto_cek_NOTA_TAHUN:'The year is not written on the meat receipt, {y} is used.', foto_cek_RAGU_TANGGAL_NOTA:'The date on the meat receipt is unclear.'
             },            id: {
                 menu_title:'Menu', nav_input:'Input Data', nav_kas:'Kas Setoran', nav_logout:'Keluar', setting_account_title:'Akun', nav_riwayat:'Riwayat', hist_title:'Riwayat perubahan', hist_hint:'Setiap tambah, ubah, dan hapus dicatat otomatis oleh server, dan catatannya tidak bisa diubah atau dihapus.', hist_all_types:'Semua jenis', hist_t_bkcm:'Input BKCM', hist_t_ifc:'Input IFC', hist_t_kas:'Kas Setoran', hist_t_cfg:'Pengaturan', hist_t_akun:'Akun pemantau', hist_all_people:'Semua orang', hist_more:'Muat lebih banyak', fd_viewer_pill:'Mode lihat saja', setting_pm_title:'Akun pemantau', setting_pm_desc:'Bos dan karyawan masuk dengan nama pengguna. Mereka bisa melihat semua menu dan mengunduh laporan, tapi tidak bisa mengubah data.', fd_pm_manage:'Kelola', fd_pm_add_title:'Tambah pemantau', fd_pm_nama:'Nama', fd_pm_nama_ph:'Contoh: Pak Joko', fd_pm_user:'Nama pengguna', fd_pm_pass:'Password (minimal 8 karakter)', fd_pm_add_btn:'Buat akun pemantau', fd_pm_hint:'Berikan nama pengguna dan password ini ke orangnya. Mereka masuk di halaman masuk seperti biasa, tanpa email.', fd_role_admin:'Admin', fd_role_pemantau:'Pemantau', fd_logout_confirm:'Keluar dari akun di HP ini? Semua data sudah aman di server.', fd_logout_pending:'Masih ada {n} perubahan yang belum terkirim ke server. Sambungkan internet dan tunggu sampai tertulis "Tersinkron", baru keluar.', setting_sync_title:'Data server', fd_reload_btn:'Muat ulang data', nav_dashboard:'Dasbor', nav_pajak:'Laporan Pajak', nav_ifc_input:'Input Harian', nav_ifc_laporan:'Laporan Bulanan', nav_ifc_export:'Export',
                 nav_export:'Ekspor', nav_install:'Pasang Aplikasi', nav_setting:'Pengaturan', nav_config:'Konfigurasi',
@@ -5241,7 +5248,7 @@
                 kas_lbl_amount:'Jumlah', kas_lbl_ket:'Keterangan', kas_ph_ket:'Contoh: giling daging', kas_btn_cancel_edit:'Batal ubah',
                 kas_open_title:'Belum selesai', kas_open_hint:'Pinjaman yang masih harus dikembalikan, posisi saat ini.', kas_open_note:'Pinjaman dari IFC dan pengembaliannya otomatis tercatat juga di buku kas IFC.',
                 kas_th_date:'Tanggal', kas_th_ket:'Keterangan', kas_th_jenis:'Jenis', kas_th_in:'Masuk', kas_th_out:'Keluar', kas_th_sisa:'Sisa', kas_th_aksi:'Aksi',
-                fab_kamera:'Foto', fab_file:'Pilih file', profil_usaha:'Usaha', profil_bkcm_sub:'Warung bakso', profil_ifc_sub:'Buku kas IFC', profil_menu:'Menu', profil_backup:'Backup', profil_foto_kamera:'Ambil foto', profil_foto_galeri:'Pilih dari galeri', profil_foto_hapus:'Hapus foto', notif_update_sub:'Tekan Update untuk memakai versi terbaru aplikasi.', notif_backup_title:'Pengingat backup', foto_btn:'Ambil foto', foto_file_btn:'Pilih file foto', foto_hint:'Foto seluruh lembar catatan harian, termasuk catatan di pinggir.', foto_title:'Hasil baca foto', foto_close:'Tutup', foto_note:'Belum tersimpan. Periksa setiap kolom bertanda, lalu tekan Simpan Data.', foto_reading:'Membaca foto...', foto_done:'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.', foto_offline:'Butuh koneksi internet untuk membaca foto. Isi manual dulu.', foto_unreachable:'Fungsi server "baca-catatan" belum terpasang atau tidak bisa dijangkau.', foto_move_date:'Pindah ke {d}', foto_reapply:'Isi lagi dari foto', foto_bad_file:'Berkas bukan gambar yang bisa dibaca.', foto_lvl_ok:'Cocok', foto_lvl_info:'Info', foto_lvl_peringatan:'Periksa', foto_lvl_error:'Salah', foto_cek_TGL_KOSONG:'Tanggal di kertas tidak terbaca. Pastikan tanggal formulir sudah benar.', foto_cek_TGL_BEDA:'Tanggal di kertas {tgl}, berbeda dengan tanggal formulir {form}.', foto_cek_HARI_BEDA:'Nama hari di kertas "{hari}" tidak cocok dengan tanggal {tgl} (seharusnya {benar}).', foto_cek_RINCIAN_BEDA:'Jumlah rincian penjualan {a} tidak sama dengan Total Penjualan {b}.', foto_cek_PENGELUARAN_BEDA:'Jumlah baris pengeluaran {a} tidak sama dengan Total Pengeluaran di kertas {b}.', foto_cek_PPN_TERTUKAR:'Total penjualan mungkin tertukar dengan angka PPN ({a}).', foto_cek_PPN_BEDA:'PPN di kertas {a}, seharusnya {b} ({r}% dari Total Penjualan {c}).', foto_cek_SETOR_BEDA:'Disetorkan {a} tidak sama dengan Saldo Akhir + PPN ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) lebih besar dari Total Penjualan ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'Total pembayaran di kertas {a}, sedangkan QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'Total ojek online di kertas {a}, sedangkan GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'Catatan GoJek/Grab biasanya ada di lembar hari Minggu, tapi lembar ini hari {hari}.', foto_cek_PENJUALAN_KECIL:'Total Penjualan {a} jauh di bawah biasanya bulan ini (median {b}). Periksa lagi angkanya.', foto_cek_ADA_DATA:'Tanggal ini sudah punya data. Menyimpan akan menimpanya.', foto_cek_RAGU:'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.', foto_cek_SEMUA_COCOK:'Semua angka saling cocok.', foto_cek_TOTAL_DARI_RINCIAN:'Total penjualan kosong, dipakai jumlah rincian.', foto_cek_TUNAI_DARI_SALDO:'Saldo Akhir kosong, dipakai Saldo.', foto_cek_RAGU_TANGGAL:'Tanggal atau nama hari di kertas kurang jelas.'
+                fab_kamera:'Foto', fab_file:'Pilih file', profil_usaha:'Usaha', profil_bkcm_sub:'Warung bakso', profil_ifc_sub:'Buku kas IFC', profil_menu:'Menu', profil_backup:'Backup', profil_foto_kamera:'Ambil foto', profil_foto_galeri:'Pilih dari galeri', profil_foto_hapus:'Hapus foto', notif_update_sub:'Tekan Update untuk memakai versi terbaru aplikasi.', notif_backup_title:'Pengingat backup', foto_btn:'Ambil foto', foto_file_btn:'Pilih file foto', foto_hint:'Foto lembar catatan harian dan/atau nota daging. Lewat Pilih file bisa 2 foto sekaligus.', foto_title:'Hasil baca foto', foto_close:'Tutup', foto_note:'Belum tersimpan. Periksa setiap kolom bertanda, lalu tekan Simpan Data.', foto_reading:'Membaca foto...', foto_done:'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.', foto_offline:'Butuh koneksi internet untuk membaca foto. Isi manual dulu.', foto_unreachable:'Fungsi server "baca-catatan" belum terpasang atau tidak bisa dijangkau.', foto_move_date:'Pindah ke {d}', foto_reapply:'Isi lagi dari foto', foto_bad_file:'Berkas bukan gambar yang bisa dibaca.', foto_lvl_ok:'Cocok', foto_lvl_info:'Info', foto_lvl_peringatan:'Periksa', foto_lvl_error:'Salah', foto_cek_TGL_KOSONG:'Tanggal di kertas tidak terbaca. Pastikan tanggal formulir sudah benar.', foto_cek_TGL_BEDA:'Tanggal di kertas {tgl}, berbeda dengan tanggal formulir {form}.', foto_cek_HARI_BEDA:'Nama hari di kertas "{hari}" tidak cocok dengan tanggal {tgl} (seharusnya {benar}).', foto_cek_RINCIAN_BEDA:'Jumlah rincian penjualan {a} tidak sama dengan Total Penjualan {b}.', foto_cek_PENGELUARAN_BEDA:'Jumlah baris pengeluaran {a} tidak sama dengan Total Pengeluaran di kertas {b}.', foto_cek_PPN_TERTUKAR:'Total penjualan mungkin tertukar dengan angka PPN ({a}).', foto_cek_PPN_BEDA:'PPN di kertas {a}, seharusnya {b} ({r}% dari Total Penjualan {c}).', foto_cek_SETOR_BEDA:'Disetorkan {a} tidak sama dengan Saldo Akhir + PPN ({b}).', foto_cek_NONTUNAI_LEBIH:'QRIS + EDC + Transfer ({a}) lebih besar dari Total Penjualan ({b}).', foto_cek_BAYAR_TOTAL_BEDA:'Total pembayaran di kertas {a}, sedangkan QRIS + EDC + Transfer = {b}.', foto_cek_OJOL_TOTAL_BEDA:'Total ojek online di kertas {a}, sedangkan GoJek + Grab = {b}.', foto_cek_OJOL_BUKAN_MINGGU:'Catatan GoJek/Grab biasanya ada di lembar hari Minggu, tapi lembar ini hari {hari}.', foto_cek_PENJUALAN_KECIL:'Total Penjualan {a} jauh di bawah biasanya bulan ini (median {b}). Periksa lagi angkanya.', foto_cek_ADA_DATA:'Tanggal ini sudah punya data. Menyimpan akan menimpanya.', foto_cek_RAGU:'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.', foto_cek_SEMUA_COCOK:'Semua angka saling cocok.', foto_cek_TOTAL_DARI_RINCIAN:'Total penjualan kosong, dipakai jumlah rincian.', foto_cek_TUNAI_DARI_SALDO:'Saldo Akhir kosong, dipakai Saldo.', foto_cek_RAGU_TANGGAL:'Tanggal atau nama hari di kertas kurang jelas.', foto_kosong:'Foto tidak berisi lembar catatan harian atau nota daging yang terbaca.', foto_nota_pindah:'Nota daging untuk tanggal {d}. Tekan tombol pindah tanggal untuk mengisi kolom Daging.', foto_nota_done:'Kolom Daging sudah diisi dari nota. Periksa sebelum menyimpan.', foto_cek_NOTA_TGL_KOSONG:'Tanggal di nota daging tidak terbaca. Pastikan tanggal formulir sudah benar.', foto_cek_NOTA_TGL_FORM:'Nota daging tanggal {tgl}, formulir sekarang {form}. Tekan tombol pindah tanggal di bawah.', foto_cek_NOTA_TOTAL_KOSONG:'Baris "Jumlah Rp." di nota daging tidak terbaca. Isi kolom Daging manual.', foto_cek_NOTA_DIPAKAI:'Hanya kolom Daging yang diisi dari nota daging ({a}).', foto_cek_NOTA_ADA_DATA:'Tanggal ini sudah punya data: data itu dimuat, lalu hanya kolom Daging yang diganti.', foto_cek_NOTA_DATA_BARU:'Tanggal ini belum punya data. Kolom lain bisa dilengkapi nanti.', foto_cek_NOTA_TGL_LAIN:'Nota daging bertanggal {a}, berbeda dengan lembar harian {b}. Angka nota tidak dipakai: foto nota itu tersendiri untuk tanggal {a}.', foto_cek_DAGING_BEDA:'Daging di lembar harian {a}, di nota daging {b}. Dipakai angka nota daging.', foto_cek_NOTA_TAHUN:'Tahun tidak tertulis di nota daging, dipakai tahun {y}.', foto_cek_RAGU_TANGGAL_NOTA:'Tanggal di nota daging kurang jelas.'
             }
         };
 
@@ -9983,12 +9990,81 @@
         return { kolom: kolom, ragu: ragu, info: info };
     }
 
+    // v7.3: NOTA DAGING. Satu nota = satu tanggal; yang diambil hanya tanggal & baris "Jumlah Rp." (total).
+    // tahunCadangan dipakai bila tahun tidak tertulis di nota.
+    function fdFotoNota(h, tahunCadangan) {
+        var n = h && h.nota_daging;
+        if (!n || typeof n !== 'object') return null;
+        var total = fdFotoAngka(n.total);
+        var d = fdFotoAngka(n.hari), m = fdFotoAngka(n.bulan), y = fdFotoAngka(n.tahun), tahunDitebak = false;
+        if (y === null && d && m && tahunCadangan) { y = tahunCadangan; tahunDitebak = true; }
+        var tgl = (d && m && y) ? fdFotoTanggal(y + '-' + m + '-' + d) : null;
+        if (total === null && !tgl) return null;
+        return { total: total, tanggal: tgl, tahunDitebak: tahunDitebak, raguTotal: n.ragu_total === true, raguTanggal: n.ragu_tanggal === true };
+    }
+    function fdFotoSamaTgl(a, b) { return !!(a && b && a.y === b.y && a.m === b.m && a.d === b.d); }
+
+    // Hasil baca (lembar harian dan/atau nota daging) -> nilai formulir.
+    // mode: 'lembar' | 'nota' | 'keduanya' | 'kosong'. Nota daging hanya mengisi kolom Daging, dan menang atas
+    // daging di lembar bila tanggalnya sama. tanggal = tanggal tujuan formulir.
+    function fdFotoPetakanSemua(hasil, tahunCadangan) {
+        var h = hasil || {}, lembar = h.ada_lembar !== false;     // hasil lama (tanpa ada_lembar) = lembar
+        var tglLembar = lembar ? fdFotoTanggal(h.tanggal) : null;
+        var nota = fdFotoNota(h, tglLembar ? tglLembar.y : tahunCadangan);
+        var nilai = lembar ? fdFotoPetakan(h) : { kolom: {}, ragu: [], info: [] };
+        nilai.mode = lembar ? (nota ? 'keduanya' : 'lembar') : (nota ? 'nota' : 'kosong');
+        nilai.nota = nota;
+        nilai.tanggal = tglLembar || (nota ? nota.tanggal : null);
+        nilai.notaDipakai = false;
+        if (nota && nota.total !== null && (!lembar || !tglLembar || !nota.tanggal || fdFotoSamaTgl(tglLembar, nota.tanggal))) {
+            nilai.dagingLembar = lembar ? (nilai.kolom.daging || 0) : null;
+            nilai.kolom.daging = nota.total;
+            nilai.notaDipakai = true;
+            nilai.ragu = nilai.ragu.filter(function (id) { return id !== 'daging'; });
+            if (nota.raguTotal) nilai.ragu.push('daging');
+        }
+        if (nota && nota.tahunDitebak && nota.tanggal) {
+            nilai.info.push({ kode: 'NOTA_TAHUN', pesan: 'Tahun tidak tertulis di nota daging, dipakai tahun {y}.', vars: { y: String(nota.tanggal.y) } });
+        }
+        if (nota && nota.raguTanggal) nilai.info.push({ kode: 'RAGU_TANGGAL_NOTA', pesan: 'Tanggal di nota daging kurang jelas.' });
+        return nilai;
+    }
+
     // Pemeriksaan silang. Tidak memblokir penyimpanan; admin yang memutuskan.
     // konteks: { ppnRate, tanggalForm: {y,m,d}, adaDataTanggalIni, medianPenjualanBulan }
     function fdFotoCek(hasil, nilai, konteks) {
         var h = hasil || {}, kol = (nilai && nilai.kolom) || {}, ctx = konteks || {}, out = [];
         function isi(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, function (_m, k) { return vars[k] != null ? vars[k] : ''; }); }
         function tambah(tingkat, kode, tpl, vars) { vars = vars || {}; out.push({ tingkat: tingkat, kode: kode, pesan: isi(tpl, vars), vars: vars }); }
+        function selesai() {
+            var ragu = (nilai && nilai.ragu) || [];
+            if (ragu.length) {
+                tambah('peringatan', 'RAGU', 'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.',
+                    { kolom: ragu.map(function (id) { return FD_FOTO_LABEL[id] || id; }).join(', ') });
+            }
+            ((nilai && nilai.info) || []).forEach(function (i) { tambah('info', i.kode, i.pesan, i.vars); });
+            var masalah = out.some(function (c) { return c.tingkat === 'peringatan' || c.tingkat === 'error'; });
+            if (!masalah) tambah('ok', 'SEMUA_COCOK', 'Semua angka saling cocok.');
+            return out;
+        }
+        var nota = nilai && nilai.nota;
+
+        // v7.3: hanya nota daging -> cukup tanggal, total, dan apakah tanggal itu sudah punya data
+        if (nilai && nilai.mode === 'nota') {
+            var tn = nota.tanggal, fn = ctx.tanggalForm;
+            if (!tn) tambah('peringatan', 'NOTA_TGL_KOSONG', 'Tanggal di nota daging tidak terbaca. Pastikan tanggal formulir sudah benar.');
+            else if (fn && !fdFotoSamaTgl(tn, fn)) {
+                tambah('peringatan', 'NOTA_TGL_FORM', 'Nota daging tanggal {tgl}, formulir sekarang {form}. Tekan tombol pindah tanggal di bawah.',
+                    { tgl: fdFotoTglTeks(tn), form: fdFotoTglTeks(fn) });
+            }
+            if (nota.total === null) tambah('error', 'NOTA_TOTAL_KOSONG', 'Baris "Jumlah Rp." di nota daging tidak terbaca. Isi kolom Daging manual.');
+            else tambah('info', 'NOTA_DIPAKAI', 'Hanya kolom Daging yang diisi dari nota daging ({a}).', { a: fdFotoRp(nota.total) });
+            if (!tn || !fn || fdFotoSamaTgl(tn, fn)) {
+                if (ctx.adaDataTanggalIni) tambah('info', 'NOTA_ADA_DATA', 'Tanggal ini sudah punya data: data itu dimuat, lalu hanya kolom Daging yang diganti.');
+                else tambah('info', 'NOTA_DATA_BARU', 'Tanggal ini belum punya data. Kolom lain bisa dilengkapi nanti.');
+            }
+            return selesai();
+        }
 
         // Tanggal & hari
         var tgl = fdFotoTanggal(h.tanggal), f = ctx.tanggalForm;
@@ -10077,16 +10153,21 @@
         }
         if (ctx.adaDataTanggalIni) tambah('info', 'ADA_DATA', 'Tanggal ini sudah punya data. Menyimpan akan menimpanya.');
 
-        var ragu = (nilai && nilai.ragu) || [];
-        if (ragu.length) {
-            tambah('peringatan', 'RAGU', 'Tulisan kurang jelas di: {kolom}. Periksa kolom bertanda merah.',
-                { kolom: ragu.map(function (id) { return FD_FOTO_LABEL[id] || id; }).join(', ') });
+        // v7.3: lembar + nota daging
+        if (nota) {
+            if (nota.total === null) {
+                tambah('peringatan', 'NOTA_TOTAL_KOSONG', 'Baris "Jumlah Rp." di nota daging tidak terbaca. Isi kolom Daging manual.');
+            } else if (!nilai.notaDipakai) {
+                tambah('error', 'NOTA_TGL_LAIN', 'Nota daging bertanggal {a}, berbeda dengan lembar harian {b}. Angka nota tidak dipakai: foto nota itu tersendiri untuk tanggal {a}.',
+                    { a: fdFotoTglTeks(nota.tanggal), b: tgl ? fdFotoTglTeks(tgl) : '-' });
+            } else if (nilai.dagingLembar && nilai.dagingLembar !== nota.total) {
+                tambah('peringatan', 'DAGING_BEDA', 'Daging di lembar harian {a}, di nota daging {b}. Dipakai angka nota daging.',
+                    { a: fdFotoRp(nilai.dagingLembar), b: fdFotoRp(nota.total) });
+            } else {
+                tambah('info', 'NOTA_DIPAKAI', 'Kolom Daging diisi dari nota daging ({a}).', { a: fdFotoRp(nota.total) });
+            }
         }
-        ((nilai && nilai.info) || []).forEach(function (i) { tambah('info', i.kode, i.pesan); });
-
-        var masalah = out.some(function (c) { return c.tingkat === 'peringatan' || c.tingkat === 'error'; });
-        if (!masalah) tambah('ok', 'SEMUA_COCOK', 'Semua angka saling cocok.');
-        return out;
+        return selesai();
     }
     /* FD-FOTO-PURE-END */
 
@@ -10094,7 +10175,7 @@
     // Hanya MENGISI kolom formulir; tidak pernah memanggil saveData() atau menulis ke appData/localStorage.
     // Foto tidak disimpan di mana pun: hanya dikirim ke fungsi server baca-catatan, pratinjau dicabut saat panel ditutup.
     var FD_FOTO_KOLOM = ['totalPenjualan', 'tunai', 'qris', 'edc', 'transfer', 'gojek', 'grab', 'belanjaPagi', 'belanjaSore', 'daging', 'dll', 'keterangan'];
-    var fdFoto = { hasil: null, nilai: null, objectUrl: null, sibuk: false, pindah: false, tanggalDiisi: null };
+    var fdFoto = { hasil: null, nilai: null, objectUrl: null, objectUrl2: null, sibuk: false, pindah: false, tanggalDiisi: null };
 
     function fdFotoEl(id) { return document.getElementById(id); }
     function fdFotoAdmin() { return !!(window.FD_MEMBER && window.FD_MEMBER.peran === 'admin'); }
@@ -10184,10 +10265,10 @@
         return { base64: await fdFotoBase64(blob), mediaType: 'image/jpeg', objectUrl: URL.createObjectURL(blob) };
     }
 
-    async function fdFotoPanggil(gambar) {
+    async function fdFotoPanggil(daftar) {
         var sb = await FD.ready;
         var res = await sb.functions.invoke('baca-catatan', {
-            body: { instansi_id: window.FD_MEMBER.instansi_id, gambar_base64: gambar.base64, media_type: gambar.mediaType }
+            body: { instansi_id: window.FD_MEMBER.instansi_id, gambar: daftar.map(function (g) { return { base64: g.base64, media_type: g.mediaType }; }) }
         });
         if (res.error) {
             var msg = res.error.message || String(res.error);
@@ -10204,6 +10285,18 @@
         FD_FOTO_KOLOM.forEach(function (id) { var el = fdFotoEl(id); if (el) el.classList.remove('fd-ai-filled', 'fd-ai-doubt'); });
     }
     function fdFotoHapusTandaSatu() { this.classList.remove('fd-ai-filled', 'fd-ai-doubt'); }
+
+    // Nota daging saja: muat data tanggal formulir lewat fungsi Edit yang lama (bila ada), supaya
+    // Simpan Data hanya mengganti kolom Daging dan kolom lain tetap.
+    function fdFotoSiapkanNota() {
+        if (!fdFoto.nilai || fdFoto.nilai.mode !== 'nota') return;
+        var f = fdFotoTanggalForm();
+        var list = (typeof appData !== 'undefined' && appData && appData[f.y + '-' + f.m]) || [];
+        var item = list.find(function (e) { return e && e.day === f.d && !e.isLibur; });
+        if (!item || (typeof currentEditDay !== 'undefined' && currentEditDay === f.d)) return;
+        fdFoto.pindah = true;
+        try { editData(f.d); } finally { fdFoto.pindah = false; }
+    }
 
     function fdFotoTerapkan(nilai) {
         if (!nilai) return;
@@ -10242,7 +10335,7 @@
     function fdFotoPerbarui() {
         if (!fdFoto.hasil || !fdFoto.nilai) return;
         fdFotoTampilCek(fdFotoCek(fdFoto.hasil, fdFoto.nilai, fdFotoKonteks()));
-        var btn = fdFotoEl('fdFotoPindahBtn'), tgl = fdFotoTanggal(fdFoto.hasil.tanggal), f = fdFotoTanggalForm();
+        var btn = fdFotoEl('fdFotoPindahBtn'), tgl = fdFoto.nilai.tanggal, f = fdFotoTanggalForm();
         if (tgl && fdFotoTglKey(tgl) !== fdFotoTglKey(f)) {
             btn.textContent = fdTr('foto_move_date', 'Pindah ke {d}', { d: tgl.d + ' ' + dispMonth(tgl.m - 1) + ' ' + tgl.y });
             btn.dataset.aksi = 'pindah';
@@ -10257,26 +10350,42 @@
         }
     }
 
-    async function fdFotoProses(file) {
-        if (!file || !fdFotoAdmin() || fdFoto.sibuk) return;
+    async function fdFotoProses(files) {
+        files = (Array.isArray(files) ? files : [files]).filter(Boolean).slice(0, 2);
+        if (!files.length || !fdFotoAdmin() || fdFoto.sibuk) return;
         fdFotoSibuk(true);
         fdFotoBukaPanel();
         fdFotoEl('fdFotoCek').textContent = '';
         fdFotoEl('fdFotoPindahBtn').hidden = true;
         fdFotoStatus(fdTr('foto_reading', 'Membaca foto...'), 'busy');
         try {
-            var gambar = await fdFotoKecilkan(file);
-            if (fdFoto.objectUrl) URL.revokeObjectURL(fdFoto.objectUrl);
-            fdFoto.objectUrl = gambar.objectUrl;
-            fdFotoEl('fdFotoThumb').src = gambar.objectUrl;
+            var daftar = [];
+            for (var i = 0; i < files.length; i++) daftar.push(await fdFotoKecilkan(files[i]));
+            fdFotoLepasGambar();
+            fdFoto.objectUrl = daftar[0].objectUrl;
+            fdFoto.objectUrl2 = daftar[1] ? daftar[1].objectUrl : null;
+            fdFotoEl('fdFotoThumb').src = fdFoto.objectUrl;
+            if (fdFoto.objectUrl2) fdFotoEl('fdFotoThumb2').src = fdFoto.objectUrl2;
             if (!navigator.onLine) throw new Error(fdTr('foto_offline', 'Butuh koneksi internet untuk membaca foto. Isi manual dulu.'));
-            var hasil = await fdFotoPanggil(gambar);
-            gambar.base64 = '';
+            var hasil = await fdFotoPanggil(daftar);
+            daftar.forEach(function (g) { g.base64 = ''; });
             fdFoto.hasil = hasil;
-            fdFoto.nilai = fdFotoPetakan(hasil);
-            fdFotoTerapkan(fdFoto.nilai);
-            fdFotoPerbarui();
-            fdFotoStatus(fdTr('foto_done', 'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.'), 'done');
+            fdFoto.nilai = fdFotoPetakanSemua(hasil, fdFotoTanggalForm().y);
+            fdFoto.tanggalDiisi = null;
+            if (fdFoto.nilai.mode === 'kosong') { fdFoto.hasil = null; fdFoto.nilai = null; throw new Error(fdTr('foto_kosong', 'Foto tidak berisi lembar catatan harian atau nota daging yang terbaca.')); }
+            var t0 = fdFoto.nilai.tanggal;
+            if (fdFoto.nilai.mode === 'nota' && t0 && !fdFotoSamaTgl(t0, fdFotoTanggalForm())) {
+                // Nota untuk tanggal lain: belum diisi; admin menekan tombol pindah tanggal dulu
+                fdFotoPerbarui();
+                fdFotoStatus(fdTr('foto_nota_pindah', 'Nota daging untuk tanggal {d}. Tekan tombol pindah tanggal untuk mengisi kolom Daging.', { d: fdFotoTglTeks(t0) }), 'done');
+            } else {
+                fdFotoSiapkanNota();
+                fdFotoTerapkan(fdFoto.nilai);
+                fdFotoPerbarui();
+                fdFotoStatus(fdFoto.nilai.mode === 'nota'
+                    ? fdTr('foto_nota_done', 'Kolom Daging sudah diisi dari nota. Periksa sebelum menyimpan.')
+                    : fdTr('foto_done', 'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.'), 'done');
+            }
         } catch (e) {
             fdFotoStatus((e && e.message) || String(e), 'error');
         } finally {
@@ -10288,31 +10397,39 @@
         if (!fdFoto.hasil || !fdFoto.nilai || fdFoto.sibuk) return;
         var btn = fdFotoEl('fdFotoPindahBtn');
         if (btn.dataset.aksi === 'pindah') {
-            var t = fdFotoTanggal(fdFoto.hasil.tanggal);
+            var t = fdFoto.nilai.tanggal;
             if (!t) return;
             fdFoto.pindah = true;
             try { calViewMonth = t.m; calViewYear = t.y; calSelectDay(t.d); }
             finally { fdFoto.pindah = false; }
         }
+        fdFotoSiapkanNota();
         // Pindah tanggal memuat ulang formulir: isi ulang dari foto, lalu periksa dengan konteks baru
         fdFotoTerapkan(fdFoto.nilai);
         fdFotoPerbarui();
+        fdFotoStatus(fdFoto.nilai.mode === 'nota'
+            ? fdTr('foto_nota_done', 'Kolom Daging sudah diisi dari nota. Periksa sebelum menyimpan.')
+            : fdTr('foto_done', 'Formulir sudah diisi dari foto. Periksa sebelum menyimpan.'), 'done');
     }
 
     function fdFotoTutup() {
         var p = fdFotoEl('fdFotoPanel');
         if (p) p.hidden = true;
-        if (fdFoto.objectUrl) URL.revokeObjectURL(fdFoto.objectUrl);
-        var img = fdFotoEl('fdFotoThumb');
-        if (img) img.removeAttribute('src');
+        fdFotoLepasGambar();
         fdFotoBersihkanTanda();
         fdFotoEl('fdFotoCek').textContent = '';
         fdFotoEl('fdFotoPindahBtn').hidden = true;
         fdFotoStatus('');
-        fdFoto.hasil = null; fdFoto.nilai = null; fdFoto.objectUrl = null; fdFoto.tanggalDiisi = null;
+        fdFoto.hasil = null; fdFoto.nilai = null; fdFoto.tanggalDiisi = null;
+    }
+    // Cabut pratinjau foto (tidak disimpan di mana pun)
+    function fdFotoLepasGambar() {
+        [fdFoto.objectUrl, fdFoto.objectUrl2].forEach(function (u) { if (u) URL.revokeObjectURL(u); });
+        fdFoto.objectUrl = null; fdFoto.objectUrl2 = null;
+        ['fdFotoThumb', 'fdFotoThumb2'].forEach(function (id) { var img = fdFotoEl(id); if (img) img.removeAttribute('src'); });
     }
 
-    function fdFotoBukaGambar() { if (fdFoto.objectUrl) window.open(fdFoto.objectUrl, '_blank', 'noopener'); }
+    function fdFotoBukaGambar(u) { u = (typeof u === 'string') ? u : fdFoto.objectUrl; if (u) window.open(u, '_blank', 'noopener'); }
 
     (function () {
         var inp = fdFotoEl('fdFotoInput');
@@ -10321,14 +10438,17 @@
         [inp, fdFotoEl('fdFotoFile')].forEach(function (el) {
             if (!el) return;
             el.addEventListener('change', function () {
-                var f = el.files && el.files[0];
+                var f = Array.prototype.slice.call(el.files || []);
                 el.value = '';                    // supaya foto yang sama bisa dipilih ulang
-                if (f) fdFotoProses(f);
+                if (f.length) fdFotoProses(f);    // maksimal 2 foto (lembar harian + nota daging)
             });
         });
-        var img = fdFotoEl('fdFotoThumb');
-        img.addEventListener('click', fdFotoBukaGambar);
-        img.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fdFotoBukaGambar(); } });
+        [['fdFotoThumb', 'objectUrl'], ['fdFotoThumb2', 'objectUrl2']].forEach(function (x) {
+            var img = fdFotoEl(x[0]);
+            if (!img) return;
+            img.addEventListener('click', function () { fdFotoBukaGambar(fdFoto[x[1]]); });
+            img.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fdFotoBukaGambar(fdFoto[x[1]]); } });
+        });
         // Tanggal formulir diganti admin: penanda dihapus (nilai di formulir sudah dimuat ulang), cek & tombol diperbarui
         var tampil = fdFotoEl('dateDisplay');
         if (tampil && 'MutationObserver' in window) {

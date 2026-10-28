@@ -13,7 +13,7 @@ assert.ok(i !== -1 && j > i, 'blok FD-FOTO-PURE tidak ditemukan di app/index.htm
 assert.equal(html.indexOf(A, i + 1), -1, 'penanda FD-FOTO-PURE-START muncul lebih dari sekali');
 const ctx = vm.createContext({});
 vm.runInContext(html.slice(i + A.length, j), ctx);
-const { fdFotoPetakan, fdFotoCek } = ctx;
+const { fdFotoPetakan, fdFotoCek, fdFotoPetakanSemua } = ctx;
 // Objek dari dalam vm punya prototipe lain: salin dulu agar bisa dibandingkan deepEqual
 const plain = (o) => JSON.parse(JSON.stringify(o));
 const kode = (cek) => plain(cek).map((c) => c.kode);
@@ -175,4 +175,60 @@ test('Tambahan - jenis tak sah, total kosong, nama dobel', () => {
   assert.equal(n.kolom.keterangan, 'KECAP ABC & GAS');
   assert.deepEqual(plain(n.ragu), ['totalPenjualan']);
   assert.ok(n.info.some((x) => x.kode === 'RAGU_TANGGAL'));
+});
+
+// v7.3: nota daging (contoh nyata: Kios Daging Sapi Barokah Jaya, 29/10/2026, Jumlah Rp. 752.000)
+const NOTA = { hari: 29, bulan: 10, tahun: 2026, total: 752000, ragu_total: false, ragu_tanggal: false };
+const hanyaNota = (n = NOTA) => ({ ada_lembar: false, tanggal: null, penjualan: {}, total_penjualan: null, pengeluaran: [], pembayaran: {},
+  saldo_akhir: null, ppn: null, nota_daging: n, keraguan: [] });
+
+test('N1 - hanya nota daging: isi kolom Daging saja', () => {
+  const n = fdFotoPetakanSemua(hanyaNota(), 2026);
+  assert.equal(n.mode, 'nota');
+  assert.deepEqual(plain(n.kolom), { daging: 752000 });
+  assert.deepEqual(plain(n.tanggal), { y: 2026, m: 10, d: 29 });
+  const a = fdFotoCek(hanyaNota(), n, konteks(2026, 10, 29, { adaDataTanggalIni: true }));
+  assert.deepEqual(kode(a), ['NOTA_DIPAKAI', 'NOTA_ADA_DATA', 'SEMUA_COCOK']);
+  const b = fdFotoCek(hanyaNota(), n, konteks(2026, 10, 28));
+  assert.ok(kode(b).includes('NOTA_TGL_FORM'));
+  assert.equal(kode(b).includes('NOTA_DATA_BARU'), false);
+  assert.equal(kode(b).includes('TGL_KOSONG'), false);
+});
+
+test('N2 - nota: tahun tidak tertulis, total tidak terbaca, ragu', () => {
+  const n = fdFotoPetakanSemua(hanyaNota({ hari: 29, bulan: 10, tahun: null, total: null }), 2026);
+  assert.deepEqual(plain(n.tanggal), { y: 2026, m: 10, d: 29 });
+  assert.equal('daging' in n.kolom, false);
+  const c = fdFotoCek(hanyaNota(), n, konteks(2026, 10, 29));
+  assert.ok(tingkat(c, 'error').includes('NOTA_TOTAL_KOSONG'));
+  assert.ok(kode(c).includes('NOTA_TAHUN'));
+  const r = fdFotoPetakanSemua(hanyaNota({ ...NOTA, ragu_total: true }), 2026);
+  assert.deepEqual(plain(r.ragu), ['daging']);
+  assert.equal(fdFotoPetakanSemua(hanyaNota(null), 2026).mode, 'kosong');
+});
+
+test('N3 - lembar + nota tanggal sama: nota menang atas daging lembar', () => {
+  const h = { ...F1, ada_lembar: true, nota_daging: { hari: 19, bulan: 4, tahun: 2026, total: 820000 } };
+  const n = fdFotoPetakanSemua(h, 2026);
+  assert.equal(n.mode, 'keduanya');
+  assert.equal(n.kolom.daging, 820000);
+  assert.equal(n.kolom.totalPenjualan, 2265000);
+  const c = fdFotoCek(h, n, konteks(2026, 4, 19));
+  assert.ok(tingkat(c, 'peringatan').includes('DAGING_BEDA'));
+  const same = { ...h, nota_daging: { hari: 19, bulan: 4, tahun: 2026, total: 800000 } };
+  assert.ok(kode(fdFotoCek(same, fdFotoPetakanSemua(same, 2026), konteks(2026, 4, 19))).includes('NOTA_DIPAKAI'));
+});
+
+test('N4 - lembar + nota beda tanggal: nota tidak dipakai', () => {
+  const h = { ...F1, ada_lembar: true, nota_daging: NOTA };
+  const n = fdFotoPetakanSemua(h, 2026);
+  assert.equal(n.kolom.daging, 800000);
+  assert.deepEqual(plain(n.tanggal), { y: 2026, m: 4, d: 19 });
+  assert.ok(tingkat(fdFotoCek(h, n, konteks(2026, 4, 19)), 'error').includes('NOTA_TGL_LAIN'));
+});
+
+test('N5 - hasil lama tanpa ada_lembar tetap dianggap lembar', () => {
+  const n = fdFotoPetakanSemua(F1, 2026);
+  assert.equal(n.mode, 'lembar');
+  assert.deepEqual(kode(fdFotoCek(F1, n, konteks(2026, 4, 19))), ['SEMUA_COCOK']);
 });

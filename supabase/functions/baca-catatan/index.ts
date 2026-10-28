@@ -1,7 +1,7 @@
 // =====================================================================
 // FINDAILY - Edge Function "baca-catatan"
-// Membaca foto LAPORAN CATATAN HARIAN BKCM dengan Claude dan mengembalikan isinya
-// dalam bentuk terstruktur. Hanya admin aktif instansi yang boleh memanggil.
+// Membaca foto LAPORAN CATATAN HARIAN BKCM dan/atau NOTA DAGING (1-2 foto) dengan Claude
+// dan mengembalikan isinya dalam bentuk terstruktur. Hanya admin aktif instansi yang boleh memanggil.
 // TIDAK menyimpan foto, TIDAK mencetak isi permintaan / gambar ke log.
 // Kunci ANTHROPIC_API_KEY dibaca dari Secrets Supabase (tidak pernah ada di kode).
 // =====================================================================
@@ -23,13 +23,20 @@ function secretKey(): string | undefined {
   return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? undefined;
 }
 
-const MAX_B64 = 2_800_000; // kira-kira 2 MB berkas
+const MAX_B64 = 2_800_000; // kira-kira 2 MB berkas, per foto
+const MAX_FOTO = 2;
 const JENIS_OK = ['image/jpeg', 'image/png', 'image/webp'];
 // Model membaca dulu (berpikir) sebelum memanggil tool: beri ruang token yang cukup.
 const MAX_TOKENS = 16000;
 const BATAS_WAKTU_MS = 110_000;
 
-const INSTRUKSI = `Kamu membaca FOTO lembar "LAPORAN CATATAN HARIAN" milik Warung Bakso Kota Cak Man (BKCM).
+const INSTRUKSI = `Kamu menerima 1 atau 2 FOTO dari Warung Bakso Kota Cak Man (BKCM). Isinya bisa:
+(a) lembar "LAPORAN CATATAN HARIAN", (b) NOTA DAGING (nota/kuitansi pembelian daging dari penjual daging atau penggilingan), atau keduanya.
+Satu foto bisa berisi kedua kertas sekaligus. Laporkan semuanya dalam SATU panggilan tool.
+
+BAGIAN A - LEMBAR "LAPORAN CATATAN HARIAN"
+Isi "ada_lembar": true hanya bila lembar ini terlihat. Bila tidak ada, "ada_lembar": false, kolom lembar diisi null,
+"penjualan" dan "pembayaran" diisi {}, "pengeluaran" diisi [].
 Lembar ini formulir tercetak yang diisi tulisan tangan. Foto bisa miring, menyamping (diputar 90 derajat), atau terbalik: bacalah sesuai arah tulisannya.
 
 SUSUNAN FORMULIR (kolom: No. | URAIAN | PEMASUKAN | PENGELUARAN):
@@ -60,15 +67,31 @@ ATURAN MEMBACA:
   Kalau satu digit meragukan dan hanya satu bacaan yang membuat hitungan cocok, pakai bacaan itu dan catat di "keraguan".
   Kalau angka yang TERTULIS memang tidak cocok satu sama lain (kesalahan hitung di kertas), laporkan apa adanya.
 - Isi "keraguan" untuk setiap angka yang tulisannya tidak jelas, dengan kolom dan alasan singkat.
+
+BAGIAN B - NOTA DAGING
+Contoh yang biasa dipakai: nota tercetak "Kios Daging Sapi BAROKAH JAYA" (Jl. Pasar Youtefa Abepura).
+Tanggal ditulis tangan di baris "Jayapura ..29../..10../2026" (hari / bulan / tahun).
+Tabel: Qty | Nama Barang | Satuan | Jumlah. Di bawah tabel ada baris "Jumlah Rp. ......" = TOTAL nota.
+- Bila ada nota pembelian daging, isi "nota_daging"; bila tidak ada, "nota_daging": null. Satu nota = satu tanggal.
+- AMBIL HANYA DUA HAL: tanggal nota dan angka di baris "Jumlah Rp." (total di bawah tabel).
+- Tanggal dipecah: "hari" (1-31), "bulan" (1-12), "tahun" (4 digit). Bagian yang tidak tertulis: null (jangan menebak tahun).
+- "total" = angka di baris "Jumlah Rp.". Kolom "Jumlah" per baris barang BUKAN total. Bila baris "Jumlah Rp." kosong: null.
+  Angka per baris barang boleh dipakai hanya untuk memastikan digit total yang meragukan (jumlahnya biasanya sama dengan total).
+- Abaikan semua tulisan di luar tabel dan di luar baris "Jumlah Rp." (contoh: "Stck 152.000", "Kata", tanda tangan).
+- Angka yang dicoret atau ditimpa: pakai angka yang ditulis terakhir/tebal, dan isi "ragu_total": true.
+- "ragu_total" / "ragu_tanggal": true bila tulisan total / tanggal kurang jelas.
+- Nota daging BUKAN baris pengeluaran lembar: jangan masukkan nota ke "pengeluaran" lembar.
+
 - Laporkan HANYA lewat tool "catat_laporan", panggil tepat satu kali. Jangan menulis jawaban di luar tool.`;
 
 const NUM = { type: ['integer', 'null'] };
 const TOOL = {
   name: 'catat_laporan',
-  description: 'Mengembalikan isi lembar LAPORAN CATATAN HARIAN apa adanya dalam bentuk terstruktur.',
+  description: 'Mengembalikan isi lembar LAPORAN CATATAN HARIAN dan/atau NOTA DAGING apa adanya dalam bentuk terstruktur.',
   input_schema: {
     type: 'object',
     properties: {
+      ada_lembar: { type: 'boolean', description: 'true bila lembar LAPORAN CATATAN HARIAN terlihat di foto' },
       tanggal: { type: ['string', 'null'], description: 'Tanggal di kepala lembar, format YYYY-MM-DD' },
       nama_hari: { type: ['string', 'null'], description: 'Nama hari yang tertulis, contoh "Minggu"' },
       penjualan: { type: 'object', properties: { bakso: NUM, minuman: NUM, ice_cream: NUM, lain_lain: NUM } },
@@ -96,6 +119,15 @@ const TOOL = {
         properties: { periode: { type: ['string', 'null'] }, gojek: NUM, grab: NUM, total: NUM }
       },
       catatan_lain: { type: ['string', 'null'] },
+      nota_daging: {
+        type: ['object', 'null'],
+        properties: {
+          hari: NUM, bulan: NUM, tahun: NUM,
+          total: { type: ['integer', 'null'], description: 'Angka di baris "Jumlah Rp." (total nota)' },
+          ragu_total: { type: 'boolean' },
+          ragu_tanggal: { type: 'boolean' }
+        }
+      },
       keraguan: {
         type: 'array',
         items: {
@@ -110,7 +142,7 @@ const TOOL = {
         }
       }
     },
-    required: ['tanggal', 'penjualan', 'total_penjualan', 'pengeluaran', 'pembayaran', 'saldo_akhir', 'ppn', 'keraguan']
+    required: ['ada_lembar', 'tanggal', 'penjualan', 'total_penjualan', 'pengeluaran', 'pembayaran', 'saldo_akhir', 'ppn', 'nota_daging', 'keraguan']
   }
 };
 
@@ -132,9 +164,13 @@ Deno.serve(async (req: Request) => {
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch (_e) { return reply(400, { kode: 'DATA_TIDAK_VALID', error: 'Data tidak valid.' }); }
   const instansiId = String(body.instansi_id ?? '');
-  const b64 = String(body.gambar_base64 ?? '');
-  const mediaType = String(body.media_type ?? 'image/jpeg');
-  if (!instansiId || !b64) return reply(400, { kode: 'DATA_TIDAK_VALID', error: 'Foto belum dikirim.' });
+  // v7.3: "gambar" = daftar 1-2 foto; "gambar_base64" (1 foto) tetap diterima dari versi lama
+  const daftar = Array.isArray(body.gambar)
+    ? body.gambar.map((g: Record<string, unknown>) => ({ b64: String(g?.base64 ?? ''), mediaType: String(g?.media_type ?? 'image/jpeg') }))
+    : [{ b64: String(body.gambar_base64 ?? ''), mediaType: String(body.media_type ?? 'image/jpeg') }];
+  const fotos = daftar.filter((g: { b64: string }) => g.b64);
+  if (!instansiId || !fotos.length) return reply(400, { kode: 'DATA_TIDAK_VALID', error: 'Foto belum dikirim.' });
+  if (fotos.length > MAX_FOTO) return reply(400, { kode: 'TERLALU_BANYAK', error: 'Maksimal ' + MAX_FOTO + ' foto sekaligus.' });
 
   // 2) Pemanggil harus admin aktif di instansi itu
   const { data: me } = await admin.from('anggota').select('peran, aktif')
@@ -144,8 +180,10 @@ Deno.serve(async (req: Request) => {
   // 3) Kunci AI, jenis & ukuran gambar, batas harian
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
   if (!apiKey) return reply(503, { kode: 'BELUM_AKTIF', error: 'Fitur baca foto belum diaktifkan: kunci AI belum dipasang di server.' });
-  if (!JENIS_OK.includes(mediaType)) return reply(400, { kode: 'JENIS_GAMBAR', error: 'Jenis gambar tidak didukung.' });
-  if (b64.length > MAX_B64) return reply(400, { kode: 'GAMBAR_TERLALU_BESAR', error: 'Foto terlalu besar. Coba foto ulang.' });
+  for (const g of fotos) {
+    if (!JENIS_OK.includes(g.mediaType)) return reply(400, { kode: 'JENIS_GAMBAR', error: 'Jenis gambar tidak didukung.' });
+    if (g.b64.length > MAX_B64) return reply(400, { kode: 'GAMBAR_TERLALU_BESAR', error: 'Foto terlalu besar. Coba foto ulang.' });
+  }
 
   const limit = Number(Deno.env.get('FD_AI_DAILY_LIMIT') ?? '20') || 20;
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
@@ -178,8 +216,11 @@ Deno.serve(async (req: Request) => {
         messages: [{
           role: 'user',
           content: [
-            { type: 'image', source: { type: 'base64', media_type: mediaType, data: b64 } },
-            { type: 'text', text: 'Baca lembar laporan ini dan laporkan isinya lewat tool catat_laporan.' }
+            ...fotos.flatMap((g: { b64: string; mediaType: string }, i: number) => [
+              { type: 'text', text: 'Foto ' + (i + 1) + ':' },
+              { type: 'image', source: { type: 'base64', media_type: g.mediaType, data: g.b64 } }
+            ]),
+            { type: 'text', text: 'Baca lembar laporan dan/atau nota daging di foto, lalu laporkan isinya lewat tool catat_laporan.' }
           ]
         }]
       })
