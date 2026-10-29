@@ -2950,6 +2950,42 @@
         .update-banner button:hover { background: #F1EBFE; }
         .success-banner { border-radius: 12px; }
 
+        /* v7.4: notifikasi = gelembung yang keluar dari lonceng ke tengah atas, selalu terlihat (posisi tetap) */
+        .success-banner {
+            position: fixed; top: calc(env(safe-area-inset-top) + 76px); left: 50%; z-index: 100000; margin: 0;
+            display: flex !important; align-items: center; gap: 10px; width: max-content; max-width: min(440px, calc(100vw - 32px));
+            padding: 12px 18px 12px 12px; border: 0 !important; border-radius: 22px;
+            background: #E8F8EE; color: #14532D; font: 600 14px/1.4 'Inter', sans-serif;
+            box-shadow: 0 14px 34px rgba(23,18,42,.22), 0 0 0 1px rgba(22,163,74,.18);
+            pointer-events: none; opacity: 0; visibility: hidden;
+            transform: translate(calc(-50% + var(--fd-bx, 40vw)), var(--fd-by, -50px)) scale(.12);
+            transform-origin: 50% 50%;
+            transition: transform .42s cubic-bezier(.55,0,.9,.45), opacity .32s ease .1s, visibility 0s linear .42s;
+        }
+        .success-banner::before {
+            content: ''; flex: none; width: 26px; height: 26px; border-radius: 999px; background: #16A34A center / 15px no-repeat
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+        }
+        .success-banner.show {
+            opacity: 1; visibility: visible; transform: translate(-50%, 0) scale(1);
+            transition: transform .55s cubic-bezier(.34,1.56,.64,1), opacity .18s ease, visibility 0s;
+        }
+        .success-banner.is-tunggu::before { display: none; }
+        .success-banner.is-tunggu { padding-left: 18px; }
+        .success-banner.is-peringatan { background: #FEF3C7; color: #78350F; box-shadow: 0 14px 34px rgba(23,18,42,.22), 0 0 0 1px rgba(217,119,6,.25); }
+        .success-banner.is-peringatan::before {
+            background: #D97706 center / 15px no-repeat
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cline x1='12' y1='6' x2='12' y2='13'/%3E%3Cline x1='12' y1='18' x2='12.01' y2='18'/%3E%3C/svg%3E");
+        }
+        .topbar-bell.fd-bell-pop { animation: fdBellPop .5s ease; }
+        @keyframes fdBellPop { 0% { transform: scale(1); } 30% { transform: scale(1.18) rotate(-12deg); } 60% { transform: scale(.95) rotate(8deg); } 100% { transform: none; } }
+        @media (max-width: 1023px) { .success-banner { top: calc(env(safe-area-inset-top) + 70px); } }
+        @media (prefers-reduced-motion: reduce) {
+            .success-banner, .success-banner.show { transition: opacity .2s ease, visibility 0s linear .2s; transform: translate(-50%, 0); }
+            .success-banner.show { transition: opacity .2s ease, visibility 0s; }
+            .topbar-bell.fd-bell-pop { animation: none; }
+        }
+
         /* Prefix Rp tetap terlihat di atas latar kolom */
         .money-wrapper .rp-prefix { z-index: 3; }
         .data-table td, .data-table td *, .annual-table td, .stat-value, .royalti-value, .preview-table td {
@@ -3704,7 +3740,7 @@
 
     <div class="container">
         <!-- Success Banner -->
-        <div id="successBanner" class="success-banner"></div>
+        <div id="successBanner" class="success-banner" role="status" aria-live="polite"></div>
 
 
 
@@ -5064,7 +5100,7 @@
         let currentLang = localStorage.getItem('appLang') || 'default';
 
         // ⚠️ NOMOR VERSI APP — samakan dengan angka di sw.js (CACHE_NAME) tiap update.
-        const APP_VERSION = 'v7.1.0-uji.16';
+        const APP_VERSION = 'v7.1.0-uji.17';
 
         // Bulan untuk TAMPILAN (kalender, grafik, tanggal). Dokumen tetap pakai 'months' (Indonesia).
         const monthsEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -10449,6 +10485,16 @@
             img.addEventListener('click', function () { fdFotoBukaGambar(fdFoto[x[1]]); });
             img.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fdFotoBukaGambar(fdFoto[x[1]]); } });
         });
+        // v7.4: setelah Simpan Data berhasil (notifikasi tersimpan muncul), panel foto ditutup & foto dibuang
+        if (typeof window.saveData === 'function') {
+            var fdSimpanLama = window.saveData;
+            window.saveData = function () {
+                var r = fdSimpanLama.apply(this, arguments);
+                var p = fdFotoEl('fdFotoPanel');
+                if (p && !p.hidden) fdFotoTutup();
+                return r;
+            };
+        }
         // Tanggal formulir diganti admin: penanda dihapus (nilai di formulir sudah dimuat ulang), cek & tombol diperbarui
         var tampil = fdFotoEl('dateDisplay');
         if (tampil && 'MutationObserver' in window) {
@@ -10458,6 +10504,40 @@
                 fdFotoPerbarui();
             }).observe(tampil, { childList: true, characterData: true, subtree: true });
         }
+    })();
+    </script>
+    <script>
+    // ===== v7.4: notifikasi gelembung dari lonceng =====
+    (function () {
+        var banner = document.getElementById('successBanner'), bell = document.getElementById('fdBell');
+        if (!banner) return;
+        // Jarak dari posisi akhir gelembung (tengah atas) ke lonceng: titik muncul & kembalinya gelembung
+        function asal() {
+            var b = bell && bell.getBoundingClientRect();
+            if (!b || !b.width) { banner.style.removeProperty('--fd-bx'); banner.style.removeProperty('--fd-by'); return; }
+            var top = parseFloat(getComputedStyle(banner).top) || 70;
+            banner.style.setProperty('--fd-bx', Math.round(b.left + b.width / 2 - window.innerWidth / 2) + 'px');
+            banner.style.setProperty('--fd-by', Math.round(b.top + b.height / 2 - top - banner.offsetHeight / 2) + 'px');
+        }
+        asal();
+        window.addEventListener('resize', asal);
+        window.addEventListener('load', asal);
+        if (window.MutationObserver) new MutationObserver(function () {
+            if (banner.classList.contains('show') && bell) {
+                bell.classList.remove('fd-bell-pop'); void bell.offsetWidth; bell.classList.add('fd-bell-pop');
+            }
+        }).observe(banner, { attributes: true, attributeFilter: ['class'] });
+        if (bell) bell.addEventListener('animationend', function () { bell.classList.remove('fd-bell-pop'); });
+        // Setiap pesan berganti: buang tanda ✓ di depan (sudah ada ikon), pilih warna, hitung ulang titik asal
+        function rapikan() {
+            var t = banner.textContent || '';
+            var bersih = t.replace(/^\s*[✓✔]\uFE0F?\s*/, '');
+            if (bersih !== t) { banner.textContent = bersih; return; }   // memicu rapikan() lagi dengan teks bersih
+            banner.classList.toggle('is-tunggu', /^\s*⏳/.test(t));
+            banner.classList.toggle('is-peringatan', /gagal|harap|tidak bisa|error|belum ada/i.test(t));
+            asal();
+        }
+        if (window.MutationObserver) new MutationObserver(rapikan).observe(banner, { childList: true, characterData: true, subtree: true });
     })();
     </script>
     <script>
